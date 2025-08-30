@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useTransition, useEffect } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { signUpAction, type SignUpFormState } from "@/actions/sign-up";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,15 @@ const SignUpPage = () => {
       formAction(formData);
     });
   };
+
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error);
+    }
+    if (state.success) {
+      toast.success("Account created successfully! Redirecting...");
+    }
+  }, [state.error, state.success]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
@@ -89,17 +99,7 @@ const SignUpPage = () => {
               )}
             </div>
 
-            {state.error && (
-              <div className="text-sm text-destructive text-center">
-                {state.error}
-              </div>
-            )}
 
-            {state.success && (
-              <div className="text-sm text-green-600 text-center">
-                Account created successfully! Redirecting...
-              </div>
-            )}
 
             <Button
               type="submit"

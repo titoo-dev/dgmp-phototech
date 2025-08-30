@@ -10,10 +10,7 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-    },
-    pages: {
-        signIn: "/auth/signin",
-        signUp: "/auth/signup",
+
     },
     trustedOrigins: [
         "http://localhost:3000",

@@ -4,34 +4,33 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { getAuthErrorMessage } from "@/lib/errors/get-auth-error-message";
 
-const signUpSchema = z.object({
+const signInSchema = z.object({
   email: z.email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  name: z.string().min(2, "Name must be at least 2 characters").optional(),
+  password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional(),
 });
 
-export type SignUpFormState = {
+export type SignInFormState = {
   success?: boolean;
   error?: string;
   fieldErrors?: {
     email?: string[];
     password?: string[];
-    name?: string[];
   };
 };
 
-export const signUpAction = async (
-  prevState: SignUpFormState,
+export const signInAction = async (
+  prevState: SignInFormState,
   formData: FormData
-): Promise<SignUpFormState> => {
+): Promise<SignInFormState> => {
   try {
     const rawData = {
       email: formData.get("email") as string,
       password: formData.get("password") as string,
-      name: formData.get("name") as string,
+      rememberMe: formData.get("rememberMe") === "true",
     };
 
-    const validatedData = signUpSchema.safeParse(rawData);
+    const validatedData = signInSchema.safeParse(rawData);
 
     if (!validatedData.success) {
       return {
@@ -40,20 +39,20 @@ export const signUpAction = async (
       };
     }
 
-    const { email, password, name } = validatedData.data;
+    const { email, password, rememberMe } = validatedData.data;
 
-    const result = await auth.api.signUpEmail({
+    const result = await auth.api.signInEmail({
       body: {
         email,
         password,
-        name: name || "unknown",
         callbackURL: "/",
+        rememberMe: rememberMe,
       },
     });
 
     if (!result.token) {
       return {
-        error: "Failed to create account",
+        error: "Invalid email or password",
       };
     }
 
@@ -61,8 +60,10 @@ export const signUpAction = async (
       success: true,
     };
   } catch (error) {
-    console.error("Sign up error:", error);
-    const errorMessage = getAuthErrorMessage(error, 'signup');
+    console.error("Sign in error:", error);
+    
+    const errorMessage = getAuthErrorMessage(error, 'signin');
+    
     return {
       error: errorMessage,
     };
