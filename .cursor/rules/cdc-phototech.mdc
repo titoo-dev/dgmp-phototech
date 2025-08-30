@@ -1,0 +1,258 @@
+---
+alwaysApply: true
+---
+    Cahier des charges pour les fonctionnalités de l'application photothèque sécurisé pour la DGMP du Gabon
+    1. Introduction
+    1.1 Contexte
+    La 
+
+    Direction Générale des Marchés Publics (DGMP) du Gabon veut moderniser la gestion de ses archives photographiques et des données liées à ses activités, notamment le contrôle des chantiers. Actuellement, la gestion des photos et des informations est inefficace, ce qui complique le suivi des missions, la capitalisation des données, et leur utilisation pour des publications comme le magazine hebdomadaire de la DGMP.
+
+
+    1.2 Objectifs
+
+    Centralisation des données: Créer une plateforme intranet sécurisée, accessible via le web et une application mobile, pour gérer les photos et les informations des missions de contrôle de chantier.
+
+
+    Capitalisation des résultats: Structurer une base de données pour stocker les informations des missions, y compris le nom, la ville, le lieu, le projet, la durée, l'entreprise, la description, les remarques, les observations, et les photos.
+
+
+    Accessibilité et sécurité: Assurer un accès sécurisé pour les utilisateurs autorisés, tels que les agents, les administrateurs et les rédacteurs du magazine.
+
+
+    Publication: Faciliter l'extraction de contenus (photos, descriptions) pour alimenter le magazine hebdomadaire de la DGMP.
+
+
+    Ergonomie et mobilité: Offrir une interface intuitive, disponible sur navigateur web et application mobile, pour une utilisation sur le terrain et au bureau.
+
+    1.3 Les différents utilisateurs
+
+    U1: Utilisateur chargé d'exécuter les missions (Web et Mobile).
+
+
+    U2: Responsable ayant accès aux rapports de mission (Web).
+
+
+    U3: Responsable de la rédaction du magazine (Web).
+
+
+    U4: Administrateur du système (Web).
+
+    1.4 Fonctionnalités principales
+    1. Pour l'utilisateur U1
+
+    F11: Vue de tous les projets accessibles à l'utilisateur.
+
+
+    F12: Vue des rapports de mission rédigés par l'utilisateur.
+
+
+    F13: Ajout, modification et suppression des rapports de mission.
+
+
+    F14: Connexion au système.
+
+    2. Pour l'utilisateur U2
+
+    F21: Vue de l'ensemble des rapports de mission.
+
+
+    F22: Validation et modification des rapports.
+
+
+    F23: Vue de l'ensemble des images associées aux rapports de mission.
+
+
+    F24: Vue de tous les projets.
+
+
+    F25: Ajout, modification et suppression des projets.
+
+
+    F26: Vue des companies responsables des projets.
+
+
+    F27: Ajout, modification et suppression des companies.
+
+
+    F28: Vue de tous les utilisateurs.
+
+
+    F29: Gestion des utilisateurs de type U1 (création d'invitations, blocage).
+
+
+    F210: Connexion au système.
+
+    3. Pour l'utilisateur U3
+
+    F31: Vue des rapports de mission validés par l'utilisateur de type U2.
+
+
+    F32: Vue de l'ensemble des images associées aux rapports de mission.
+
+
+    F33: Vue de l'ensemble des projets.
+
+
+    F34: Connexion au système.
+
+    4. Pour l'utilisateur U4
+
+    F41: Vue de l'ensemble des rapports de mission.
+
+
+    F42: Modification des rapports.
+
+
+    F43: Vue de l'ensemble des images associées aux rapports de mission.
+
+
+    F44: Vue de tous les projets.
+
+
+    F45: Ajout, modification et suppression des projets.
+
+
+    F46: Vue des companies responsables des projets.
+
+
+    F47: Ajout, modification et suppression des companies.
+
+
+    F48: Vue de tous les utilisateurs.
+
+
+    F49: Gestion de tous les utilisateurs (création d'invitations, blocage).
+
+
+    F410: Connexion au système.
+
+    1.5 Détail de chaque fonctionnalité
+    F11: Vue de tous les projets accessibles à l'utilisateur
+    L'utilisateur U1 n'a accès qu'aux projets pour lesquels l'administrateur lui a accordé des droits. Il peut voir une vue cartographique des projets et consulter les rapports de mission en cliquant sur une carte.
+
+
+    F12: Vue des rapports de mission rédigés par l'utilisateur
+    En cliquant sur la carte d'un projet, l'utilisateur peut voir la liste des missions qu'il a rédigées pour ce projet.
+
+    F13: Ajout, modification et suppression des rapports de mission
+    Sur la page de liste des rapports, un bouton permet de créer un nouveau rapport. Un formulaire s'affiche avec les champs suivants:
+
+
+    Début de mission: Date.
+
+    Fin de mission: Date.
+
+    Lieu: Sélection sur une carte (vue Map).
+
+    Nom du projet: Sélection.
+
+    Description détaillée de la mission: Champ texte multilignes.
+
+    Remarques et observations: Champ texte multilignes.
+
+    Statut: En cours, Terminée, En attente de validation.
+
+    Ajout de photos:
+
+    Possibilité d'importer des images depuis un navigateur web ou une application mobile.
+
+    Sur mobile, possibilité de capturer une photo directement.
+
+    Extraction automatique des métadonnées des images (date, localisation, etc.).
+
+    Dans la vue de la liste des missions, un clic sur une ligne permet de voir les détails du rapport et de le modifier ou de le supprimer.
+
+    F14: Connexion au système
+    Connexion via adresse e-mail et mot de passe, avec une option de récupération de mot de passe.
+
+    F21: Vue de l'ensemble des rapports de mission
+    L'utilisateur U2 peut consulter tous les rapports créés et dispose de fonctions de recherche et de filtres. Les vues disponibles sont en tableau, cartographique (Map) et calendrier.
+
+
+    F22: Validation et modification des rapports
+    L'utilisateur U2 peut valider un rapport et modifier l'ensemble de ses champs.
+
+    F23: Vue de l'ensemble des images associées aux rapports de mission
+    Toutes les images sont affichées sur cette page, avec des fonctions de recherche et de filtres.
+
+    F24: Vue de tous les projets
+    La liste des projets est affichée avec des fonctions de recherche et de filtres. Les vues disponibles sont Kanban, tableau et calendrier.
+
+
+    F25: Ajout, modification et suppression des projets
+    L'utilisateur U2 peut créer un projet en remplissant un formulaire avec les champs suivants:
+
+    Titre du projet.
+
+    Date de début.
+
+    Date de fin.
+
+    Chef de projet.
+
+    Entreprise responsable: Sélection.
+
+    Description.
+
+    Statut: Nouveau, En cours, Terminé.
+
+    F26: Vue des companies responsables des projets
+    La liste des companies est affichée sous forme de tableau, avec des fonctions de recherche et de filtres.
+
+    F27: Ajout, modification et suppression des companies
+    L'utilisateur U2 peut créer une entreprise en remplissant un formulaire avec le nom de l'entreprise, le contact et le numéro SIRET.
+
+
+    F28: Vue de tous les utilisateurs
+    L'utilisateur U2 peut consulter la liste de tous les utilisateurs de type U1 et leurs informations.
+
+    F29: Gestion des utilisateurs de type U1
+    L'utilisateur U2 peut créer un utilisateur U1 en fournissant un nom, une adresse e-mail et un mot de passe.
+
+    F210: Connexion au système
+    Connexion via e-mail et mot de passe, avec une option de récupération de mot de passe.
+
+    F31: Vue des rapports de mission validés par l'utilisateur de type U2
+    Seuls les rapports validés sont visibles par l'utilisateur U3. La vue est identique à celle de la fonctionnalité F21.
+
+
+    F32: Vue de l'ensemble des images associées aux rapports de mission
+    Seules les images des rapports validés sont visibles par l'utilisateur U3. La vue est identique à celle de la fonctionnalité F23.
+
+
+    F33: Vue de l'ensemble des projets
+    Identique à la fonctionnalité F24.
+
+    F34: Connexion au système
+    Connexion via e-mail et mot de passe, avec une option de récupération de mot de passe.
+
+    F41: Vue de l'ensemble des rapports de mission
+    Identique à la fonctionnalité F21.
+
+    F42: Modification des rapports
+    Identique à la fonctionnalité F22.
+
+    F43: Vue de l'ensemble des images associées aux rapports de mission
+    Identique à la fonctionnalité F23.
+
+    F44: Vue de tous les projets
+    Identique à la fonctionnalité F24.
+
+    F45: Ajout, modification et suppression des projets
+    Identique à la fonctionnalité F25.
+
+    F46: Vue des companies responsables des projets
+    Identique à la fonctionnalité F26.
+
+    F47: Ajout, modification et suppression des companies
+    Identique à la fonctionnalité F27.
+
+    F48: Vue de tous les utilisateurs
+    Identique à la fonctionnalité F28.
+
+    F49: Gestion de tous les utilisateurs
+    L'utilisateur U4 peut gérer tous les types d'utilisateurs.
+
+    F410: Connexion au système
+    Connexion via e-mail et mot de passe, avec une option de récupération de mot de passe.
