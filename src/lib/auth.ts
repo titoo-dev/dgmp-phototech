@@ -20,7 +20,7 @@ export const auth = betterAuth({
         disableSignUp: process.env.DISABLE_SIGN_UP === "true",
     },
     trustedOrigins: [
-        "http://localhost:3000",
+        `${process.env.NEXT_PUBLIC_APP_URL}`,
     ],
     emailVerification: {
         sendOnSignUp: true,

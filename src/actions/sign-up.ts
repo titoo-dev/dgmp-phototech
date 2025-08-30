@@ -48,7 +48,7 @@ export const signUpAction = async (
         email,
         password,
         name: name || "unknown",
-        callbackURL: "http://localhost:3000/auth/signin",
+        callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
       },
     });
 
