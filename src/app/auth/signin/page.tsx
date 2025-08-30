@@ -9,13 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 const initialState: SignInFormState = {};
 
 const SignInPage = () => {
   const [state, formAction] = useActionState(signInAction, initialState);
   const [isPending, startTransition] = useTransition();
-
+  const router = useRouter();
+  
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {
       formAction(formData);
@@ -26,8 +28,9 @@ const SignInPage = () => {
     if (state.error) {
       toast.error(state.error);
     }
-    if (state.success) {
+    if (state.success && state.redirect) {
       toast.success("Sign in successful! Redirecting...");
+      router.push(state.redirect);
     }
   }, [state.error, state.success]);
 

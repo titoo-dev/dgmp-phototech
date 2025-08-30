@@ -17,6 +17,7 @@ export type SignInFormState = {
     email?: string[];
     password?: string[];
   };
+  redirect?: string;
 };
 
 export const signInAction = async (
@@ -60,6 +61,7 @@ export const signInAction = async (
 
     return {
       success: true,
+      redirect: "/",
     };
   } catch (error) {
     console.error("Sign in error:", error);

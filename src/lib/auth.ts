@@ -5,6 +5,7 @@ import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, u1, u2, u3, u4, user } from "./permissions/permissions";
 import { Resend } from "resend";
 import { VerificationTemplate } from "@/components/template/verification-template";
+import { nextCookies } from "better-auth/next-js";
  
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -42,6 +43,7 @@ export const auth = betterAuth({
         },
     },
     plugins: [
+        nextCookies(),
         adminPlugin({
             ac,
             roles: {

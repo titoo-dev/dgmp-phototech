@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { signOutAction } from "@/actions/sign-out";
 
 interface User {
   id: string;
@@ -11,131 +12,90 @@ interface User {
 }
 
 const DashboardPage = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  useEffect(() => {
-    const checkSession = async () => {
+  const handleSignOut = async () => {
+    startTransition(async () => {
       try {
-        const response = await fetch("/api/auth/session");
-        if (response.ok) {
-          const session = await response.json();
-          if (session.user) {
-            setUser(session.user);
-          } else {
-            router.push("/auth/signin");
-          }
+        const result = await signOutAction();
+        if (result.success) {
+          router.push("/");
         } else {
-          router.push("/auth/signin");
+          console.error("Error signing out:", result.error);
         }
       } catch (error) {
-        router.push("/auth/signin");
-      } finally {
-        setIsLoading(false);
+        console.error("Error signing out:", error);
       }
-    };
-
-    checkSession();
-  }, [router]);
-
-  const handleSignOut = async () => {
-    try {
-      await fetch("/api/auth/signout", { method: "POST" });
-      router.push("/");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+    });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">PhotoTech</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                {user.image && (
-                  <img
-                    className="h-8 w-8 rounded-full"
-                    src={user.image}
-                    alt="Profile"
-                  />
-                )}
-                <span className="text-sm text-gray-700">
-                  {user.name || user.email}
-                </span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={handleSignOut}
+          disabled={isPending}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isPending ? "Signing out..." : "Sign out"}
+        </button>
+      </div>
+
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center px-6">
+          <div className="mb-8">
+            <h1 className="text-6xl font-bold text-gray-900 mb-4">
+              Welcome to{" "}
+              <span className="bg-gradient-to-r from-indigo-600 to-cyan-600 bg-clip-text text-transparent">
+                PhotoTech
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Your ultimate photography technology platform. Capture, create, and connect with the world through the lens.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center space-x-4 mb-8">
+            <div className="w-16 h-1 bg-indigo-500 rounded"></div>
+            <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+            <div className="w-16 h-1 bg-cyan-500 rounded"></div>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <svg className="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sign out
-              </button>
+              <h4 className="font-semibold text-gray-900 mb-2">Capture</h4>
+              <p className="text-sm text-gray-600">Professional-grade tools for stunning photography</p>
+            </div>
+
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="h-12 w-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <svg className="h-6 w-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Create</h4>
+              <p className="text-sm text-gray-600">Edit and enhance your photos with advanced features</p>
+            </div>
+
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Connect</h4>
+              <p className="text-sm text-gray-600">Share your work with a community of photographers</p>
             </div>
           </div>
         </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 p-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Welcome to PhotoTech!
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Your photography technology platform dashboard
-              </p>
-              
-              <div className="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  User Information
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Email:</span>
-                    <span className="text-gray-900">{user.email}</span>
-                  </div>
-                  {user.name && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Name:</span>
-                      <span className="text-gray-900">{user.name}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">User ID:</span>
-                    <span className="text-gray-900 font-mono text-xs">
-                      {user.id}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <p className="text-gray-500 text-sm">
-                  This is a protected dashboard page. You can only see this if you're authenticated.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 };
