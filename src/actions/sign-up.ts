@@ -18,6 +18,7 @@ export type SignUpFormState = {
     password?: string[];
     name?: string[];
   };
+  redirect?: string;
 };
 
 export const signUpAction = async (
@@ -47,13 +48,15 @@ export const signUpAction = async (
         email,
         password,
         name: name || "unknown",
-        callbackURL: "/",
+        callbackURL: "http://localhost:3000/auth/signin",
       },
     });
 
-    if (!result.token) {
+    if (!result.user.emailVerified) {
       return {
-        error: "Failed to create account",
+        success: false,
+        error: "Please verify your email address",
+        redirect: "/auth/verify-email",
       };
     }
 

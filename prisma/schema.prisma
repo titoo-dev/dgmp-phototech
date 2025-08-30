@@ -9,6 +9,30 @@ datasource db {
   url      = env("PRISMA_DATABASE_URL")
 }
 
+enum ProjectNature {
+  SUPPLY
+  SERVICES
+  INTELLECTUAL
+  PROGRAM
+  MIXED
+  CONTROLLED_EXPENSES
+}
+
+enum ProjectStatus {
+  UNCONTROLLED
+  CONTROLLED_IN_PROGRESS
+  CONTROLLED_DELIVERED
+  CONTROLLED_OTHER
+  DISPUTED
+}
+
+enum MissionStatus {
+  DRAFT
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
 model User {
   id            String    @id
   name          String
@@ -20,8 +44,14 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  role       String?
+  banned     Boolean?
+  banReason  String?
+  banExpires DateTime?
+
   @@unique([email])
   @@map("user")
+  missionsTeamLeader Mission[] @relation("TeamLeader")
 }
 
 model Session {
@@ -34,6 +64,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
 
   @@unique([token])
   @@map("session")
@@ -67,4 +99,70 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+
+model Contact {
+  id        String    @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  missionsMember     Mission[] @relation("Member")
+}
+
+model Company {
+  id            String      @id @default(cuid())
+  name          String
+  email         String
+  phoneNumber   String
+  nif           String
+  employeeCount Int
+  projects      Project[]
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  status      ProjectStatus
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id])
+  nature      ProjectNature
+  missionProjects MissionProject[]
+}
+
+model Mission {
+  id           String               @id @default(cuid())
+  missionNumber String
+  teamLeader   User @relation("TeamLeader", fields: [teamLeaderId], references: [id])
+  teamLeaderId String
+  members      Contact[] @relation("Member")
+  startDate    DateTime
+  endDate      DateTime
+  location     String
+  agentCount   Int
+  marketCount Int
+  status       MissionStatus
+  missionProjects MissionProject[]
+}
+
+model MissionFile {
+  id        String    @id @default(cuid())
+  fileUrl   String
+  metadata  String
+  createdAt DateTime @default(now())
+  missionProjectId String
+  missionProject MissionProject @relation(fields: [missionProjectId], references: [id])
+}
+
+model MissionProject {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+  files     MissionFile[]
+  notes     String
+  missionId String
+  mission Mission @relation(fields: [missionId], references: [id])
 }

@@ -41,6 +41,8 @@ export const signInAction = async (
 
     const { email, password, rememberMe } = validatedData.data;
 
+    console.log("Sign in action called with:", { email, password, rememberMe });
+
     const result = await auth.api.signInEmail({
       body: {
         email,

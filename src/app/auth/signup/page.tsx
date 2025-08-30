@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 const initialState: SignUpFormState = {};
 
 const SignUpPage = () => {
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
-
+  const router = useRouter();
+  
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {
       formAction(formData);
@@ -22,6 +24,9 @@ const SignUpPage = () => {
   };
 
   useEffect(() => {
+    if (state.redirect) {
+      router.push(state.redirect);
+    }
     if (state.error) {
       toast.error(state.error);
     }
