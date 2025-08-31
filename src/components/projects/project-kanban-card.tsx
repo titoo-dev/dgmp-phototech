@@ -90,12 +90,9 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
     <div className={`bg-white rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 ${getStatusColor(projet.status)} border-l-4 ${className}`}>
       <div className="p-4 space-y-3">
         {/* Header avec statut et actions */}
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getStatusIcon(projet.status)}
-            <span className="text-xs font-medium text-muted-foreground">
-              #{projet.id.toString().padStart(3, '0')}
-            </span>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
