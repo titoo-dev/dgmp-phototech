@@ -33,7 +33,7 @@ export type RolePermissions = {
 
 export const rolePermissions: Record<UserRole, RolePermissions> = {
   u1: {
-    canViewDashboard: true,
+    canViewDashboard: false,
     canViewMissions: true,
     canCreateMissions: true,
     canViewProjects: true,
