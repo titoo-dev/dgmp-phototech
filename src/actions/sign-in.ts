@@ -48,7 +48,7 @@ export const signInAction = async (
       body: {
         email,
         password,
-        callbackURL: "/",
+        callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/`,
         rememberMe: rememberMe,
       },
     });
