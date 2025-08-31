@@ -38,7 +38,7 @@ export function MissionHeader({ viewMode, onViewModeChange }: MissionHeaderProps
           </Button>
         </div>
         <Button asChild>
-          <Link href="/missions/new">
+          <Link href="/dashboard/missions/new">
             <Plus className="mr-2 h-4 w-4" />
             Nouveau rapport
           </Link>
