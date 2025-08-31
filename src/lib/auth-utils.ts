@@ -29,7 +29,7 @@ export const rolePermissions = {
     canViewGallery: true,
     canViewMissions: true,
     canCreateMissions: true,
-    canViewProjects: false,
+    canViewProjects: true,
     canViewCompanies: false,
     canManageUsers: false,
   },
