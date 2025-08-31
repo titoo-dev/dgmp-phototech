@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import type { CompanyModel } from "@/models/company-schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +24,13 @@ type FormState = {
   message?: string
 }
 
-export default function ProjectFormFields({ state }: { state: FormState }) {
+interface ProjectFormFieldsProps {
+  state: FormState;
+  companies: CompanyModel[];
+}
+
+export default function ProjectFormFields({ state, companies }: ProjectFormFieldsProps) {
+
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <div className="space-y-6">
@@ -88,9 +95,15 @@ export default function ProjectFormFields({ state }: { state: FormState }) {
                     <SelectValue placeholder="Sélectionner une entreprise" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">SARL Construction Excellence</SelectItem>
-                    <SelectItem value="2">Entreprise BTP Gabon</SelectItem>
-                    <SelectItem value="3">Société Travaux Publics</SelectItem>
+                    {companies.length === 0 ? (
+                      <SelectItem value="" disabled>Aucune entreprise disponible</SelectItem>
+                    ) : (
+                      companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>

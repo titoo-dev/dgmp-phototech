@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { CompanyModel } from "@/models/company-schema";
+import type { CompanyModel } from "@/models/company-schema";
 
 export type GetCompaniesState = {
     companies: CompanyModel[];

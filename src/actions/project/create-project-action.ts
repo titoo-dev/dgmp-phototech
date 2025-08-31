@@ -62,8 +62,7 @@ export async function createProjectAction(
         });
 
         // Revalidate projects listing
-        revalidatePath("/projects");
-        revalidatePath("/(client)/projects", "page");
+        revalidatePath("/dashboard/projects");
 
         return {
             success: true,
@@ -81,5 +80,5 @@ export async function createProjectAction(
 
 export async function createProjectWithRedirectAction(formData: FormData): Promise<void> {
     const result = await createProjectAction({}, formData);
-    if (result.success) redirect('/projects');
+    if (result.success) redirect('/dashboard/projects');
 }

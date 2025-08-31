@@ -38,7 +38,7 @@ export function ProjectHeader({ viewMode, onViewModeChange }: ProjectHeaderProps
 					</Button>
 				</div>
 				<Button asChild>
-					<Link href="/projects/new">
+					<Link href="/dashboard/projects/new">
 						<Plus className="w-4 h-4" />
 						Nouveau projet
 					</Link>
