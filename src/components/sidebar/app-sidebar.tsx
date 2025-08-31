@@ -1,8 +1,12 @@
 "use client";
 
+
+import { useTransition } from "react";
+import { signOutAction } from "@/actions/sign-out";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -12,10 +16,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Building2, Home, Camera, FolderOpen, Building, Users } from "lucide-react"
+import { Building2, Home, Camera, FolderOpen, Building, Users, LogOut } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { Button } from "../ui/button";
 
 const getNavigationItems = (hasPermission: (permission: any) => boolean) => [
   {
@@ -61,10 +67,22 @@ const getNavigationItems = (hasPermission: (permission: any) => boolean) => [
   }
 ]
 
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { hasPermission } = useAuth()
   const navigationItems = getNavigationItems(hasPermission)
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter();
+  
+  const handleSignOut = () => {
+    startTransition(async () => {
+      const result = await signOutAction()
+      if (result.success) {
+        router.push('/')
+      }
+    })
+  }
   
   return (
     <Sidebar {...props}>
@@ -102,6 +120,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" className="w-full justify-start gap-2" disabled={isPending}>
+              <LogOut className="size-4" />
+              Déconnexion
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Déconnexion</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir vous déconnecter ?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleSignOut}
+                disabled={isPending}
+              >
+                {isPending ? "Déconnexion..." : "Déconnexion"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
