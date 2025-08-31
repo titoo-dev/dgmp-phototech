@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionAction } from "@/actions/get-session";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 // Define route permissions for different user roles
 const routePermissions = {
@@ -84,7 +86,9 @@ export async function middleware(request: NextRequest) {
   
   try {
     // Get session using better-auth
-    const { session } = await getSessionAction();
+    const session = await auth.api.getSession({
+      headers: await headers()
+    })
 
     // Redirect to signin if no session
     if (!session) {
@@ -125,6 +129,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: "nodejs",
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
