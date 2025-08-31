@@ -26,10 +26,10 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
   // Transform database projects to the format expected by components
   const projectsData = useMemo(() => {
     return projects.map((project): ProjectKanbanItem => ({
-      id: project.id.toString(),
+      id: project.id,
       name: project.title,
       column: project.status,
-      data: {
+              data: {
         id: project.id,
         title: project.title,
         description: project.description,
@@ -37,6 +37,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
         endDate: project.endDate,
         status: project.status,
         nature: project.nature,
+        companyId: project.companyId,
         company: {
           id: project.company.id,
           name: project.company.name,

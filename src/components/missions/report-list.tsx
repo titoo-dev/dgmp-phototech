@@ -59,7 +59,7 @@ export function ReportList({ missions, getStatusBadge }: RapportsListProps) {
                 <TableRow key={mission.id}>
                   <TableCell className="font-medium">#{missionData.missionNumber}</TableCell>
                   <TableCell>
-                    {missionData.teamLeader.firstName} {missionData.teamLeader.lastName}
+                    {missionData.teamLeader.name}
                   </TableCell>
                   <TableCell>{missionData.location}</TableCell>
                   <TableCell>{missionData.startDate.toLocaleDateString('fr-FR')}</TableCell>
@@ -75,13 +75,13 @@ export function ReportList({ missions, getStatusBadge }: RapportsListProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/missions/${missionData.id}`}>
+                          <Link href={`/dashboard/missions/${missionData.id}`}>
                             <Eye className="mr-2 h-4 w-4" />
                             Voir détails
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/missions/${missionData.id}/modifier`}>
+                          <Link href={`/dashboard/missions/${missionData.id}/modifier`}>
                             <Edit className="mr-2 h-4 w-4" />
                             Modifier
                           </Link>

@@ -68,7 +68,7 @@ export default function CompaniesList({ companies }: Props) {
 		});
 	}, [companies, searchQuery, statusFilter]);
 
-	const handleDeleteCompany = (companyId: number) => {
+	const handleDeleteCompany = (companyId: string) => {
 		startTransition(async () => {
 			try {
 				const result = await deleteCompanyAction(companyId);
@@ -133,7 +133,7 @@ export default function CompaniesList({ companies }: Props) {
 									<TableCell>
 										<div className="space-y-1">
 											<p className="font-medium">{entreprise.name}</p>
-											<p className="text-sm text-muted-foreground">#{entreprise.id.toString().padStart(3, '0')}</p>
+																							<p className="text-sm text-muted-foreground">#{entreprise.id.slice(-8)}</p>
 										</div>
 									</TableCell>
 									<TableCell>
@@ -166,10 +166,10 @@ export default function CompaniesList({ companies }: Props) {
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
 												<DropdownMenuItem asChild>
-													<Link href={`/companies/${entreprise.id}`}><Eye className="w-4 h-4 mr-2" />Voir</Link>
+													<Link href={`/dashboard/companies/${entreprise.id}`}><Eye className="w-4 h-4 mr-2" />Voir</Link>
 												</DropdownMenuItem>
 												<DropdownMenuItem asChild>
-													<Link href={`/companies/${entreprise.id}/modifier`}><Edit className="w-4 h-4 mr-2" />Modifier</Link>
+													<Link href={`/dashboard/companies/${entreprise.id}/modifier`}><Edit className="w-4 h-4 mr-2" />Modifier</Link>
 												</DropdownMenuItem>
 												<DropdownMenuSeparator />
 												<AlertDialog open={openDialog} onOpenChange={setOpenDialog}>

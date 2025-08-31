@@ -8,7 +8,7 @@ type Props = {
 export default async function Page(props: Props) {
   const { params } = props;
   const { id } = await params;
-  const companyId = Number(id);
+  const companyId = id;
   const company = await getCompanyAction(companyId);
 
   return <EditCompanyForm company={company} />;

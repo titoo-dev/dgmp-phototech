@@ -85,13 +85,13 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/missions/${mission.id}`}>
+                <Link href={`/dashboard/missions/${mission.id}`}>
                   <Eye className="w-4 h-4 mr-2" />
                   Voir détails
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/missions/${mission.id}/modifier`}>
+                <Link href={`/dashboard/missions/${mission.id}/modifier`}>
                   <Edit className="w-4 h-4 mr-2" />
                   Modifier
                 </Link>
@@ -127,7 +127,7 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
         <div className="space-y-1">
           <div className="flex items-center text-xs">
             <Users className="w-3 h-3 mr-1 text-muted-foreground" />
-            <span className="font-medium">{mission.teamLeader.firstName} {mission.teamLeader.lastName}</span>
+            <span className="font-medium">{mission.teamLeader.name}</span>
           </div>
         </div>
 

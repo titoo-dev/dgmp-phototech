@@ -21,24 +21,14 @@ import {
   Users,
   AlertCircle,
   Save,
-  Globe,
-  MapPin,
 } from 'lucide-react';
 import { updateCompanyAction } from '@/actions/company/update-company-action';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import type { Company } from '@/models/company-schema';
 
 interface Props {
-  company: {
-    id: number;
-    name?: string | null;
-    nif?: string | null;
-    employeeCount?: number | null;
-    email?: string | null;
-    phoneNumber?: string | null;
-    website?: string | null;
-    address?: string | null;
-  };
+  company: Company;
 }
 
 export default function EditCompanyForm({ company }: Props) {
@@ -101,7 +91,7 @@ export default function EditCompanyForm({ company }: Props) {
                     <Label htmlFor="name" className="text-sm font-medium text-foreground">Dénomination de l&#39;entreprise <span className="text-destructive ml-1">*</span></Label>
                     <div className="relative">
                       <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="name" name="name" type="text" placeholder="ex: SARL Construction Excellence" className="pl-10 h-12" defaultValue={company.name ?? ''} aria-invalid={!!state.errors?.name} />
+                      <Input id="name" name="name" type="text" placeholder="ex: SARL Construction Excellence" className="pl-10 h-12" defaultValue={company.name} aria-invalid={!!state.errors?.name} />
                     </div>
                     {state.errors?.name && (<p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="w-4 h-4" />{state.errors.name[0]}</p>)}
                   </div>
@@ -110,7 +100,7 @@ export default function EditCompanyForm({ company }: Props) {
                     <Label htmlFor="nif" className="text-sm font-medium text-foreground">Numéro d&apos;Identification Fiscale (NIF) <span className="text-destructive ml-1">*</span></Label>
                     <div className="relative">
                       <FileText className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="nif" name="nif" type="text" placeholder="ex: 2024XXXXXXXXX" className="pl-10 h-12" defaultValue={company.nif ?? ''} aria-invalid={!!state.errors?.nif} />
+                      <Input id="nif" name="nif" type="text" placeholder="ex: 2024XXXXXXXXX" className="pl-10 h-12" defaultValue={company.nif} aria-invalid={!!state.errors?.nif} />
                     </div>
                     {state.errors?.nif && (<p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="w-4 h-4" />{state.errors.nif[0]}</p>)}
                   </div>
@@ -119,7 +109,7 @@ export default function EditCompanyForm({ company }: Props) {
                     <Label htmlFor="employeeCount" className="text-sm font-medium text-foreground">Effectif de l&#39;entreprise <span className="text-destructive ml-1">*</span></Label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="employeeCount" name="employeeCount" type="number" min="1" placeholder="ex: 25" className="pl-10 h-12" defaultValue={company.employeeCount ?? undefined} aria-invalid={!!state.errors?.employeeCount} />
+                      <Input id="employeeCount" name="employeeCount" type="number" min="1" placeholder="ex: 25" className="pl-10 h-12" defaultValue={company.employeeCount} aria-invalid={!!state.errors?.employeeCount} />
                     </div>
                     {state.errors?.employeeCount && (<p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="w-4 h-4" />{state.errors.employeeCount[0]}</p>)}
                   </div>
@@ -138,7 +128,7 @@ export default function EditCompanyForm({ company }: Props) {
                     <Label htmlFor="email" className="text-sm font-medium text-foreground">Adresse email <span className="text-destructive ml-1">*</span></Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="email" name="email" type="email" placeholder="contact@entreprise.ga" className="pl-10 h-12" defaultValue={company.email ?? ''} aria-invalid={!!state.errors?.email} />
+                      <Input id="email" name="email" type="email" placeholder="contact@entreprise.ga" className="pl-10 h-12" defaultValue={company.email} aria-invalid={!!state.errors?.email} />
                     </div>
                     {state.errors?.email && (<p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="w-4 h-4" />{state.errors.email[0]}</p>)}
                   </div>
@@ -147,26 +137,12 @@ export default function EditCompanyForm({ company }: Props) {
                     <Label htmlFor="phoneNumber" className="text-sm font-medium text-foreground">Numéro de téléphone <span className="text-destructive ml-1">*</span></Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+241 XX XX XX XX" className="pl-10 h-12" defaultValue={company.phoneNumber ?? ''} aria-invalid={!!state.errors?.phoneNumber} />
+                      <Input id="phoneNumber" name="phoneNumber" type="tel" placeholder="+241 XX XX XX XX" className="pl-10 h-12" defaultValue={company.phoneNumber} aria-invalid={!!state.errors?.phoneNumber} />
                     </div>
                     {state.errors?.phoneNumber && (<p className="text-sm text-destructive flex items-center gap-1"><AlertCircle className="w-4 h-4" />{state.errors.phoneNumber[0]}</p>)}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="website" className="text-sm font-medium text-foreground">Site web (optionnel)</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="website" name="website" type="url" placeholder="https://www.entreprise.ga" className="pl-10 h-12" defaultValue={company.website || ''} />
-                    </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address" className="text-sm font-medium text-foreground">Adresse (optionnel)</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="address" name="address" type="text" placeholder="ex: BP 123, Libreville, Gabon" className="pl-10 h-12" defaultValue={company.address || ''} />
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>
