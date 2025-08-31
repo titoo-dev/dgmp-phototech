@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getSessionAction } from "@/actions/get-session";
 
 // Define route permissions for different user roles
 const routePermissions = {
@@ -84,14 +84,11 @@ export async function middleware(request: NextRequest) {
   
   try {
     // Get session using better-auth
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-    
+    const { session } = await getSessionAction();
+
     // Redirect to signin if no session
     if (!session) {
       const url = new URL("/auth/signin", request.url);
-      url.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(url);
     }
     
