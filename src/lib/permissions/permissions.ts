@@ -14,11 +14,6 @@ export const statement = {
 } as const;
  
 export const ac = createAccessControl(statement);
-
-// Default user role with no specific permissions
-export const user = ac.newRole({
-    noAccess: [],
-});
  
 export const u1 = ac.newRole({ 
     mission: ["create"], 

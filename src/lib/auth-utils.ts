@@ -1,73 +1,80 @@
 import { User } from "better-auth";
 
-export type UserRole = "user" | "u1" | "u2" | "u3" | "u4";
+export type UserRole = "u1" | "u2" | "u3" | "u4";
 
 export interface AuthUser extends User {
   role?: UserRole;
 }
 
 export const roleHierarchy: Record<UserRole, number> = {
-  user: 0,
   u1: 1,
   u2: 2,
   u3: 3,
   u4: 4,
 };
 
-export const rolePermissions = {
-  user: {
-    canViewDashboard: true,
-    canViewGallery: true,
-    canViewMissions: false,
-    canCreateMissions: false,
-    canViewProjects: false,
-    canViewCompanies: false,
-    canManageUsers: false,
-  },
+export type RolePermissions = {
+  canViewDashboard?: boolean;
+  canViewGallery?: boolean;
+  canViewMissions: boolean;
+  canCreateMissions?: boolean;
+  canValidateMissions?: boolean;
+  canEditMissions?: boolean;
+  canViewProjects?: boolean;
+  canViewCompanies?: boolean;
+  canCreateCompanies?: boolean;
+  canEditCompanies?: boolean;
+  canManageUsers?: boolean;
+  canCreateProjects?: boolean;
+  canEditProjects?: boolean;
+  canDeleteProjects?: boolean;
+  canDeleteCompanies?: boolean;
+};
+
+export const rolePermissions: Record<UserRole, RolePermissions> = {
   u1: {
     canViewDashboard: true,
-    canViewGallery: true,
     canViewMissions: true,
     canCreateMissions: true,
     canViewProjects: true,
-    canViewCompanies: false,
-    canManageUsers: false,
   },
   u2: {
-    canViewDashboard: true,
-    canViewGallery: true,
     canViewMissions: true,
-    canCreateMissions: true,
-    canEditMissions: true,
+    canValidateMissions: true,
+    canViewDashboard: true,
     canViewProjects: true,
-    canViewCompanies: false,
-    canManageUsers: false,
+    canCreateProjects: true,
+    canEditProjects: true,
+    canDeleteProjects: true,
+    canViewCompanies: true,
+    canCreateCompanies: true,
+    canEditCompanies: true,
+    canDeleteCompanies: true,
+    canManageUsers: true,
+    canViewGallery: true,
   },
   u3: {
-    canViewDashboard: true,
-    canViewGallery: true,
     canViewMissions: true,
-    canCreateMissions: true,
-    canEditMissions: true,
+    canViewGallery: true,
     canViewProjects: true,
-    canViewCompanies: true,
-    canManageUsers: false,
   },
   u4: {
-    canViewDashboard: true,
-    canViewGallery: true,
     canViewMissions: true,
-    canCreateMissions: true,
     canEditMissions: true,
+    canViewGallery: true,
     canViewProjects: true,
+    canEditProjects: true,
+    canDeleteProjects: true,
     canViewCompanies: true,
     canEditCompanies: true,
+    canCreateCompanies: true,
+    canDeleteCompanies: true,
     canManageUsers: true,
   },
-} as const;
+};
 
 export function getUserRole(user: AuthUser | null): UserRole {
-  return (user?.role as UserRole) || "user";
+  return (user?.role as UserRole) || "u1";
 }
 
 export function hasRole(user: AuthUser | null, requiredRole: UserRole): boolean {
@@ -77,7 +84,7 @@ export function hasRole(user: AuthUser | null, requiredRole: UserRole): boolean 
 
 export function hasPermission(
   user: AuthUser | null,
-  permission: keyof typeof rolePermissions.user
+  permission: keyof typeof rolePermissions[UserRole]
 ): boolean {
   const userRole = getUserRole(user);
   const permissions = rolePermissions[userRole];
@@ -89,8 +96,8 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
   
   // Route-specific access control
   const routeAccess: Record<string, UserRole[]> = {
-    "/dashboard": ["user", "u1", "u2", "u3", "u4"],
-    "/dashboard/gallery": ["user", "u1", "u2", "u3", "u4"],
+    "/dashboard": ["u1", "u2", "u3", "u4"],
+    "/dashboard/gallery": ["u1", "u2", "u3", "u4"],
     "/dashboard/missions": ["u1", "u2", "u3", "u4"],
     "/dashboard/missions/new": ["u1", "u2", "u3", "u4"],
     "/dashboard/projects": ["u2", "u3", "u4"],

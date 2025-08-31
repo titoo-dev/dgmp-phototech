@@ -1,5 +1,6 @@
 import { authClient } from "@/lib/auth-client";
 import { AuthUser, UserRole, hasRole, hasPermission, canAccessRoute, getUserRole } from "@/lib/auth-utils";
+import { rolePermissions } from "@/lib/auth-utils";
 
 export function useAuth() {
   const { data: session, isPending } = authClient.useSession();
@@ -15,7 +16,7 @@ export function useAuth() {
     isLoading,
     userRole,
     hasRole: (role: UserRole) => hasRole(user, role),
-    hasPermission: (permission: keyof typeof import("@/lib/auth-utils").rolePermissions.user) => 
+    hasPermission: (permission: keyof typeof rolePermissions[UserRole]) => 
       hasPermission(user, permission),
     canAccessRoute: (routePath: string) => canAccessRoute(user, routePath),
   };

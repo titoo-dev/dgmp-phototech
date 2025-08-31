@@ -4,11 +4,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { UserRole } from "@/lib/auth-utils";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { rolePermissions } from "@/lib/auth-utils";
 
 interface AccessGuardProps {
   children: React.ReactNode;
   requiredRole?: UserRole;
-  requiredPermission?: keyof typeof import("@/lib/auth-utils").rolePermissions.user;
+  requiredPermission?: keyof typeof rolePermissions[UserRole];
   fallback?: React.ReactNode;
 }
 
