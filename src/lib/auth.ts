@@ -66,6 +66,7 @@ const createAdminConfig = () => ({
     },
     adminRoles: ['u4'],
     adminUserIds: ['vtSUjR6YWn3ov2sDMkyzwe36LDes8X7b'],
+    defaultRole: 'u1'
 });
 
 const createPluginsConfig = () => [

@@ -1,0 +1,69 @@
+'use client';
+
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search } from 'lucide-react';
+
+type Props = {
+  uniqueProjects: string[];
+  uniqueStatuses: string[];
+  searchTerm: string;
+  selectedProject: string;
+  selectedStatus: string;
+  onSearchChange: (value: string) => void;
+  onProjectChange: (value: string) => void;
+  onStatusChange: (value: string) => void;
+};
+
+export default function SearchFilters({ uniqueProjects, uniqueStatuses, searchTerm, selectedProject, selectedStatus, onSearchChange, onProjectChange, onStatusChange }: Props) {
+  const [local, setLocal] = useState(searchTerm);
+
+  return (
+    <div className="bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-6 py-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Rechercher dans la photothèque"
+                value={local}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setLocal(e.target.value);
+                  onSearchChange(e.target.value);
+                }}
+                className="pl-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Select value={selectedProject} onValueChange={(value) => onProjectChange(value)}>
+              <SelectTrigger className="w-48 border-gray-300">
+                <SelectValue placeholder="Tous les projets" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les projets</SelectItem>
+                {uniqueProjects.map((project) => (
+                  <SelectItem key={project} value={project}>{project}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={(value) => onStatusChange(value)}>
+              <SelectTrigger className="w-40 border-gray-300">
+                <SelectValue placeholder="Tous les statuts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                {uniqueStatuses.map((status) => (
+                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
