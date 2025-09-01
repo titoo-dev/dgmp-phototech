@@ -1,17 +1,64 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Image as ImageIcon, X } from "lucide-react";
+import { Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Photo } from "./types";
+import { toast } from "sonner";
 
 interface Props {
   photos: Photo[];
   onRemove: (photoId: number) => void;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUpload: (photos: Photo[]) => void;
 }
 
 export default function PhotoGrid({ photos, onRemove, onUpload }: Props) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newPhotos: Photo[] = [];
+
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const result = await response.json();
+        
+        newPhotos.push({
+          id: Date.now() + Math.random(),
+          url: result.url,
+          file: file,
+          uploaded: true,
+          uploadData: result
+        });
+      }
+
+      onUpload(newPhotos);
+      toast.success(`${newPhotos.length} photo(s) uploadée(s) avec succès`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erreur lors de l\'upload des photos');
+    } finally {
+      setUploading(false);
+      // Reset the input
+      e.target.value = '';
+    }
+  };
+
   return (
 		<div className="flex flex-col space-y-3">
 			<label className="text-sm font-medium text-foreground">
@@ -40,17 +87,29 @@ export default function PhotoGrid({ photos, onRemove, onUpload }: Props) {
 					</div>
 				))}
 
-				<label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 transition-colors hover:bg-muted/50">
-					<ImageIcon className="h-6 w-6 text-muted-foreground" />
-					<span className="mt-1 text-xs text-muted-foreground">
-						Ajouter
-					</span>
+				<label className={`flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 transition-colors hover:bg-muted/50 ${uploading ? 'opacity-50' : ''}`}>
+					{uploading ? (
+						<>
+							<Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
+							<span className="mt-1 text-xs text-muted-foreground">
+								Upload...
+							</span>
+						</>
+					) : (
+						<>
+							<ImageIcon className="h-6 w-6 text-muted-foreground" />
+							<span className="mt-1 text-xs text-muted-foreground">
+								Ajouter
+							</span>
+						</>
+					)}
 					<input
 						type="file"
 						multiple
 						accept="image/*"
 						className="hidden"
-						onChange={onUpload}
+						onChange={handleFileUpload}
+						disabled={uploading}
 					/>
 				</label>
 			</div>

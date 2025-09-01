@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import PhotoGrid from "./photo-grid";
-import { Market } from "./types";
+import { Market, Photo } from "./types";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   marketsCount: number;
   onRemoveMarket: (id: number) => void;
   onRemovePhoto: (marketId: number, photoId: number) => void;
-  onUploadPhotos: (marketId: number, e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUploadPhotos: (marketId: number, photos: Photo[]) => void;
   onChangeRemarks: (marketId: number, remarks: string) => void;
 }
 
@@ -41,7 +41,7 @@ export default function MarketCard({ market, marketsCount, onRemoveMarket, onRem
 				<PhotoGrid
 					photos={market.photos}
 					onRemove={(photoId) => onRemovePhoto(market.id, photoId)}
-					onUpload={(e) => onUploadPhotos(market.id, e)}
+					onUpload={(photos) => onUploadPhotos(market.id, photos)}
 				/>
 
 				<div className="flex flex-col space-y-2">

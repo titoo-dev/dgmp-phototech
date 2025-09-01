@@ -93,8 +93,8 @@ export async function createMissionAction(
 
     console.log('Mission created successfully:', mission);
 
-    revalidatePath('/missions');
-    revalidatePath('/(client)/missions', 'page');
+    revalidatePath('/dashboard/missions');
+    revalidatePath('/dashboard/missions', 'page');
 
     return {
       success: true,
@@ -112,5 +112,5 @@ export async function createMissionAction(
 
 export async function createMissionWithRedirectAction(formData: FormData): Promise<void> {
   const result = await createMissionAction({}, formData);
-  if (result.success) redirect('/missions');
+  if (result.success) redirect('/dashboard/missions');
 }

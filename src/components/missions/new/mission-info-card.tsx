@@ -4,14 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MapPin, Users, Building } from "lucide-react";
 import { MissionModel } from "@/models/mission-schema";
+import type { UserModel } from "@/models/user-schema";
+import type { ContactModel } from "@/models/contact-schema";
 import DatePickerField from "@/components/date-picker/date-picker-field";
+import { UserCombobox } from "@/components/combobox/user-combobox";
+import ContactCreationDialog from "./contact-creation-dialog";
 
 interface Props {
   formData: Partial<MissionModel>;
   setFormData: (v: Partial<MissionModel> | ((prev: Partial<MissionModel>) => Partial<MissionModel>)) => void;
+  teamLeaders: UserModel[];
+  contacts: ContactModel[];
 }
 
-export default function MissionInfoCard({ formData, setFormData }: Props) {
+export default function MissionInfoCard({ formData, setFormData, teamLeaders, contacts }: Props) {
   return (
 		<Card className="border-border/50 shadow-none">
 			<CardHeader className="pb-4">
@@ -25,22 +31,23 @@ export default function MissionInfoCard({ formData, setFormData }: Props) {
 					<label className="text-sm font-medium text-foreground">
 						Chef de mission
 					</label>
-					<div className="relative">
-						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							name="teamLeaderId"
-							type="number"
-							placeholder="ID du chef de mission"
-							className="pl-10"
-							defaultValue={1}
-						/>
-					</div>
+					<UserCombobox
+						users={teamLeaders}
+						name="teamLeaderId"
+						placeholder="Sélectionner un chef de mission"
+						onValueChange={(value) => 
+							setFormData((prev) => ({ ...prev, teamLeaderId: value }))
+						}
+					/>
 				</div>
 
 				<div className="flex flex-col space-y-2">
-					<label className="text-sm font-medium text-foreground">
-						Membres de l&apos;équipe
-					</label>
+					<div className="flex items-center justify-between">
+						<label className="text-sm font-medium text-foreground">
+							Membres de l&apos;équipe
+						</label>
+						<ContactCreationDialog />
+					</div>
 					<div className="relative">
 						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 						<Input
