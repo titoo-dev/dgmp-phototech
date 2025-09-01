@@ -6,6 +6,7 @@ import { CreateMissionSchema, type CreateMission } from "../../models/mission-sc
 import prisma from "@/lib/prisma";
 import { MissionStatus } from "@/lib/generated/prisma";
 
+
 export type CreateMissionState = {
   errors?: Record<string, string[]>;
   success?: boolean;
@@ -37,6 +38,8 @@ export async function createMissionAction(
     status: formData.get("status"),
     agentCount: formData.get("agentCount"),
     marketCount: formData.get("marketCount"),
+    memberIds: formData.getAll("memberIds"),
+    projectsData: formData.get("projectsData"),
   };
 
   console.log('Raw form data received:', raw);
@@ -44,8 +47,17 @@ export async function createMissionAction(
   // If missionNumber not provided, generate one
   const missionNumber = raw.missionNumber ? String(raw.missionNumber) : generateMissionNumber();
 
+     // Parse projects data
+   let projectsData: Array<{projectId: string, notes: string}> = [];
+   try {
+     if (raw.projectsData) {
+       projectsData = JSON.parse(raw.projectsData as string);
+     }
+   } catch (error) {
+     console.error('Failed to parse projects data:', error);
+   }
+
   const parsed = {
-    missionNumber,
     teamLeaderId: raw.teamLeaderId ? String(raw.teamLeaderId) : undefined,
     startDate: raw.startDate ? new Date(raw.startDate as string) : undefined,
     endDate: raw.endDate ? new Date(raw.endDate as string) : undefined,
@@ -53,7 +65,7 @@ export async function createMissionAction(
     status: raw.status ? String(raw.status) : 'DRAFT',
     agentCount: raw.agentCount ? Number(raw.agentCount) : 0,
     marketCount: raw.marketCount ? Number(raw.marketCount) : 0,
-    members: [], // For now, empty array as required by schema
+    members: Array.isArray(raw.memberIds) ? raw.memberIds.map(id => String(id)) : [],
   };
 
   console.log('Parsed data:', parsed);
@@ -75,23 +87,42 @@ export async function createMissionAction(
     // Prisma expects MissionStatus enum values (uppercase). Ensure status is set accordingly.
     const statusValue = (data.status as unknown as MissionStatus) || ("DRAFT" as MissionStatus);
 
-    const mission = await prisma.mission.create({
-      data: {
-        missionNumber: missionNumber as string,
-        teamLeader: { connect: { id: data.teamLeaderId } },
-        startDate: data.startDate,
-        endDate: data.endDate,
-        location: data.location,
-        status: statusValue,
-        agentCount: data.agentCount,
-        marketCount: data.marketCount,
-      },
-      include: {
-        teamLeader: true,
-      },
-    });
+          const mission = await prisma.mission.create({
+        data: {
+          missionNumber: missionNumber as string,
+          teamLeader: { connect: { id: data.teamLeaderId } },
+          members: data.members && data.members.length > 0 ? {
+            connect: data.members.map(memberId => ({ id: memberId }))
+          } : undefined,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          location: data.location,
+          status: statusValue,
+          agentCount: data.agentCount,
+          marketCount: data.marketCount,
+        },
+        include: {
+          teamLeader: true,
+          members: true,
+        },
+      });
 
     console.log('Mission created successfully:', mission);
+
+    // Create MissionProject entries
+    if (projectsData.length > 0) {
+      await Promise.all(
+        projectsData.map(projectData =>
+          prisma.missionProject.create({
+            data: {
+              missionId: mission.id,
+              projectId: projectData.projectId,
+              notes: projectData.notes,
+            },
+          })
+        )
+      );
+    }
 
     revalidatePath('/dashboard/missions');
     revalidatePath('/dashboard/missions', 'page');

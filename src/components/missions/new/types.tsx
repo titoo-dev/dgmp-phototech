@@ -6,9 +6,12 @@ export interface Photo {
     uploadData?: any;
 }
 
+import type { ProjectWithCompany } from '@/actions/project/get-projects-action';
+
 export interface Market {
     id: number;
     name: string;
     photos: Photo[];
     remarks: string;
+    selectedProject: ProjectWithCompany | null;
 }

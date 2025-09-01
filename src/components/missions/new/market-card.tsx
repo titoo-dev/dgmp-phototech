@@ -2,24 +2,28 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Building } from "lucide-react";
 import PhotoGrid from "./photo-grid";
 import { Market, Photo } from "./types";
 import { Textarea } from "@/components/ui/textarea";
+import { ProjectCombobox } from "@/components/combobox/project-combobox";
+import type { ProjectWithCompany } from '@/actions/project/get-projects-action';
 
 interface Props {
   market: Market;
   marketsCount: number;
+  projects: ProjectWithCompany[];
   onRemoveMarket: (id: number) => void;
   onRemovePhoto: (marketId: number, photoId: number) => void;
   onUploadPhotos: (marketId: number, photos: Photo[]) => void;
   onChangeRemarks: (marketId: number, remarks: string) => void;
+  onProjectChange: (marketId: number, projectId: string | null) => void;
 }
 
-export default function MarketCard({ market, marketsCount, onRemoveMarket, onRemovePhoto, onUploadPhotos, onChangeRemarks }: Props) {
+export default function MarketCard({ market, marketsCount, projects, onRemoveMarket, onRemovePhoto, onUploadPhotos, onChangeRemarks, onProjectChange }: Props) {
   return (
 		<Card className="border-border/50 shadow-none">
-			<CardHeader className="pb-4">
+			<CardHeader>
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-base font-medium">
 						{market.name}
@@ -38,6 +42,28 @@ export default function MarketCard({ market, marketsCount, onRemoveMarket, onRem
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
+				{/* Sélection de projet */}
+				<div className="flex flex-col space-y-2">
+					<label className="text-sm font-medium text-foreground">
+						Projet à contrôler
+						<span className="text-destructive ml-1">*</span>
+					</label>
+					<ProjectCombobox
+						projects={projects}
+						value={market.selectedProject?.id || ""}
+						onValueChange={(projectId) => onProjectChange(market.id, projectId)}
+						placeholder="Sélectionner un projet..."
+					/>
+					{market.selectedProject && (
+						<div className="p-3 bg-muted/30 rounded-md">
+							<p className="text-sm font-medium">{market.selectedProject.title}</p>
+							<p className="text-xs text-muted-foreground">
+								{market.selectedProject.company.name} • {market.selectedProject.status}
+							</p>
+						</div>
+					)}
+				</div>
+
 				<PhotoGrid
 					photos={market.photos}
 					onRemove={(photoId) => onRemovePhoto(market.id, photoId)}

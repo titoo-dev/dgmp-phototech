@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MapPin, Users, Building } from "lucide-react";
@@ -9,18 +9,21 @@ import type { ContactModel } from "@/models/contact-schema";
 import DatePickerField from "@/components/date-picker/date-picker-field";
 import { UserCombobox } from "@/components/combobox/user-combobox";
 import ContactCreationDialog from "./contact-creation-dialog";
+import ContactChips from "./contact-chips";
 
 interface Props {
   formData: Partial<MissionModel>;
   setFormData: (v: Partial<MissionModel> | ((prev: Partial<MissionModel>) => Partial<MissionModel>)) => void;
   teamLeaders: UserModel[];
   contacts: ContactModel[];
+  selectedContacts: ContactModel[];
+  onContactsChange: (contacts: ContactModel[]) => void;
 }
 
-export default function MissionInfoCard({ formData, setFormData, teamLeaders, contacts }: Props) {
+export default function MissionInfoCard({ formData, setFormData, teamLeaders, contacts, selectedContacts, onContactsChange }: Props) {
   return (
 		<Card className="border-border/50 shadow-none">
-			<CardHeader className="pb-4">
+			<CardHeader>
 				<CardTitle className="flex items-center gap-2 text-lg">
 					<Users className="h-5 w-5 text-primary" />
 					Informations de la mission
@@ -48,14 +51,11 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 						</label>
 						<ContactCreationDialog />
 					</div>
-					<div className="relative">
-						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							name="memberIds"
-							placeholder="IDs des membres (séparés par des virgules)"
-							className="pl-10"
-						/>
-					</div>
+					<ContactChips
+						contacts={contacts}
+						selectedContacts={selectedContacts}
+						onContactsChange={onContactsChange}
+					/>
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">

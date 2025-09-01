@@ -18,14 +18,11 @@ import { createContactAction } from "@/actions/contact/create-contact-action";
 import { Plus, User } from "lucide-react";
 import { toast } from "sonner";
 
-interface ContactCreationDialogProps {
-  onContactCreated?: () => void;
-}
-
-export default function ContactCreationDialog({ onContactCreated }: ContactCreationDialogProps) {
+export default function ContactCreationDialog() {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useActionState(createContactAction, {});
   const [isPending, startTransition] = useTransition();
+  const formRef = React.useRef<HTMLFormElement>(null);
 
   React.useEffect(() => {
     if (state.success) {
@@ -34,16 +31,24 @@ export default function ContactCreationDialog({ onContactCreated }: ContactCreat
         duration: 4000,
       });
       setOpen(false);
-      onContactCreated?.();
+      formRef.current?.reset();
     } else if (state.errors?._form) {
       toast.error('Erreur lors de la création', {
         description: state.errors._form[0],
         duration: 5000,
       });
     }
-  }, [state.success, state.errors, onContactCreated]);
+  }, [state.success, state.errors]);
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
+    console.log('Contact form submitted with data:');
+    for (const [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`);
+    }
+
     startTransition(() => {
       formAction(formData);
     });
@@ -68,7 +73,7 @@ export default function ContactCreationDialog({ onContactCreated }: ContactCreat
           </DialogDescription>
         </DialogHeader>
         
-        <form action={handleSubmit}>
+        <form ref={formRef} onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">Prénom</Label>

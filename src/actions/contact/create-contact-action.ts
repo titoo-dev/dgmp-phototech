@@ -17,19 +17,36 @@ export async function createContactAction(
     prevState: CreateContactState,
     formData: FormData
 ): Promise<CreateContactState> {
+    console.log('createContactAction called with formData:');
+    for (const [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+
     const raw = {
         firstName: formData.get("firstName"),
         lastName: formData.get("lastName"),
         email: formData.get("email"),
     };
 
-    const validation = CreateContactSchema.safeParse(raw);
+    console.log('Raw form data received:', raw);
+
+    // Convert to proper types (FormData.get() returns string | null)
+    const parsed = {
+        firstName: raw.firstName ? String(raw.firstName) : "",
+        lastName: raw.lastName ? String(raw.lastName) : "",
+        email: raw.email ? String(raw.email) : "",
+    };
+
+    console.log('Parsed data:', parsed);
+
+    const validation = CreateContactSchema.safeParse(parsed);
 
     if (!validation.success) {
+        console.log('Validation errors:', validation.error.flatten().fieldErrors);
         return {
             errors: validation.error.flatten().fieldErrors,
             success: false,
-            data: raw,
+            data: parsed,
         };
     }
 
@@ -61,6 +78,7 @@ export async function createContactAction(
 
         // Revalidate contacts pages
         revalidatePath("/dashboard/missions");
+        revalidatePath("/dashboard/missions/new");
 
         return {
             success: true,
