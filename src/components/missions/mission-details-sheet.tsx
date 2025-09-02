@@ -25,7 +25,6 @@ import {
     ExternalLink
 } from "lucide-react";
 import { getMissionAction } from "@/actions/mission/get-mission-action";
-import { generateMissionPhotos } from "@/components/gallery/generate-mission-photos";
 import Image from "next/image";
 
 interface MissionDetailsSheetProps {
@@ -40,8 +39,6 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
     const [mission, setMission] = useState<MissionWithDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const mockPhotos = generateMissionPhotos(8).slice(0, 4);
 
     useEffect(() => {
         if (isOpen && missionId) {
@@ -63,6 +60,17 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
         } finally {
             setLoading(false);
         }
+    };
+
+    const getAllMissionFiles = () => {
+        if (!mission?.missionProjects) return [];
+        
+        return mission.missionProjects.flatMap(mp => 
+            mp.files.map(file => ({
+                ...file,
+                projectTitle: mp.project.title
+            }))
+        );
     };
 
     const getStatusIcon = (status: string) => {
@@ -350,46 +358,58 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
                             )}
 
                             {/* Photos de mission */}
-                            <Card className='shadow-none'>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Camera className="w-5 h-5" />
-                                        Photos de mission ({mockPhotos.length})
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {mockPhotos.map((photo) => (
-                                            <div key={photo.id} className="group relative aspect-square rounded-lg overflow-hidden border">
-                                                <Image
-                                                    src={photo.imageUrl}
-                                                    alt={photo.title}
-                                                    fill
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-200"
-                                                />
-                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
-                                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                    <Button size="sm" variant="secondary" className="h-6 w-6 p-0">
-                                                        <ExternalLink className="h-3 w-3" />
-                                                    </Button>
-                                                </div>
-                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                    <p className="text-white text-xs font-medium truncate">{photo.title}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                            {(() => {
+                                const missionFiles = getAllMissionFiles();
+                                return (
+                                    <Card className='shadow-none'>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Camera className="w-5 h-5" />
+                                                Photos de mission ({missionFiles.length})
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {missionFiles.length > 0 ? (
+                                                <>
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        {missionFiles.map((file) => (
+                                                            <div key={file.id} className="group relative aspect-square rounded-lg overflow-hidden border">
+                                                                <Image
+                                                                    src={file.fileUrl}
+                                                                    alt={`Photo de ${file.projectTitle}`}
+                                                                    fill
+                                                                    className="object-cover"
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
+                                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                                    <p className="text-white text-xs font-medium truncate">{file.projectTitle}</p>
+                                                                    {file.metadata && (
+                                                                        <p className="text-white/80 text-xs truncate">{JSON.parse(file.metadata).originalName || 'Photo'}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
 
-                                    {mockPhotos.length > 0 && (
-                                        <div className="mt-4 flex justify-center">
-                                            <Button variant="outline" size="sm">
-                                                Voir toutes les photos
-                                                <ExternalLink className="w-4 h-4 ml-2" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                                    {missionFiles.length > 4 && (
+                                                        <div className="mt-4 flex justify-center">
+                                                            <Button variant="outline" size="sm">
+                                                                Voir toutes les photos ({missionFiles.length})
+                                                                <ExternalLink className="w-4 h-4 ml-2" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-8 text-muted-foreground">
+                                                    <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                                    <p>Aucune photo disponible pour cette mission</p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })()}
                         </div>
                     </div>
                 </ScrollArea>

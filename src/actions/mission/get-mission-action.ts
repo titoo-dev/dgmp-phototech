@@ -17,6 +17,7 @@ export async function getMissionAction(id: string) {
               company: true,
             },
           },
+          files: true,
         },
       },
     },
