@@ -19,6 +19,9 @@ import {
 import { Calendar, MoreHorizontal, Eye, Edit, Trash2, Users, Plus, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { MissionModel } from '@/models/mission-schema';
+import { MissionStatusDropdown } from './mission-status-dropdown';
+import { DeleteMissionDialog } from './delete-mission-dialog';
+import { MissionStatus } from '@/lib/generated/prisma';
 
 type MissionKanbanItem = {
 	id: string;
@@ -92,7 +95,11 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge }: Miss
 										</div>
 									</TableCell>
 									<TableCell>
-										{getStatusBadge(missionData.status.toLowerCase())}
+										<MissionStatusDropdown
+											missionId={missionData.id}
+											currentStatus={missionData.status as MissionStatus}
+											missionNumber={missionData.missionNumber}
+										/>
 									</TableCell>
 									<TableCell>
 										<DropdownMenu>
@@ -115,10 +122,19 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge }: Miss
 													</Link>
 												</DropdownMenuItem>
 												<DropdownMenuSeparator />
-												<DropdownMenuItem className="text-red-600">
-													<Trash2 className="w-4 h-4 mr-2" />
-													Supprimer
-												</DropdownMenuItem>
+												<DeleteMissionDialog
+													missionId={missionData.id}
+													missionNumber={missionData.missionNumber}
+													trigger={
+														<DropdownMenuItem 
+															className="text-red-600 focus:text-red-600 focus:bg-red-50"
+															onSelect={(e) => e.preventDefault()}
+														>
+															<Trash2 className="w-4 h-4 mr-2" />
+															Supprimer
+														</DropdownMenuItem>
+													}
+												/>
 											</DropdownMenuContent>
 										</DropdownMenu>
 									</TableCell>

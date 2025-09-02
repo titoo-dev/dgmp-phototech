@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { MissionModel } from '@/models/mission-schema';
 import {
 	Clock,
@@ -13,6 +13,9 @@ import { ReportHeader } from '@/components/missions/report-header';
 import { ReportSearch } from '@/components/missions/report-search';
 import { MissionListTable } from '@/components/missions/mission-list-table';
 import type { MissionWithRelations } from '../../actions/mission/get-missions-action';
+import { updateMissionStatusAction } from '@/actions/mission/update-mission-status-action';
+import { MissionStatus } from '@/lib/generated/prisma';
+import { toast } from 'sonner';
 
 interface MissionsClientProps {
   missions: MissionWithRelations[];
@@ -29,6 +32,7 @@ export function MissionsClient({ missions }: MissionsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [, startTransition] = useTransition();
 
   // Transform database missions to the format expected by components
   const missionsData = useMemo(() => {
@@ -99,10 +103,32 @@ export function MissionsClient({ missions }: MissionsClientProps) {
 
   const [currentMissionsData, setCurrentMissionsData] = useState<MissionKanbanItem[]>(missionsData);
 
-  // Update missions data when the props change
-  useEffect(() => {
-    setCurrentMissionsData(missionsData);
-  }, [missionsData]);
+  const handleMissionsChange = (newMissions: MissionKanbanItem[]) => {
+    const changedMissions = newMissions.filter((newMission) => {
+      const originalMission = missions.filter(m => m.id === newMission.id)[0];
+      return originalMission.status !== newMission.column;
+    });
+
+    // Update UI immediately for better UX
+    setCurrentMissionsData(newMissions);
+
+    // Process status updates
+    if (changedMissions.length > 0) {
+      startTransition(async () => {
+        for (const changedMission of changedMissions) {
+          try {
+            const newStatus = changedMission.column as MissionStatus;
+            await updateMissionStatusAction(changedMission.id, newStatus);
+          } catch (error) {
+            toast.error('Erreur', {
+              description: 'Une erreur inattendue est survenue',
+              duration: 5000,
+            });
+          }
+        }
+      });
+    }
+  };
 
   const filteredMissions = currentMissionsData.filter((mission) => {
     const missionData = mission.data as MissionModel;
@@ -168,11 +194,13 @@ export function MissionsClient({ missions }: MissionsClientProps) {
       />
 
       {viewMode === 'kanban' ? (
-        <MissionKanbanView
-          columns={kanbanColumns}
-          missions={filteredMissions}
-          onMissionsChange={setCurrentMissionsData}
-        />
+        <div className="relative">
+          <MissionKanbanView
+            columns={kanbanColumns}
+            missions={filteredMissions}
+            onMissionsChange={handleMissionsChange}
+          />
+        </div>
       ) : (
         <MissionListTable 
           missions={filteredMissions} 

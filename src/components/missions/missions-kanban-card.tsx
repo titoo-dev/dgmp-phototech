@@ -21,6 +21,9 @@ import {
   MapPin} from "lucide-react"
 import Link from "next/link"
 import { MissionModel } from "@/models/mission-schema"
+import { MissionStatusDropdown } from "./mission-status-dropdown"
+import { DeleteMissionDialog } from "./delete-mission-dialog"
+import { MissionStatus } from "@/lib/generated/prisma"
 
 interface MissionKanbanCardProps {
   mission: MissionModel;
