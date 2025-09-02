@@ -118,7 +118,13 @@ export function MissionsClient({ missions }: MissionsClientProps) {
         for (const changedMission of changedMissions) {
           try {
             const newStatus = changedMission.column as MissionStatus;
-            await updateMissionStatusAction(changedMission.id, newStatus);
+            const result = await updateMissionStatusAction(changedMission.id, newStatus);
+            if (!result.success) {
+              toast.error('Erreur', {
+                description: result.errors?._form?.[0] || 'Une erreur inattendue est survenue',
+                duration: 5000,
+              });
+            }
           } catch (error) {
             toast.error('Erreur', {
               description: 'Une erreur inattendue est survenue',
