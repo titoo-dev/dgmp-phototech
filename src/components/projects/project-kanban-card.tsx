@@ -20,8 +20,7 @@ import {
   Trash2,
   AlertCircle,
   Phone,
-  Mail,
-  MapPin
+  Mail
 } from "lucide-react"
 import Link from "next/link"
 import { ProjectModel } from "@/models/project-schema"
@@ -175,10 +174,6 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
           <Badge variant="outline" className="text-xs break-words">
             {projet.nature}
           </Badge>
-          <div className="flex items-center gap-1 shrink-0">
-            <MapPin className="w-3 h-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Gabon</span>
-          </div>
         </div>
       </div>
     </div>

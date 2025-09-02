@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useTransition } from 'react';
 import { ProjectHeader } from '@/components/projects/project-header';
 import { ProjectSearch } from '@/components/projects/project-search';
 import { ProjectKanbanView } from '@/components/projects/project-kanban-view';
 import { ProjectListTable } from '@/components/projects/project-list-table';
 import type { ProjectWithCompany } from '../../actions/project/get-projects-action';
 import type { ProjectModel } from '@/models/project-schema';
+import { updateProjectStatusAction } from '@/actions/project/update-project-status-action';
+import { ProjectStatus } from '@/lib/generated/prisma';
+import { toast } from 'sonner';
 
 interface ProjectsClientProps {
   projects: ProjectWithCompany[];
@@ -22,6 +25,7 @@ type ProjectKanbanItem = {
 export function ProjectsClient({ projects }: ProjectsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [, startTransition] = useTransition();
 
   // Transform database projects to the format expected by components
   const projectsData = useMemo(() => {
@@ -97,10 +101,40 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
 
   const [currentProjectsData, setCurrentProjectsData] = useState<ProjectKanbanItem[]>(projectsData);
 
-  // Update projects data when the props change
-  useEffect(() => {
-    setCurrentProjectsData(projectsData);
-  }, [projectsData]);
+  const handleProjectsChange = (newProjects: ProjectKanbanItem[]) => {
+    // Find projects that have changed status
+    const changedProjects = newProjects.filter((newProject) => {
+      const originalProject = projects.filter(p => p.id === newProject.id)[0];
+      return originalProject.status !== newProject.column;
+    });
+
+    // Update UI immediately for better UX
+    setCurrentProjectsData(newProjects);
+
+    // Process status updates
+    if (changedProjects.length > 0) {
+      startTransition(async () => {
+        for (const changedProject of changedProjects) {
+          try {
+            const newStatus = changedProject.column as ProjectStatus;
+            const result = await updateProjectStatusAction(changedProject.id, newStatus);
+            
+            if (!result.success) {
+              toast.error('Erreur', {
+                description: result.errors?._form?.[0] || 'Une erreur inattendue est survenue',
+                duration: 5000,
+              });
+            }
+          } catch (error) {
+            toast.error('Erreur', {
+              description: 'Une erreur inattendue est survenue',
+              duration: 5000,
+            });
+          }
+        }
+      });
+    }
+  };
 
   const filteredProjects = currentProjectsData.filter((project) =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -122,7 +156,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
         <ProjectKanbanView 
           columns={kanbanColumns}
           projects={filteredProjects}
-          onProjectsChange={setCurrentProjectsData}
+          onProjectsChange={handleProjectsChange}
         />
       ) : (
         <ProjectListTable 
