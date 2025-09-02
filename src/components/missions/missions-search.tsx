@@ -52,16 +52,16 @@ export function MissionSearch({
           <DropdownMenuItem onClick={() => onStatusFilterChange("all")}>
             Tous les statuts
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("draft")}>
+          <DropdownMenuItem onClick={() => onStatusFilterChange("DRAFT")}>
             Brouillons
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("pending")}>
+          <DropdownMenuItem onClick={() => onStatusFilterChange("PENDING")}>
             En attente
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("completed")}>
+          <DropdownMenuItem onClick={() => onStatusFilterChange("COMPLETED")}>
             Validés
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("rejected")}>
+          <DropdownMenuItem onClick={() => onStatusFilterChange("REJECTED")}>
             Refusés
           </DropdownMenuItem>
         </DropdownMenuContent>

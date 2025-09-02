@@ -30,13 +30,13 @@ interface MissionKanbanCardProps {
 export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "draft":
+      case "DRAFT":
         return <AlertCircle className="w-3 h-3 text-blue-600" />
-      case "pending":
+      case "PENDING":
         return <Clock className="w-3 h-3 text-yellow-600" />
-      case "completed":
+      case "COMPLETED":
         return <CheckCircle className="w-3 h-3 text-green-600" />
-      case "rejected":
+      case "REJECTED":
         return <AlertCircle className="w-3 h-3 text-red-600" />
       default:
         return <AlertCircle className="w-3 h-3 text-gray-600" />
@@ -45,13 +45,13 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "draft":
+      case "DRAFT":
         return "border-l-blue-500"
-      case "pending":
+      case "PENDING":
         return "border-l-yellow-500"
-      case "completed":
+      case "COMPLETED":
         return "border-l-green-500"
-      case "rejected":
+      case "REJECTED":
         return "border-l-red-500"
       default:
         return "border-l-gray-500"
