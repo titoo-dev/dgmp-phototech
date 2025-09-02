@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -21,9 +22,7 @@ import {
   MapPin} from "lucide-react"
 import Link from "next/link"
 import { MissionModel } from "@/models/mission-schema"
-import { MissionStatusDropdown } from "./mission-status-dropdown"
-import { DeleteMissionDialog } from "./delete-mission-dialog"
-import { MissionStatus } from "@/lib/generated/prisma"
+import { MissionDetailsSheet } from "./mission-details-sheet"
 
 interface MissionKanbanCardProps {
   mission: MissionModel;
@@ -31,6 +30,8 @@ interface MissionKanbanCardProps {
 }
 
 export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps) {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "DRAFT":
@@ -80,32 +81,54 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
               #{mission.missionNumber}
             </span>
           </div>
-          <DropdownMenu>
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 p-0"
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/missions/${mission.id}`}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Voir détails
-                </Link>
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSheetOpen(true);
+                }}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Voir détails
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/missions/${mission.id}/modifier`}>
+                <Link 
+                  href={`/dashboard/missions/${mission.id}/modifier`}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Edit className="w-4 h-4 mr-2" />
                   Modifier
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem 
+                className="text-red-600"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Titre Mission */}
@@ -146,6 +169,12 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
           </div>
         </div>
       </div>
+
+      <MissionDetailsSheet
+        missionId={mission.id}
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+      />
     </div>
   )
 }
