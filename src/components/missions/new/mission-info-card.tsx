@@ -117,16 +117,9 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 								name="agentCount"
 								type="number"
 								min="1"
-								placeholder="0"
-								className="pl-10"
-								value={formData.agentCount || ''}
-								onChange={(e) =>
-									setFormData((prev) => ({
-										...prev,
-										agentCount:
-											parseInt(e.target.value) || 0,
-									}))
-								}
+								value={(formData.teamLeaderId ? 1 : 0) + selectedContacts.length}
+								className="pl-10 bg-muted/50"
+								readOnly
 							/>
 						</div>
 					</div>

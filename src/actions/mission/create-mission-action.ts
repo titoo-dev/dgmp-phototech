@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { CreateMissionSchema, type CreateMission } from "../../models/mission-schema";
 import prisma from "@/lib/prisma";
 import { MissionStatus } from "@/lib/generated/prisma";
+import { put } from '@vercel/blob';
 
 
 export type CreateMissionState = {
@@ -20,15 +21,40 @@ function generateMissionNumber() {
   return `MIS-${year}-${stamp}`;
 }
 
+async function uploadPhotoFile(file: File): Promise<{ url: string; metadata: any }> {
+  // Validate file type (images only)
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Only image files are allowed');
+  }
+
+  // Generate a unique filename
+  const fileExtension = file.name.split('.').pop() || 'jpg';
+  const filename = `mission-photo.${fileExtension}`;
+
+  // Upload to Vercel Blob
+  const blob = await put(filename, file, {
+    access: 'public',
+    addRandomSuffix: true,
+    multipart: true,
+  });
+
+  return {
+    url: blob.url,
+    metadata: {
+      success: true,
+      filename: blob.pathname,
+      size: file.size,
+      type: file.type,
+      ...blob,
+    }
+  };
+}
+
 export async function createMissionAction(
   prevState: CreateMissionState,
   formData: FormData
 ): Promise<CreateMissionState> {
-  console.log('createMissionAction called with formData:');
-  for (const [key, value] of formData.entries()) {
-    console.log(`  ${key}: ${value}`);
-  }
-  
+
   const raw = {
     missionNumber: formData.get("missionNumber"),
     teamLeaderId: formData.get("teamLeaderId"),
@@ -40,22 +66,45 @@ export async function createMissionAction(
     marketCount: formData.get("marketCount"),
     memberIds: formData.getAll("memberIds"),
     projectsData: formData.get("projectsData"),
+    marketData: formData.get("marketData"),
   };
-
-  console.log('Raw form data received:', raw);
 
   // If missionNumber not provided, generate one
   const missionNumber = raw.missionNumber ? String(raw.missionNumber) : generateMissionNumber();
 
-     // Parse projects data
-   let projectsData: Array<{projectId: string, notes: string}> = [];
-   try {
-     if (raw.projectsData) {
-       projectsData = JSON.parse(raw.projectsData as string);
-     }
-   } catch (error) {
-     console.error('Failed to parse projects data:', error);
-   }
+  // Parse projects data
+  let projectsData: Array<{ projectId: string, notes: string, marketName: string }> = [];
+  try {
+    if (raw.projectsData) {
+      projectsData = JSON.parse(raw.projectsData as string);
+    }
+  } catch (error) {
+    console.error('Failed to parse projects data:', error);
+  }
+
+  // Parse market data with photos
+  let marketData: Array<{ name: string, remarks: string, photoCount: number, projectId: string | null }> = [];
+  try {
+    if (raw.marketData) {
+      marketData = JSON.parse(raw.marketData as string);
+    }
+  } catch (error) {
+    console.error('Failed to parse market data:', error);
+  }
+
+  // Extract photo files from FormData
+  const photoFiles: { [marketName: string]: File[] } = {};
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith('photos_')) {
+      const marketName = key.replace('photos_', '');
+      if (!photoFiles[marketName]) {
+        photoFiles[marketName] = [];
+      }
+      if (value instanceof File) {
+        photoFiles[marketName].push(value);
+      }
+    }
+  }
 
   const parsed = {
     teamLeaderId: raw.teamLeaderId ? String(raw.teamLeaderId) : undefined,
@@ -87,31 +136,29 @@ export async function createMissionAction(
     // Prisma expects MissionStatus enum values (uppercase). Ensure status is set accordingly.
     const statusValue = (data.status as unknown as MissionStatus) || ("DRAFT" as MissionStatus);
 
-          const mission = await prisma.mission.create({
-        data: {
-          missionNumber: missionNumber as string,
-          teamLeader: { connect: { id: data.teamLeaderId } },
-          members: data.members && data.members.length > 0 ? {
-            connect: data.members.map(memberId => ({ id: memberId }))
-          } : undefined,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          location: data.location,
-          status: statusValue,
-          agentCount: data.agentCount,
-          marketCount: data.marketCount,
-        },
-        include: {
-          teamLeader: true,
-          members: true,
-        },
-      });
+    const mission = await prisma.mission.create({
+      data: {
+        missionNumber: missionNumber as string,
+        teamLeader: { connect: { id: data.teamLeaderId } },
+        members: data.members && data.members.length > 0 ? {
+          connect: data.members.map(memberId => ({ id: memberId }))
+        } : undefined,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        location: data.location,
+        status: statusValue,
+        agentCount: data.agentCount,
+        marketCount: data.marketCount,
+      },
+      include: {
+        teamLeader: true,
+        members: true,
+      },
+    });
 
-    console.log('Mission created successfully:', mission);
-
-    // Create MissionProject entries
+    // Create MissionProject entries and upload photos
     if (projectsData.length > 0) {
-      await Promise.all(
+      const missionProjects = await Promise.all(
         projectsData.map(projectData =>
           prisma.missionProject.create({
             data: {
@@ -122,6 +169,31 @@ export async function createMissionAction(
           })
         )
       );
+
+      // Upload photos and create MissionFile entries
+      for (const projectData of projectsData) {
+        const missionProject = missionProjects.find(mp => mp.projectId === projectData.projectId);
+        if (!missionProject) continue;
+
+        const marketPhotos = photoFiles[projectData.marketName] || [];
+        
+        for (const photoFile of marketPhotos) {
+          try {
+            const uploadResult = await uploadPhotoFile(photoFile);
+            
+            await prisma.missionFile.create({
+              data: {
+                fileUrl: uploadResult.url,
+                metadata: JSON.stringify(uploadResult.metadata),
+                missionProjectId: missionProject.id,
+              },
+            });
+          } catch (error) {
+            console.error('Failed to upload photo:', error);
+            // Continue with other photos even if one fails
+          }
+        }
+      }
     }
 
     revalidatePath('/dashboard/missions');

@@ -40,6 +40,13 @@ export default function MissionFormClient({ teamLeaders, contacts, projects }: M
 	});
 
 	const [selectedContacts, setSelectedContacts] = useState<ContactModel[]>([]);
+
+	// Auto-update agent count based on team leader + contacts
+	useEffect(() => {
+		const teamLeaderCount = formData.teamLeaderId ? 1 : 0;
+		const agentCount = teamLeaderCount + selectedContacts.length;
+		setFormData(prev => ({ ...prev, agentCount }));
+	}, [formData.teamLeaderId, selectedContacts.length, setFormData]);
 	const [markets, setMarkets] = useState<Market[]>([
 		{ id: 1, name: "Marché 1", photos: [], remarks: "", selectedProject: null },
 	]);
@@ -151,6 +158,15 @@ export default function MissionFormClient({ teamLeaders, contacts, projects }: M
 		// Add contact IDs
 		selectedContacts.forEach(contact => {
 			form.append('memberIds', contact.id);
+		});
+
+		// Add photo files for each market
+		markets.forEach(market => {
+			market.photos.forEach(photo => {
+				if (photo.file) {
+					form.append(`photos_${market.name}`, photo.file);
+				}
+			});
 		});
 
 		console.log('Form data being submitted:');
