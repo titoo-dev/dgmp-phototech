@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
+import { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
 import { MissionModel } from '@/models/mission-schema';
 import {
 	Clock,
@@ -33,10 +33,11 @@ export function MissionsClient({ missions }: MissionsClientProps) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [, startTransition] = useTransition();
+  const [currentMissions, setCurrentMissions] = useState<MissionWithRelations[]>(missions);
 
   // Transform database missions to the format expected by components
   const missionsData = useMemo(() => {
-    return missions.map((mission): MissionKanbanItem => ({
+    return currentMissions.map((mission): MissionKanbanItem => ({
       id: mission.id,
       name: `Mission #${mission.missionNumber}`,
       column: mission.status,
@@ -63,7 +64,7 @@ export function MissionsClient({ missions }: MissionsClientProps) {
         status: mission.status,
       },
     }));
-  }, [missions]);
+  }, [currentMissions]);
 
   // Calculate kanban columns with dynamic counts
   const kanbanColumns = useMemo(() => [
@@ -103,9 +104,27 @@ export function MissionsClient({ missions }: MissionsClientProps) {
 
   const [currentMissionsData, setCurrentMissionsData] = useState<MissionKanbanItem[]>(missionsData);
 
+  // Update currentMissionsData when missionsData changes
+  useEffect(() => {
+    setCurrentMissionsData(missionsData);
+  }, [missionsData]);
+
+  // Refresh missions data
+  const refreshMissions = useCallback(async () => {
+    try {
+      const response = await fetch('/api/missions');
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentMissions(data.missions);
+      }
+    } catch (error) {
+      console.error('Failed to refresh missions:', error);
+    }
+  }, []);
+
   const handleMissionsChange = (newMissions: MissionKanbanItem[]) => {
     const changedMissions = newMissions.filter((newMission) => {
-      const originalMission = missions.filter(m => m.id === newMission.id)[0];
+      const originalMission = currentMissions.filter(m => m.id === newMission.id)[0];
       return originalMission.status !== newMission.column;
     });
 
@@ -205,6 +224,7 @@ export function MissionsClient({ missions }: MissionsClientProps) {
             columns={kanbanColumns}
             missions={filteredMissions}
             onMissionsChange={handleMissionsChange}
+            onMissionDeleted={refreshMissions}
           />
         </div>
       ) : (

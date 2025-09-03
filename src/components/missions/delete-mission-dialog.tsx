@@ -20,11 +20,25 @@ interface DeleteMissionDialogProps {
   missionId: string;
   missionNumber: string;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onDeleteSuccess?: () => void;
 }
 
-export function DeleteMissionDialog({ missionId, missionNumber, trigger }: DeleteMissionDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function DeleteMissionDialog({ 
+  missionId, 
+  missionNumber, 
+  trigger, 
+  open: externalOpen, 
+  onOpenChange: externalOnOpenChange,
+  onDeleteSuccess
+}: DeleteMissionDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = externalOnOpenChange || setInternalOpen;
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -36,6 +50,9 @@ export function DeleteMissionDialog({ missionId, missionNumber, trigger }: Delet
           duration: 3000,
         });
         setIsOpen(false);
+        if (onDeleteSuccess) {
+          onDeleteSuccess();
+        }
       } else {
         toast.error('Erreur', {
           description: result.errors?._form?.[0] || 'Impossible de supprimer la mission',
@@ -47,24 +64,16 @@ export function DeleteMissionDialog({ missionId, missionNumber, trigger }: Delet
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <div onClick={() => setIsOpen(true)}>
-        {trigger || (
-          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-            <Trash2 className="w-4 h-4 mr-2" />
-            Supprimer
-          </Button>
-        )}
-      </div>
+      {trigger && (
+        <div onClick={() => setIsOpen(true)}>
+          {trigger}
+        </div>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Supprimer la mission #{missionNumber}</AlertDialogTitle>
           <AlertDialogDescription>
-            Êtes-vous sûr de vouloir supprimer cette mission ? Cette action est irréversible et supprimera également :
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Tous les projets associés à cette mission</li>
-              <li>Tous les fichiers uploadés</li>
-              <li>Toutes les données de la mission</li>
-            </ul>
+            Êtes-vous sûr de vouloir supprimer cette mission ? Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -82,7 +91,7 @@ export function DeleteMissionDialog({ missionId, missionNumber, trigger }: Delet
             ) : (
               <>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Supprimer définitivement
+                Supprimer
               </>
             )}
           </AlertDialogAction>

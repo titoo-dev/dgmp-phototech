@@ -28,9 +28,10 @@ interface MissionKanbanViewProps {
 	}>;
 	missions: MissionKanbanItem[];
 	onMissionsChange: (missions: MissionKanbanItem[]) => void;
+	onMissionDeleted?: () => void;
 }
 
-export function MissionKanbanView({ columns, missions, onMissionsChange }: MissionKanbanViewProps) {
+export function MissionKanbanView({ columns, missions, onMissionsChange, onMissionDeleted }: MissionKanbanViewProps) {
 	return (
 		<div className="h-[calc(100vh-400px)] min-h-[600px] overflow-hidden">
 			<KanbanProvider
@@ -46,42 +47,59 @@ export function MissionKanbanView({ columns, missions, onMissionsChange }: Missi
 					const isEmpty = columnData.length === 0;
 
 					return (
-						<KanbanBoard
+						<div
 							key={column.id}
-							id={column.id}
-							className={`${column.bgColor} ${column.borderColor} flex-shrink-0`}
+							onPointerDown={(e) => e.stopPropagation()}
+							onMouseDown={(e) => e.stopPropagation()}
+							onClick={(e) => e.stopPropagation()}
 						>
-							<KanbanHeader
-								className={`${column.color} font-semibold border-b border-border/40`}
+							<KanbanBoard
+								key={column.id}
+								id={column.id}
+								className={`${column.bgColor} ${column.borderColor} flex-shrink-0`}
 							>
-								<div className="flex items-center justify-between">
-									<span>{column.name}</span>
-									<Badge variant="secondary" className="ml-2">
-										{column.count}
-									</Badge>
-								</div>
-							</KanbanHeader>
-							{isEmpty ? (
-								<EmptyMissionColumn />
-							) : (
-								<KanbanCards id={column.id}>
-									{(item) => {
-										const mission = item.data as MissionModel;
-										return (
-											<KanbanCard
-												key={item.id}
-												id={item.id}
-												name={item.name}
-												column={item.column}
-												className="bg-transparent border-0 shadow-none p-0"
-											>
-												<MissionKanbanCard mission={mission} />
-											</KanbanCard>
-										);
-									}}
-								</KanbanCards>
-							)}
-						</KanbanBoard>
+								<KanbanHeader
+									className={`${column.color} font-semibold border-b border-border/40`}
+								>
+									<div className="flex items-center justify-between">
+										<span>{column.name}</span>
+										<Badge variant="secondary" className="ml-2">
+											{column.count}
+										</Badge>
+									</div>
+								</KanbanHeader>
+								{isEmpty ? (
+									<EmptyMissionColumn />
+								) : (
+									<KanbanCards id={column.id}>
+										{(item) => {
+											const mission = item.data as MissionModel;
+											return (
+												<div
+													key={item.id}
+													onPointerDown={(e) => e.stopPropagation()}
+													onMouseDown={(e) => e.stopPropagation()}
+													onClick={(e) => e.stopPropagation()}
+												>
+													<KanbanCard
+														key={item.id}
+														id={item.id}
+														name={item.name}
+														column={item.column}
+														className="bg-transparent border-0 shadow-none p-0"
+													>
+														<MissionKanbanCard 
+															mission={mission} 
+															onMissionDeleted={onMissionDeleted}
+														/>
+													</KanbanCard>
+												</div>
+											);
+										}}
+									</KanbanCards>
+								)}
+							</KanbanBoard>
+						</div>
 					);
 				}}
 			</KanbanProvider>

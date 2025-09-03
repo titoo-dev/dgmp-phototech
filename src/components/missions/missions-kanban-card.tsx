@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
+import {
   Users,
   Calendar,
   Clock,
@@ -19,18 +19,23 @@ import {
   Edit,
   Trash2,
   AlertCircle,
-  MapPin} from "lucide-react"
+  MapPin
+} from "lucide-react"
 import Link from "next/link"
 import { MissionModel } from "@/models/mission-schema"
 import { MissionDetailsSheet } from "./mission-details-sheet"
+import { DeleteMissionDialog } from "./delete-mission-dialog"
+import { useRouter } from "next/navigation";
 
 interface MissionKanbanCardProps {
   mission: MissionModel;
   className?: string;
+  onMissionDeleted?: () => void;
 }
 
-export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps) {
+export function MissionKanbanCard({ mission, className, onMissionDeleted }: MissionKanbanCardProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -70,6 +75,18 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
     })
   }
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    setIsDeleteDialogOpen(false);
+    if (onMissionDeleted) {
+      onMissionDeleted();
+    }
+  };
+
   return (
     <div className={`bg-white rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 ${getStatusColor(mission.status)} border-l-4 ${className}`}>
       <div className="p-4 space-y-3">
@@ -88,9 +105,9 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
           >
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-6 w-6 p-0"
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
@@ -100,7 +117,7 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsSheetOpen(true);
@@ -110,7 +127,7 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
                 Voir détails
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link 
+                <Link
                   href={`/dashboard/missions/${mission.id}/modifier`}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -119,9 +136,9 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-red-600"
-                onClick={(e) => e.stopPropagation()}
+                onClick={handleDeleteClick}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Supprimer
@@ -170,7 +187,7 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
         </div>
       </div>
 
-      <div 
+      <div
         onPointerDown={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
@@ -179,6 +196,20 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
           missionId={mission.id}
           isOpen={isSheetOpen}
           onClose={() => setIsSheetOpen(false)}
+        />
+      </div>
+
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DeleteMissionDialog
+          missionId={mission.id}
+          missionNumber={mission.missionNumber}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onDeleteSuccess={handleDeleteSuccess}
         />
       </div>
     </div>
