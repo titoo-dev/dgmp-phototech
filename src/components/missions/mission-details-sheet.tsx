@@ -64,8 +64,8 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
 
     const getAllMissionFiles = () => {
         if (!mission?.missionProjects) return [];
-        
-        return mission.missionProjects.flatMap(mp => 
+
+        return mission.missionProjects.flatMap(mp =>
             mp.files.map(file => ({
                 ...file,
                 projectTitle: mp.project.title
@@ -161,8 +161,9 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
 
     if (loading) {
         return (
-            <Sheet open={isOpen} onOpenChange={onClose} modal>
+            <Sheet open={isOpen} onOpenChange={onClose}>
                 <SheetContent className="w-full sm:max-w-2xl lg:max-w-4xl">
+                    <SheetTitle></SheetTitle>
                     <div className="flex items-center justify-center h-96">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     </div>
@@ -173,8 +174,9 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
 
     if (error || !mission) {
         return (
-            <Sheet open={isOpen} onOpenChange={onClose} modal>
+            <Sheet open={isOpen} onOpenChange={onClose}>
                 <SheetContent className="w-full sm:max-w-2xl lg:max-w-4xl">
+                    <SheetTitle></SheetTitle>
                     <div className="flex flex-col items-center justify-center h-96 space-y-4">
                         <AlertCircle className="w-12 h-12 text-red-500" />
                         <p className="text-lg font-medium text-gray-900">Erreur de chargement</p>
@@ -189,14 +191,11 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
     }
 
     return (
-        <Sheet open={isOpen} onOpenChange={onClose} modal>
+        <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="w-full sm:max-w-2xl lg:max-w-4xl">
+                <SheetTitle></SheetTitle>
                 <ScrollArea className="h-full">
-                    <div className="space-y-6 px-6 pb-6"
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="space-y-6 px-6 pb-6">
                         <SheetHeader className="space-y-4 p-0 pt-4">
                             <div className="flex items-start justify-between">
                                 <div className="space-y-2">

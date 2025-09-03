@@ -170,11 +170,17 @@ export function MissionKanbanCard({ mission, className }: MissionKanbanCardProps
         </div>
       </div>
 
-      <MissionDetailsSheet
-        missionId={mission.id}
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-      />
+      <div 
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <MissionDetailsSheet
+          missionId={mission.id}
+          isOpen={isSheetOpen}
+          onClose={() => setIsSheetOpen(false)}
+        />
+      </div>
     </div>
   )
 }
