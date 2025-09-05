@@ -10,16 +10,11 @@ export const CompanySchema = z.object({
 		.number()
 		.int()
 		.min(0, "L'effectif ne peut pas être négatif"),
-	projectsCount: z
-		.number()
-		.int()
-		.min(0, 'Le nombre de projets ne peut pas être négatif'),
 });
 
-// Schema for creating a new company (without id and counts)
+// Schema for creating a new company (without id)
 export const CreateCompanySchema = CompanySchema.omit({
 	id: true,
-	projectsCount: true,
 }).extend({
 	employeeCount: z
 		.number()

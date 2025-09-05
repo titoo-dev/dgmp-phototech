@@ -36,15 +36,23 @@ export default function EditCompanyForm({ company }: Props) {
   const [isPending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+  const prevStateRef = React.useRef<{ success?: boolean; error?: string }>({});
 
   React.useEffect(() => {
-    if (state.success) {
+    if (state.success && !prevStateRef.current.success) {
       toast.success('Entreprise mise à jour', { description: 'Les modifications ont été enregistrées.' });
-      router.push('/companies');
-    } else if (state.errors?._form) {
-      toast.error('Erreur', { description: state.errors._form[0] });
+      router.push('/dashboard/companies');
     }
-  }, [state.success, state.errors, router]);
+    prevStateRef.current.success = state.success;
+  }, [state.success, router]);
+
+  React.useEffect(() => {
+    const currentError = state.errors?._form?.[0];
+    if (currentError && currentError !== prevStateRef.current.error) {
+      toast.error('Erreur', { description: currentError });
+    }
+    prevStateRef.current.error = currentError;
+  }, [state.errors?._form]);
 
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {

@@ -22,7 +22,7 @@ export default async function EntreprisesPage() {
 				</div>
 				<div className="flex items-center gap-2">
 					<Button asChild>
-						<Link href="/companies/new">
+						<Link href="/dashboard/companies/new">
 							<Plus className="w-4 h-4 mr-2" />
 							Nouvelle entreprise
 						</Link>

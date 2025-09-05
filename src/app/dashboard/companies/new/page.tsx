@@ -20,8 +20,6 @@ import {
 	Users,
 	AlertCircle,
 	Save,
-	Globe,
-	MapPin,
 } from 'lucide-react';
 import { createCompanyAction } from '@/actions/company/create-company-action';
 import { toast } from 'sonner';
@@ -30,23 +28,31 @@ export default function NewCompanyPage() {
 	const [state, formAction] = useActionState(createCompanyAction, {});
 	const [isPending, startTransition] = useTransition();
 	const formRef = React.useRef<HTMLFormElement>(null);
+	const prevStateRef = React.useRef<{ success?: boolean; error?: string }>({});
 
 	// Handle success and error states with toast notifications
 	useEffect(() => {
-		if (state.success) {
+		if (state.success && !prevStateRef.current.success) {
 			toast.success("Entreprise créée avec succès", {
 				description: "L'entreprise a été ajoutée à la base de données.",
 				duration: 4000,
 			});
 			// Reset form on success
 			formRef.current?.reset();
-		} else if (state.errors?._form) {
+		}
+		prevStateRef.current.success = state.success;
+	}, [state.success]);
+
+	useEffect(() => {
+		const currentError = state.errors?._form?.[0];
+		if (currentError && currentError !== prevStateRef.current.error) {
 			toast.error("Erreur lors de la création", {
-				description: state.errors._form[0],
+				description: currentError,
 				duration: 5000,
 			});
 		}
-	}, [state.success, state.errors?._form]);
+		prevStateRef.current.error = currentError;
+	}, [state.errors?._form]);
 
 	const handleSubmit = (formData: FormData) => {
 		startTransition(() => {
@@ -291,45 +297,6 @@ export default function NewCompanyPage() {
 										)}
 									</div>
 
-									{/* Website (Optional) */}
-									<div className="space-y-2">
-										<Label
-											htmlFor="website"
-											className="text-sm font-medium text-foreground"
-										>
-											Site web (optionnel)
-										</Label>
-										<div className="relative">
-											<Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-											<Input
-												id="website"
-												name="website"
-												type="url"
-												placeholder="https://www.entreprise.ga"
-												className="pl-10 h-12"
-											/>
-										</div>
-									</div>
-
-									{/* Address (Optional) */}
-									<div className="space-y-2">
-										<Label
-											htmlFor="address"
-											className="text-sm font-medium text-foreground"
-										>
-											Adresse (optionnel)
-										</Label>
-										<div className="relative">
-											<MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-											<Input
-												id="address"
-												name="address"
-												type="text"
-												placeholder="ex: BP 123, Libreville, Gabon"
-												className="pl-10 h-12"
-											/>
-										</div>
-									</div>
 								</CardContent>
 							</Card>
 						</div>

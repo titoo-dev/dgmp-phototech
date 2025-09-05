@@ -80,17 +80,6 @@ export default function NewCompanyLoadingSkeleton() {
                                     <Skeleton className="h-12 w-full" />
                                 </div>
 
-                                {/* Website Field */}
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-40" />
-                                    <Skeleton className="h-12 w-full" />
-                                </div>
-
-                                {/* Address Field */}
-                                <div className="space-y-2">
-                                    <Skeleton className="h-5 w-40" />
-                                    <Skeleton className="h-12 w-full" />
-                                </div>
                             </CardContent>
                         </Card>
                     </div>

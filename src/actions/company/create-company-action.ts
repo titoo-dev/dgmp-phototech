@@ -88,8 +88,8 @@ export async function createCompanyAction(
         });
 
         // Revalidate the companies page to show the new company
-        revalidatePath("/companies");
-        revalidatePath("/(client)/companies", "page");
+        revalidatePath("/dashboard/companies");
+        revalidatePath("/(client)/dashboard/companies", "page");
         
         return {
             success: true,
@@ -116,7 +116,7 @@ export async function createCompanyWithRedirectAction(formData: FormData): Promi
     const result = await createCompanyAction({}, formData);
     
     if (result.success) {
-        redirect("/companies");
+        redirect("/dashboard/companies");
     }
     
     // If there are errors, the form component should handle them
