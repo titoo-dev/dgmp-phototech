@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useDebounce } from "use-debounce"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -111,6 +112,9 @@ export function UsersClient({
     const [banDialogOpen, setBanDialogOpen] = useState(false)
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    
+    // Debounce search query with 500ms delay
+    const [debouncedSearchQuery] = useDebounce(searchQuery, 500)
 
     const updateSearchParams = (newParams: Record<string, string | undefined>) => {
         const params = new URLSearchParams(searchParamsHook.toString())
@@ -133,9 +137,15 @@ export function UsersClient({
         })
     }
 
+    // Effect to handle debounced search
+    useEffect(() => {
+        if (debouncedSearchQuery !== (searchParams.search || "")) {
+            updateSearchParams({ search: debouncedSearchQuery })
+        }
+    }, [debouncedSearchQuery, searchParams.search])
+
     const handleSearch = (value: string) => {
         setSearchQuery(value)
-        updateSearchParams({ search: value })
     }
 
     const handleRoleFilter = (role: string) => {
@@ -187,8 +197,6 @@ export function UsersClient({
                     ? "Utilisateur débanni avec succès" 
                     : "Utilisateur banni avec succès"
                 toast.success(message)
-                setBanDialogOpen(false)
-                setSelectedUser(null)
                 router.refresh()
             } else {
                 const errorMessage = selectedUser.banned 
@@ -196,6 +204,10 @@ export function UsersClient({
                     : "Erreur lors du bannissement"
                 toast.error(result.error || errorMessage)
             }
+            
+            // Close dialog and reset state after action is complete
+            setBanDialogOpen(false)
+            setSelectedUser(null)
         })
     }
 
@@ -210,12 +222,14 @@ export function UsersClient({
             
             if (result.success) {
                 toast.success("Utilisateur supprimé avec succès")
-                setRemoveDialogOpen(false)
-                setSelectedUser(null)
                 router.refresh()
             } else {
                 toast.error(result.error || "Erreur lors de la suppression")
             }
+            
+            // Close dialog and reset state after action is complete
+            setRemoveDialogOpen(false)
+            setSelectedUser(null)
         })
     }
 
@@ -449,7 +463,6 @@ export function UsersClient({
                                 value={searchQuery}
                                 onChange={(e) => handleSearch(e.target.value)}
                                 className="pl-8"
-                                disabled={isPending}
                             />
                         </div>
                         <div className="flex items-center gap-2">
