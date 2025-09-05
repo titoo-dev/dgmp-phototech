@@ -16,62 +16,33 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Building2, Home, Camera, FolderOpen, Building, Users, LogOut } from "lucide-react"
+import { Building, Building2, Camera, FolderOpen, Home, LogOut, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 
-const getNavigationItems = (hasPermission: (permission: any) => boolean) => [
-  {
-    title: "Menu",
-    items: [
-      {
-        title: "Accueil",
-        url: "/dashboard",
-        icon: Home,
-        permission: "canViewDashboard",
-      },
-      {
-        title: "Galerie",
-        url: "/dashboard/gallery",
-        icon: Camera,
-        permission: "canViewGallery",
-      },
-      {
-        title: "Missions",
-        url: "/dashboard/missions",
-        icon: FolderOpen,
-        permission: "canViewMissions",
-      },
-      {
-        title: "Marchés",
-        url: "/dashboard/projects",
-        icon: Building2,
-        permission: "canViewProjects",
-      },
-      {
-        title: "Entreprises",
-        url: "/dashboard/companies",
-        icon: Building,
-        permission: "canViewCompanies",
-      },
-      {
-        title: "Utilisateurs",
-        url: "/dashboard/users",
-        icon: Users,
-        permission: "canManageUsers",
-      },
-    ].filter((item) => hasPermission(item.permission)),
-  }
-]
+interface NavigationItem {
+  title: string;
+  url: string;
+}
 
+interface NavigationGroup {
+  title: string;
+  items: NavigationItem[];
+}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const navigationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  "/dashboard": Home,
+  "/dashboard/gallery": Camera,
+  "/dashboard/missions": FolderOpen,
+  "/dashboard/projects": Building2,
+  "/dashboard/companies": Building,
+  "/dashboard/users": Users,
+};
+
+export function AppSidebar({ navigationItems, ...props }: React.ComponentProps<typeof Sidebar> & { navigationItems: NavigationGroup[] }) {
   const pathname = usePathname()
-  const { hasPermission } = useAuth()
-  const navigationItems = getNavigationItems(hasPermission)
   const [isPending, startTransition] = useTransition()
   const router = useRouter();
   
@@ -103,12 +74,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const Icon = item.icon
+                  const Icon = navigationIcons[item.url]
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={pathname === item.url}>
                         <Link href={item.url} className="flex items-center gap-2">
-                          <Icon className="size-4" />
+                          {Icon && <Icon className="size-4" />}
                           {item.title}
                         </Link>
                       </SidebarMenuButton>
