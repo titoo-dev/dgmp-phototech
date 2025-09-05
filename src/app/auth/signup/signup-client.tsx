@@ -3,18 +3,17 @@
 import { useActionState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { signInAction, type SignInFormState } from "@/actions/sign-in";
+import { signUpAction, type SignUpFormState } from "@/actions/sign-up";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
-const initialState: SignInFormState = {};
+const initialState: SignUpFormState = {};
 
-const SignInPage = () => {
-  const [state, formAction] = useActionState(signInAction, initialState);
+const SignUpClientPage = () => {
+  const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   
@@ -25,12 +24,14 @@ const SignInPage = () => {
   };
 
   useEffect(() => {
+    if (state.redirect) {
+      router.push(state.redirect);
+    }
     if (state.error) {
       toast.error(state.error);
     }
-    if (state.success && state.redirect) {
-      toast.success("Sign in successful! Redirecting...");
-      router.push(state.redirect);
+    if (state.success) {
+      toast.success("Account created successfully! Redirecting...");
     }
   }, [state.error, state.success]);
 
@@ -39,22 +40,36 @@ const SignInPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign in to your account
+            Create your account
           </CardTitle>
-          {process.env.DISABLE_SIGN_UP === "true" && (
-            <CardDescription className="text-center">
-              Or{" "}
-              <Link
-                href="/auth/signup"
-                className="font-medium text-primary hover:underline"
-              >
-                create a new account
-              </Link>
-            </CardDescription>
-          )}
+          <CardDescription className="text-center">
+            Or{" "}
+            <Link
+              href="/auth/signin"
+              className="font-medium text-primary hover:underline"
+            >
+              sign in to your existing account
+            </Link>
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form action={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Enter your name"
+                aria-invalid={!!state.fieldErrors?.name}
+              />
+              {state.fieldErrors?.name && (
+                <p className="text-sm text-destructive">
+                  {state.fieldErrors.name[0]}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -62,7 +77,6 @@ const SignInPage = () => {
                 name="email"
                 type="email"
                 placeholder="Enter your email"
-                autoComplete="email"
                 required
                 aria-invalid={!!state.fieldErrors?.email}
               />
@@ -80,7 +94,6 @@ const SignInPage = () => {
                 name="password"
                 type="password"
                 placeholder="Enter your password"
-                autoComplete="current-password"
                 required
                 aria-invalid={!!state.fieldErrors?.password}
               />
@@ -91,20 +104,6 @@ const SignInPage = () => {
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="rememberMe" 
-                name="rememberMe"
-                value="true"
-              />
-              <Label 
-                htmlFor="rememberMe" 
-                className="text-sm font-normal cursor-pointer"
-              >
-                Remember me
-              </Label>
-            </div>
-
 
 
             <Button
@@ -112,7 +111,7 @@ const SignInPage = () => {
               className="w-full"
               disabled={isPending}
             >
-              {isPending ? "Signing in..." : "Sign in"}
+              {isPending ? "Creating account..." : "Create account"}
             </Button>
           </form>
         </CardContent>
@@ -121,4 +120,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default SignUpClientPage;
