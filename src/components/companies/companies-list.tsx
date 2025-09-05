@@ -35,6 +35,7 @@ import {
 import { CompanyModel } from '@/models/company-schema';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { deleteCompanyAction } from '@/actions/company/delete-company-action';
+import { CompanyDetailsSheet } from './company-details-sheet';
 
 interface Props {
 	companies: CompanyModel[];
@@ -45,6 +46,8 @@ export default function CompaniesList({ companies }: Props) {
 	const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 	const [openDialog, setOpenDialog] = useState<boolean>(false);
 	const [isPending, startTransition] = React.useTransition();
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
 	const filtered = useMemo(() => {
 		const q = searchQuery.trim().toLowerCase();
@@ -62,8 +65,8 @@ export default function CompaniesList({ companies }: Props) {
 				}
 			}
 
-			if (statusFilter === 'active') return c.projectsCount > 0;
-			if (statusFilter === 'inactive') return c.projectsCount === 0;
+			if (statusFilter === 'active') return c.employeeCount > 0;
+			if (statusFilter === 'inactive') return c.employeeCount === 0;
 			return true;
 		});
 	}, [companies, searchQuery, statusFilter]);
@@ -122,8 +125,7 @@ export default function CompaniesList({ companies }: Props) {
 								<TableHead>Dénomination</TableHead>
 								<TableHead>Contact</TableHead>
 								<TableHead>NIF</TableHead>
-								<TableHead>Nombre de projets</TableHead>
-								<TableHead>Nombre d employes</TableHead>
+								<TableHead>Nombre d'employés</TableHead>
 								<TableHead className="w-[70px]"></TableHead>
 							</TableRow>
 							</TableHeader>
@@ -133,7 +135,7 @@ export default function CompaniesList({ companies }: Props) {
 									<TableCell>
 										<div className="space-y-1">
 											<p className="font-medium">{entreprise.name}</p>
-																							<p className="text-sm text-muted-foreground">#{entreprise.id.slice(-8)}</p>
+											<p className="text-sm text-muted-foreground">#{entreprise.id.slice(-8)}</p>
 										</div>
 									</TableCell>
 									<TableCell>
@@ -152,9 +154,6 @@ export default function CompaniesList({ companies }: Props) {
 										<span className="text-sm font-mono">{entreprise.nif}</span>
 									</TableCell>
 									<TableCell>
-										<span className="text-sm font-mono">{entreprise.projectsCount}</span>
-									</TableCell>
-									<TableCell>
 										<span className="text-sm font-mono">{entreprise.employeeCount}</span>
 									</TableCell>
 									<TableCell>
@@ -165,8 +164,13 @@ export default function CompaniesList({ companies }: Props) {
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
-												<DropdownMenuItem asChild>
-													<Link href={`/dashboard/companies/${entreprise.id}`}><Eye className="w-4 h-4 mr-2" />Voir</Link>
+												<DropdownMenuItem 
+													onClick={() => {
+														setSelectedCompanyId(entreprise.id);
+														setIsSheetOpen(true);
+													}}
+												>
+													<Eye className="w-4 h-4 mr-2" />Voir
 												</DropdownMenuItem>
 												<DropdownMenuItem asChild>
 													<Link href={`/dashboard/companies/${entreprise.id}/modifier`}><Edit className="w-4 h-4 mr-2" />Modifier</Link>
@@ -214,6 +218,12 @@ export default function CompaniesList({ companies }: Props) {
 					</Table>
 				</CardContent>
 			</Card>
+
+			<CompanyDetailsSheet
+				companyId={selectedCompanyId}
+				isOpen={isSheetOpen}
+				onClose={() => setIsSheetOpen(false)}
+			/>
 		</>
 	);
 }

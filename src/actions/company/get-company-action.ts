@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import type { Company } from "@/models/company-schema";
 
-export async function getCompanyAction(id: string): Promise<Company> {
+export async function getCompanyAction(id: string) {
   if (!id || typeof id !== 'string') throw new Error("Invalid company id");
 
   const company = await prisma.company.findUnique({
@@ -12,6 +12,12 @@ export async function getCompanyAction(id: string): Promise<Company> {
       projects: {
         select: {
           id: true,
+          title: true,
+          description: true,
+          startDate: true,
+          endDate: true,
+          status: true,
+          nature: true,
         },
       },
     },
@@ -19,14 +25,5 @@ export async function getCompanyAction(id: string): Promise<Company> {
 
   if (!company) throw new Error("Company not found");
 
-  // Transform to match Company schema with projects count
-  return {
-    id: company.id,
-    name: company.name,
-    email: company.email,
-    phoneNumber: company.phoneNumber,
-    nif: company.nif,
-    employeeCount: company.employeeCount,
-    projectsCount: company.projects.length,
-  };
+  return company;
 }
