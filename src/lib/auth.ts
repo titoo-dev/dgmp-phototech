@@ -11,26 +11,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const prisma = new PrismaClient();
 
-const createDatabaseConfig = () => ({
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
-});
-
-const createEmailPasswordConfig = () => ({
-    emailAndPassword: {
-        enabled: true,
-        autoSignIn: false,
-        disableSignUp: process.env.DISABLE_SIGN_UP === "true",
-    },
-});
-
-const createTrustedOriginsConfig = () => ({
-    trustedOrigins: [
-        `${process.env.NEXT_PUBLIC_APP_URL}`,
-    ],
-});
-
 const sendVerificationEmail = async ({ user, url }: { user: User, url: string }) => {
     const { data, error } = await resend.batch.send([
         {
@@ -48,35 +28,38 @@ const sendVerificationEmail = async ({ user, url }: { user: User, url: string })
     console.log(data);
 };
 
-const createEmailVerificationConfig = () => ({
+export const auth = betterAuth({
+    database: prismaAdapter(prisma, {
+        provider: "postgresql",
+    }),
+    emailAndPassword: {
+        enabled: true,
+        autoSignIn: false,
+        disableSignUp: process.env.DISABLE_SIGN_UP === "true",
+    },
+    trustedOrigins: [
+        `${process.env.NEXT_PUBLIC_APP_URL}`,
+    ],
     emailVerification: {
         sendOnSignUp: true,
         sendVerificationEmail,
     },
-});
-
-const createAdminConfig = () => ({
-    ac,
-    roles: {
-        u1,
-        u2,
-        u3,
-        u4
-    },
-    adminRoles: ['u4'],
-    adminUserIds: ['vtSUjR6YWn3ov2sDMkyzwe36LDes8X7b'],
-    defaultRole: 'u1'
-});
-
-const createPluginsConfig = () => [
-    nextCookies(),
-    adminPlugin(createAdminConfig())
-];
-
-export const auth = betterAuth({
-    ...createDatabaseConfig(),
-    ...createEmailPasswordConfig(),
-    ...createTrustedOriginsConfig(),
-    ...createEmailVerificationConfig(),
-    plugins: createPluginsConfig(),
+    plugins: [
+        nextCookies(),
+        adminPlugin({
+            ac,
+            roles: {
+                u1,
+                u2,
+                u3,
+                u4
+            },
+            adminRoles: ['u4'],
+            adminUserIds: ['vtSUjR6YWn3ov2sDMkyzwe36LDes8X7b'],
+            defaultRole: 'u1',
+            defaultBanExpiresIn: 30,
+            bannedUserMessage: 'Votre compte a été banni. Veuillez contacter l\'administrateur.',
+            defaultBanReason: 'Banni par l\'administrateur.',
+        })
+    ],
 });

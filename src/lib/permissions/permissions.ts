@@ -6,7 +6,7 @@ export const statement = {
     mission: ["create", "update", "delete"],
     report: ["create", "update", "delete"],
     magazine: ["create", "update", "delete"],
-    user: ["create", "update", "delete"],
+    user: ["create", "update", "delete", "list", "set-role", "ban", "impersonate", "delete", "set-password", "update"],
     role: ["create", "update", "delete"],
     permission: ["create", "update", "delete"],
     settings: ["create", "update", "delete"],
@@ -31,5 +31,6 @@ export const u3 = ac.newRole({
 export const u4 = ac.newRole({ 
     mission: ["create", "update"],
     ...adminAc.statements,
+    user: ["create", "list", "set-role", "ban", "impersonate", "delete", "set-password", "update"],
 }); 
  

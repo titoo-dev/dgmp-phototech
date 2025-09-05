@@ -32,6 +32,17 @@ import {
     PaginationEllipsis,
 } from "@/components/ui/pagination"
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
     Users,
     User,
     Mail,
@@ -49,6 +60,10 @@ import {
     UserPlus
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
+import { banUserAction } from "@/actions/user/ban-user"
+import { unbanUserAction } from "@/actions/user/unban-user"
+import { removeUserAction } from "@/actions/user/remove-user"
 
 interface User {
     id: string
@@ -88,6 +103,9 @@ export function UsersClient({
     const [searchQuery, setSearchQuery] = useState(searchParams.search || "")
     const [roleFilter, setRoleFilter] = useState(searchParams.role || "all")
     const [statusFilter, setStatusFilter] = useState(searchParams.status || "all")
+    const [banDialogOpen, setBanDialogOpen] = useState(false)
+    const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
     const updateSearchParams = (newParams: Record<string, string | undefined>) => {
         const params = new URLSearchParams(searchParamsHook.toString())
@@ -130,6 +148,69 @@ export function UsersClient({
         params.set("page", page.toString())
         startTransition(() => {
             router.push(`/dashboard/users?${params.toString()}`)
+        })
+    }
+
+    const handleBanUser = (user: User) => {
+        setSelectedUser(user)
+        setBanDialogOpen(true)
+    }
+
+    const handleRemoveUser = (user: User) => {
+        setSelectedUser(user)
+        setRemoveDialogOpen(true)
+    }
+
+    const confirmBanUser = () => {
+        if (!selectedUser) return
+
+        startTransition(async () => {
+            const formData = new FormData()
+            formData.append("userId", selectedUser.id)
+
+            let result
+            if (selectedUser.banned) {
+                result = await unbanUserAction({}, formData)
+            } else {
+                formData.append("banReason", "Banned by administrator")
+                formData.append("banExpiresIn", "30") // 30 days
+                result = await banUserAction({}, formData)
+            }
+            
+            if (result.success) {
+                const message = selectedUser.banned 
+                    ? "Utilisateur débanni avec succès" 
+                    : "Utilisateur banni avec succès"
+                toast.success(message)
+                setBanDialogOpen(false)
+                setSelectedUser(null)
+                router.refresh()
+            } else {
+                const errorMessage = selectedUser.banned 
+                    ? "Erreur lors du débannissement" 
+                    : "Erreur lors du bannissement"
+                toast.error(result.error || errorMessage)
+            }
+        })
+    }
+
+    const confirmRemoveUser = () => {
+        if (!selectedUser) return
+
+        startTransition(async () => {
+            const formData = new FormData()
+            formData.append("userId", selectedUser.id)
+
+            const result = await removeUserAction({}, formData)
+            
+            if (result.success) {
+                toast.success("Utilisateur supprimé avec succès")
+                setRemoveDialogOpen(false)
+                setSelectedUser(null)
+                router.refresh()
+            } else {
+                toast.error(result.error || "Erreur lors de la suppression")
+            }
         })
     }
 
@@ -352,216 +433,279 @@ export function UsersClient({
     }
 
     return (
-        <Card className="shadow-none">
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Rechercher un utilisateur..."
-                            value={searchQuery}
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="pl-8"
-                            disabled={isPending}
-                        />
-                    </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" disabled={isPending}>
-                                <Filter className="w-4 h-4 mr-2" />
-                                Rôle
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Filtrer par rôle</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleRoleFilter("all")}>
-                                Tous les rôles
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRoleFilter("u1")}>
-                                Agent terrain
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRoleFilter("u2")}>
-                                Responsable
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRoleFilter("u3")}>
-                                Rédacteur
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRoleFilter("u4")}>
-                                Administrateur
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" disabled={isPending}>
-                                <Filter className="w-4 h-4 mr-2" />
-                                Statut
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleStatusFilter("all")}>
-                                Tous les statuts
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleStatusFilter("active")}>
-                                Actif
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleStatusFilter("inactive")}>
-                                Inactif
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleStatusFilter("pending")}>
-                                En attente
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Utilisateur</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Rôle</TableHead>
-                                <TableHead>Statut</TableHead>
-                                <TableHead>Membre depuis</TableHead>
-                                <TableHead className="w-[70px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.id}>
-                                    <TableCell>
-                                        <div className="space-y-1">
-                                            <p className="font-medium">{user.name}</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                #{user.id.slice(-8)}
-                                            </p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center">
-                                            <Mail className="w-4 h-4 mr-2 text-muted-foreground" />
-                                            <span className="text-sm">{user.email}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {getRoleBadge(user.role)}
-                                    </TableCell>
-                                    <TableCell>
-                                        {getStatusBadge(user)}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="text-sm">
-                                            {new Date(user.createdAt).toLocaleDateString('fr-FR')}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/dashboard/users/${user.id}`}>
-                                                        <Eye className="w-4 h-4 mr-2" />
-                                                        Voir
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/dashboard/users/${user.id}/modifier`}>
-                                                        <Edit className="w-4 h-4 mr-2" />
-                                                        Modifier
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                {user.banned ? (
-                                                    <DropdownMenuItem className="text-green-600">
-                                                        <UserCheck className="w-4 h-4 mr-2" />
-                                                        Débannir
-                                                    </DropdownMenuItem>
-                                                ) : (
-                                                    <DropdownMenuItem className="text-orange-600">
-                                                        <UserX className="w-4 h-4 mr-2" />
-                                                        Bannir
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem className="text-red-600">
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Supprimer
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-
-                    {users.length === 0 && (
-                        <div className="text-center py-8">
-                            <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">Aucun utilisateur trouvé</h3>
-                            <p className="text-muted-foreground mb-4">
-                                {searchQuery || roleFilter !== "all" || statusFilter !== "all"
-                                    ? "Essayez de modifier vos critères de recherche"
-                                    : "Commencez par créer votre premier utilisateur"
-                                }
-                            </p>
-                            {!searchQuery && roleFilter === "all" && statusFilter === "all" && (
-                                <Button asChild>
-                                    <Link href="/dashboard/users/new">
-                                        <UserPlus className="w-4 h-4 mr-2" />
-                                        Créer un utilisateur
-                                    </Link>
+        <>
+            <Card className="shadow-none">
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <div className="relative flex-1 max-w-sm">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Rechercher un utilisateur..."
+                                value={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                className="pl-8"
+                                disabled={isPending}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" disabled={isPending}>
+                                    <Filter className="w-4 h-4 mr-2" />
+                                    Rôle
                                 </Button>
-                            )}
-                        </div>
-                    )}
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filtrer par rôle</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleRoleFilter("all")}>
+                                    Tous les rôles
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleRoleFilter("u1")}>
+                                    Agent terrain
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleRoleFilter("u2")}>
+                                    Responsable
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleRoleFilter("u3")}>
+                                    Rédacteur
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleRoleFilter("u4")}>
+                                    Administrateur
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" disabled={isPending}>
+                                    <Filter className="w-4 h-4 mr-2" />
+                                    Statut
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleStatusFilter("all")}>
+                                    Tous les statuts
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter("active")}>
+                                    Actif
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter("inactive")}>
+                                    Inactif
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusFilter("pending")}>
+                                    En attente
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Utilisateur</TableHead>
+                                    <TableHead>Email</TableHead>
+                                    <TableHead>Rôle</TableHead>
+                                    <TableHead>Statut</TableHead>
+                                    <TableHead>Membre depuis</TableHead>
+                                    <TableHead className="w-[70px]"></TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell>
+                                            <div className="space-y-1">
+                                                <p className="font-medium">{user.name}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    #{user.id.slice(-8)}
+                                                </p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center">
+                                                <Mail className="w-4 h-4 mr-2 text-muted-foreground" />
+                                                <span className="text-sm">{user.email}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {getRoleBadge(user.role)}
+                                        </TableCell>
+                                        <TableCell>
+                                            {getStatusBadge(user)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-sm">
+                                                {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/dashboard/users/${user.id}`}>
+                                                            <Eye className="w-4 h-4 mr-2" />
+                                                            Voir
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/dashboard/users/${user.id}/modifier`}>
+                                                            <Edit className="w-4 h-4 mr-2" />
+                                                            Modifier
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    {user.banned ? (
+                                                        <DropdownMenuItem 
+                                                            className="text-green-600"
+                                                            onClick={() => handleBanUser(user)}
+                                                            disabled={isPending}
+                                                        >
+                                                            <UserCheck className="w-4 h-4 mr-2" />
+                                                            Débannir
+                                                        </DropdownMenuItem>
+                                                    ) : (
+                                                        <DropdownMenuItem 
+                                                            className="text-orange-600"
+                                                            onClick={() => handleBanUser(user)}
+                                                            disabled={isPending}
+                                                        >
+                                                            <UserX className="w-4 h-4 mr-2" />
+                                                            Bannir
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                    <DropdownMenuItem 
+                                                        className="text-red-600"
+                                                        onClick={() => handleRemoveUser(user)}
+                                                        disabled={isPending}
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Supprimer
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
 
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm text-muted-foreground">
-                                Affichage de {((currentPage - 1) * 10) + 1} à {Math.min(currentPage * 10, total)} sur {total} utilisateurs
+                        {users.length === 0 && (
+                            <div className="text-center py-8">
+                                <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">Aucun utilisateur trouvé</h3>
+                                <p className="text-muted-foreground mb-4">
+                                    {searchQuery || roleFilter !== "all" || statusFilter !== "all"
+                                        ? "Essayez de modifier vos critères de recherche"
+                                        : "Commencez par créer votre premier utilisateur"
+                                    }
+                                </p>
+                                {!searchQuery && roleFilter === "all" && statusFilter === "all" && (
+                                    <Button asChild>
+                                        <Link href="/dashboard/users/new">
+                                            <UserPlus className="w-4 h-4 mr-2" />
+                                            Créer un utilisateur
+                                        </Link>
+                                    </Button>
+                                )}
                             </div>
-                            <Pagination>
-                                <PaginationContent>
-                                    <PaginationItem>
-                                        <PaginationPrevious
-                                            href="#"
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                if (currentPage > 1) {
-                                                    handlePageChange(currentPage - 1)
-                                                }
-                                            }}
-                                            className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                                        />
-                                    </PaginationItem>
-                                    {renderPaginationItems()}
-                                    <PaginationItem>
-                                        <PaginationNext
-                                            href="#"
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                if (currentPage < totalPages) {
-                                                    handlePageChange(currentPage + 1)
-                                                }
-                                            }}
-                                            className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                                        />
-                                    </PaginationItem>
-                                </PaginationContent>
-                            </Pagination>
-                        </div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                        )}
+
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between">
+                                <div className="text-sm text-muted-foreground">
+                                    Affichage de {((currentPage - 1) * 10) + 1} à {Math.min(currentPage * 10, total)} sur {total} utilisateurs
+                                </div>
+                                <Pagination>
+                                    <PaginationContent>
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    if (currentPage > 1) {
+                                                        handlePageChange(currentPage - 1)
+                                                    }
+                                                }}
+                                                className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                                            />
+                                        </PaginationItem>
+                                        {renderPaginationItems()}
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    if (currentPage < totalPages) {
+                                                        handlePageChange(currentPage + 1)
+                                                    }
+                                                }}
+                                                className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                            />
+                                        </PaginationItem>
+                                    </PaginationContent>
+                                </Pagination>
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Ban User Confirmation Dialog */}
+            <AlertDialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {selectedUser?.banned ? "Débannir l'utilisateur" : "Bannir l'utilisateur"}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {selectedUser?.banned 
+                                ? `Êtes-vous sûr de vouloir débannir ${selectedUser?.name} ?`
+                                : `Êtes-vous sûr de vouloir bannir ${selectedUser?.name} ? Cette action empêchera l'utilisateur de se connecter.`
+                            }
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmBanUser}
+                            disabled={isPending}
+                            className={selectedUser?.banned ? "bg-green-600 hover:bg-green-700" : "bg-orange-600 hover:bg-orange-700"}
+                        >
+                            {isPending ? "Traitement..." : (selectedUser?.banned ? "Débannir" : "Bannir")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Remove User Confirmation Dialog */}
+            <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer {selectedUser?.name} ? Cette action est irréversible et supprimera définitivement toutes les données de l'utilisateur.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={confirmRemoveUser}
+                            disabled={isPending}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {isPending ? "Suppression..." : "Supprimer"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }
