@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useTransition, useActionState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
 	Card,
 	CardContent,
@@ -25,7 +26,6 @@ import {
 	Mail,
 	Shield,
 	AlertCircle,
-	CheckCircle,
 	Save,
 	UserPlus,
 	Edit,
@@ -33,7 +33,7 @@ import {
 	Eye,
 	EyeOff,
 } from 'lucide-react';
-import { createUserAction, type CreateUserFormState } from '@/actions/user/create-user';
+import { createUserAction } from '@/actions/user/create-user';
 
 
 export default function NewUserPage() {
@@ -50,15 +50,24 @@ export default function NewUserPage() {
 		});
 	};
 
-	// Redirect on success
+	// Handle notifications and redirect on success
 	React.useEffect(() => {
 		if (state.success) {
+			toast.success('Utilisateur créé avec succès', {
+				description: `L'utilisateur ${state.user?.name} a été créé avec succès.`,
+			});
 			const timer = setTimeout(() => {
 				router.push('/dashboard/users');
 			}, 2000);
 			return () => clearTimeout(timer);
 		}
-	}, [state.success, router]);
+		
+		if (state.error) {
+			toast.error('Erreur lors de la création', {
+				description: state.error,
+			});
+		}
+	}, [state.success, state.error, state.user?.name, router]);
 
 	const getRoleDescription = (role: string) => {
 		switch (role) {
@@ -108,47 +117,6 @@ export default function NewUserPage() {
 			</div>
 
 			<div className="mx-auto max-w-7xl px-6 py-8">
-				{/* Success Message */}
-				{state.success && (
-					<div className="mb-8">
-						<div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 p-6 shadow-sm">
-							<div className="flex items-center gap-3">
-								<div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-									<CheckCircle className="w-4 h-4 text-white" />
-								</div>
-								<div>
-									<h3 className="font-semibold text-emerald-900 dark:text-emerald-100">
-										Utilisateur créé avec succès
-									</h3>
-									<p className="text-sm text-emerald-700 dark:text-emerald-300">
-										L'utilisateur {state.user?.name} a été créé avec succès. Redirection en cours...
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* Error Message */}
-				{state.error && (
-					<div className="mb-8">
-						<div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-6 shadow-sm">
-							<div className="flex items-center gap-3">
-								<div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
-									<AlertCircle className="w-4 h-4 text-white" />
-								</div>
-								<div>
-									<h3 className="font-semibold text-red-900 dark:text-red-100">
-										Erreur lors de la création
-									</h3>
-									<p className="text-sm text-red-700 dark:text-red-300">
-										{state.error}
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
 
 				<form id="user-form" action={handleSubmit}>
 					<div className="mx-auto max-w-2xl">
