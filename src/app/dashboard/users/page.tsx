@@ -30,6 +30,8 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
     offset,
     sortBy: "name",
     sortDirection: "asc",
+    role: params.role,
+    status: params.status,
   }
 
   const result = await listUsersAction(paramsValues)

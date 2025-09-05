@@ -23,6 +23,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
     Pagination,
     PaginationContent,
     PaginationItem,
@@ -40,7 +47,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
     Users,
@@ -52,7 +58,6 @@ import {
     Search,
     Filter,
     MoreHorizontal,
-    Eye,
     Edit,
     Trash2,
     Clock,
@@ -447,57 +452,34 @@ export function UsersClient({
                                 disabled={isPending}
                             />
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" disabled={isPending}>
-                                    <Filter className="w-4 h-4 mr-2" />
-                                    Rôle
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filtrer par rôle</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleRoleFilter("all")}>
-                                    Tous les rôles
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleFilter("u1")}>
-                                    Agent terrain
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleFilter("u2")}>
-                                    Responsable
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleFilter("u3")}>
-                                    Rédacteur
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleFilter("u4")}>
-                                    Administrateur
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" disabled={isPending}>
-                                    <Filter className="w-4 h-4 mr-2" />
-                                    Statut
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleStatusFilter("all")}>
-                                    Tous les statuts
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter("active")}>
-                                    Actif
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter("inactive")}>
-                                    Inactif
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusFilter("pending")}>
-                                    En attente
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center gap-2">
+                            <Filter className="w-4 h-4 text-muted-foreground" />
+                            <Select value={roleFilter} onValueChange={handleRoleFilter} disabled={isPending}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Filtrer par rôle" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tous les rôles</SelectItem>
+                                    <SelectItem value="u1">Agent terrain</SelectItem>
+                                    <SelectItem value="u2">Responsable</SelectItem>
+                                    <SelectItem value="u3">Rédacteur</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Filter className="w-4 h-4 text-muted-foreground" />
+                            <Select value={statusFilter} onValueChange={handleStatusFilter} disabled={isPending}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Filtrer par statut" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tous les statuts</SelectItem>
+                                    <SelectItem value="active">Actif</SelectItem>
+                                    <SelectItem value="inactive">Inactif</SelectItem>
+                                    <SelectItem value="pending">En attente</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -549,18 +531,6 @@ export function UsersClient({
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/dashboard/users/${user.id}`}>
-                                                            <Eye className="w-4 h-4 mr-2" />
-                                                            Voir
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/dashboard/users/${user.id}/modifier`}>
-                                                            <Edit className="w-4 h-4 mr-2" />
-                                                            Modifier
-                                                        </Link>
-                                                    </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     {user.banned ? (
                                                         <DropdownMenuItem 
