@@ -24,10 +24,19 @@ export async function getMissionsAction(): Promise<
 
         const userRole = getUserRole(session.user as AuthUser);
         
-        // Role-based filtering: only u1 users see their own missions, others see all
-        const whereClause = userRole === 'u1' 
-            ? { teamLeaderId: session.user.id }
-            : {}; // u2, u3, u4 can see all missions
+        // Role-based filtering
+        let whereClause = {};
+        
+        if (userRole === 'u1') {
+            // u1 users: only see their own missions
+            whereClause = { teamLeaderId: session.user.id };
+        } else if (userRole === 'u3') {
+            // u3 users: only see completed missions
+            whereClause = { status: 'COMPLETED' };
+        } else {
+            // u2 and u4 users: see all missions
+            whereClause = {};
+        }
 
         const missions = await prisma.mission.findMany({
             where: whereClause,

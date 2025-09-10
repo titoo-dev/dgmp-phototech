@@ -171,7 +171,9 @@ import { AuthUser, getUserRole } from '@/lib/auth-utils';
  *     description: |
  *       Retrieve missions based on user role:
  *       - u1 users: Only missions where they are the team leader
- *       - u2, u3, u4 users: All missions in the system
+ *       - u2 users: All missions in the system
+ *       - u3 users: Only missions with COMPLETED status
+ *       - u4 users: All missions in the system
  *       Returns missions with their associated team leader, members, and project information
  *     security:
  *       - bearerAuth: []

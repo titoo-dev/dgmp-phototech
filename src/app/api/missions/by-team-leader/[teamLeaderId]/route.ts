@@ -13,7 +13,9 @@ import { getUserRole, AuthUser } from '@/lib/auth-utils';
  *     description: |
  *       Retrieve missions for a specific team leader with role-based access control:
  *       - u1 users: Can only access their own missions (teamLeaderId must match their user ID)
- *       - u2, u3, u4 users: Can access missions for any team leader
+ *       - u2 users: Can access missions for any team leader
+ *       - u3 users: Can access missions for any team leader, but only COMPLETED missions
+ *       - u4 users: Can access missions for any team leader
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -85,10 +87,16 @@ export async function GET(
       );
     }
 
+    // Build where clause based on role
+    let whereClause: any = { teamLeaderId: teamLeaderId };
+    
+    if (userRole === 'u3') {
+      // u3 users can only see completed missions
+      whereClause.status = 'COMPLETED';
+    }
+
     const missions = await prisma.mission.findMany({
-      where: {
-        teamLeaderId: teamLeaderId,
-      },
+      where: whereClause,
       include: {
         teamLeader: true,
         members: true,

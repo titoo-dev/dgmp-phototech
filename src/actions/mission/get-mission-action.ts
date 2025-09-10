@@ -39,9 +39,13 @@ export async function getMissionAction(id: string) {
 
   if (!mission) throw new Error("Mission not found");
 
-  // Role-based access control: u1 users can only access their own missions
+  // Role-based access control
   if (userRole === 'u1' && mission.teamLeaderId !== session.user.id) {
     throw new Error("Access denied: You can only view your own missions");
+  }
+  
+  if (userRole === 'u3' && mission.status !== 'COMPLETED') {
+    throw new Error("Access denied: You can only view completed missions");
   }
 
   return mission;

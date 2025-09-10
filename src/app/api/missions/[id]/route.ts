@@ -12,7 +12,9 @@ import { getMissionAction } from '@/actions/mission/get-mission-action';
  *     description: |
  *       Retrieve a specific mission by its ID with role-based access control:
  *       - u1 users: Can only access missions where they are the team leader
- *       - u2, u3, u4 users: Can access any mission
+ *       - u2 users: Can access any mission
+ *       - u3 users: Can only access missions with COMPLETED status
+ *       - u4 users: Can access any mission
  *       Returns mission with associated team leader, members, and project information
  *     security:
  *       - bearerAuth: []
@@ -170,6 +172,12 @@ export async function GET(
         );
       }
       if (error.message === 'Access denied: You can only view your own missions') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 403 }
+        );
+      }
+      if (error.message === 'Access denied: You can only view completed missions') {
         return NextResponse.json(
           { error: error.message },
           { status: 403 }
