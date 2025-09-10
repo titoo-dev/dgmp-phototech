@@ -49,7 +49,6 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
           phoneNumber: project.company.phoneNumber,
           nif: project.company.nif,
           employeeCount: project.company.employeeCount,
-          projectsCount: 0, // We can calculate this if needed
         },
       },
     }));
