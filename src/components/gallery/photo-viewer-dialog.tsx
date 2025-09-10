@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -21,10 +21,8 @@ import {
   Building2,
   Users,
   Camera,
-  FileText,
-  Clock
-} from 'lucide-react';
-import { toast } from 'sonner';
+  FileText} from 'lucide-react';
+import { downloadSinglePhoto } from '@/lib/download-utils';
 import type { GalleryPhoto } from '@/actions/gallery/get-gallery-photos-action';
 
 interface PhotoViewerDialogProps {
@@ -104,53 +102,10 @@ export function PhotoViewerDialog({ photo, isOpen, onClose }: PhotoViewerDialogP
   const handleDownload = async () => {
     startTransition(async () => {
       try {
-        const photoMetadata = photo.metadata ? JSON.parse(photo.metadata) : {};
-        
-        // Use Vercel Blob's downloadUrl if available, otherwise fallback to regular URL
-        const downloadUrl = photoMetadata.downloadUrl || photo.fileUrl;
-        
-        // Get original filename from metadata or create a default one
-        const originalName = photoMetadata.originalName || photoMetadata.filename || `photo-${photo.id}`;
-        const fileExtension = originalName.split('.').pop() || 'jpg';
-        const fileName = originalName.includes('.') ? originalName : `${originalName}.${fileExtension}`;
-        
-        // For Vercel Blob URLs, we can use direct link approach for better performance
-        if (photoMetadata.downloadUrl) {
-          // Use Vercel Blob's built-in download URL with proper headers
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = fileName;
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          toast.success(`Téléchargement de ${fileName} démarré`);
-        } else {
-          // Fallback: Fetch and download for non-blob URLs
-          const response = await fetch(photo.fileUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          // Clean up the blob URL
-          window.URL.revokeObjectURL(url);
-          
-          toast.success(`Téléchargement de ${fileName} terminé`);
-        }
+        await downloadSinglePhoto(photo);
       } catch (error) {
         console.error('Download error:', error);
-        toast.error('Erreur lors du téléchargement de la photo');
+        // Error handling is done in the utility function
       }
     });
   };

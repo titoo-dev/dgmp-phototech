@@ -1,8 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { MoreVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CheckCircle2 } from 'lucide-react';
 import type { GalleryPhoto } from '@/actions/gallery/get-gallery-photos-action';
 import { useCallback } from 'react';
 
@@ -26,15 +25,38 @@ export default function PhotoCard({ photo, isSelected, onSelect, onOpen }: Props
 
     return (
         <div
-            className={`group relative cursor-pointer rounded-lg p-2 transition-colors duration-150 ${isSelected ? 'bg-blue-100 ring-1 ring-blue-100' : 'hover:bg-gray-100'}`}
+            className={`group relative cursor-pointer rounded-lg p-2 transition-all duration-200 ${
+                isSelected 
+                    ? 'bg-blue-50 ring-2 ring-blue-500 shadow-md transform scale-[0.98]' 
+                    : 'hover:bg-gray-100 hover:shadow-sm'
+            }`}
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
         >
             <div className="relative">
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2 border border-gray-200">
-                    <Image src={photo.fileUrl} alt={`Photo de ${photo.missionProject.project.title}`} width={600} height={400} className="w-full h-full object-cover" />
+                <div className={`aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2 border transition-all duration-200 ${
+                    isSelected ? 'border-blue-300 shadow-sm' : 'border-gray-200'
+                }`}>
+                    <Image 
+                        src={photo.fileUrl} 
+                        alt={`Photo de ${photo.missionProject.project.title}`} 
+                        width={600} 
+                        height={400} 
+                        className={`w-full h-full object-cover transition-all duration-200 ${
+                            isSelected ? 'brightness-110' : ''
+                        }`} 
+                    />
+                    
+                    {/* Selection indicator */}
+                    {isSelected && (
+                        <div className="absolute top-2 left-2 bg-blue-500 rounded-full p-1 shadow-md">
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                    )}
+                    
+                    {/* Mission status indicator */}
                     <div className="absolute top-2 right-2">
-                        <div className={`w-3 h-3 rounded-full ${
+                        <div className={`w-3 h-3 rounded-full shadow-sm ${
                             photo.missionProject.mission.status === 'COMPLETED' ? 'bg-green-500' : 
                             photo.missionProject.mission.status === 'PENDING' ? 'bg-yellow-500' : 
                             photo.missionProject.mission.status === 'DRAFT' ? 'bg-blue-500' :
@@ -44,12 +66,15 @@ export default function PhotoCard({ photo, isSelected, onSelect, onOpen }: Props
                 </div>
 
                 <div className="px-1">
-                    <h3 className="text-sm text-gray-900 font-normal truncate mb-1">{photo.missionProject.project.title}</h3>
+                    <h3 className={`text-sm font-normal truncate mb-1 transition-colors duration-200 ${
+                        isSelected ? 'text-blue-900 font-medium' : 'text-gray-900'
+                    }`}>
+                        {photo.missionProject.project.title}
+                    </h3>
                     <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 truncate">{new Date(photo.createdAt).toLocaleDateString('fr-FR')}</span>
-                        <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 hover:bg-gray-200" onClick={(e) => e.stopPropagation()}>
-                            <MoreVertical className="h-3 w-3" />
-                        </Button>
+                        <span className="text-xs text-gray-500 truncate">
+                            {new Date(photo.createdAt).toLocaleDateString('fr-FR')}
+                        </span>
                     </div>
                 </div>
             </div>

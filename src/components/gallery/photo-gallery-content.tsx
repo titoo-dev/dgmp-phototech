@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { Filter } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { Filter, Download, Loader2, Archive } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import PhotoCard from './photo-card';
 import SearchFilters from './search-filters';
 import GalleryPagination from './gallery-pagination';
 import { PhotoViewerDialog } from './photo-viewer-dialog';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { downloadSinglePhoto, downloadPhotosAsZip, estimateZipSize } from '@/lib/download-utils';
 import type { GalleryPhoto } from '@/actions/gallery/get-gallery-photos-action';
 
 const PHOTOS_PER_PAGE = 18;
@@ -18,12 +21,14 @@ interface PhotoGalleryContentProps {
 export default function PhotoGalleryContent({ photos }: PhotoGalleryContentProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedProject, setSelectedProject] = useState(searchParams.get('project') || 'all');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || 'all');
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [downloadProgress, setDownloadProgress] = useState<{current: number, total: number} | null>(null);
 
   const currentPage = parseInt(searchParams.get('page') || '1');
 
@@ -71,6 +76,42 @@ export default function PhotoGalleryContent({ photos }: PhotoGalleryContentProps
     );
   };
 
+  const handleDownload = async () => {
+    if (selectedPhotos.length === 0) {
+      toast.error('Aucune photo sélectionnée');
+      return;
+    }
+
+    const selectedPhotoObjects = photos.filter(photo => selectedPhotos.includes(photo.id));
+
+    startTransition(async () => {
+      try {
+        if (selectedPhotos.length === 1) {
+          // Single photo download
+          await downloadSinglePhoto(selectedPhotoObjects[0]);
+        } else {
+          // Multiple photos - ZIP download
+          setDownloadProgress({ current: 0, total: selectedPhotos.length });
+          
+          await downloadPhotosAsZip(selectedPhotoObjects, {
+            onProgress: (current, total) => {
+              setDownloadProgress({ current, total });
+            }
+          });
+        }
+        
+        // Clear selection after successful download
+        setSelectedPhotos([]);
+        
+      } catch (error) {
+        console.error('Download error:', error);
+        // Error handling is done in the utility functions
+      } finally {
+        setDownloadProgress(null);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -83,11 +124,38 @@ export default function PhotoGalleryContent({ photos }: PhotoGalleryContentProps
             <div className="flex items-center space-x-3">
               {selectedPhotos.length > 0 && (
                 <>
-                  <span className="text-sm font-medium text-blue-600">{selectedPhotos.length} sélectionné(s)</span>
-                  <button className="btn btn-outline btn-sm" onClick={() => setSelectedPhotos([])}>Désélectionner tout</button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={handleDownload}
+                      disabled={isPending || selectedPhotos.length === 0}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {downloadProgress ? `${downloadProgress.current}/${downloadProgress.total}` : 'Préparation...'}
+                        </>
+                      ) : selectedPhotos.length === 1 ? (
+                        <>
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="h-4 w-4 mr-2" />
+                          Télécharger ZIP {(() => {
+                            const selectedPhotoObjects = photos.filter(photo => selectedPhotos.includes(photo.id));
+                            const size = estimateZipSize(selectedPhotoObjects);
+                            return size ? `(${size})` : '';
+                          })()}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </>
               )}
-              <span className="text-sm text-gray-600">{filteredPhotos.length} éléments</span>
             </div>
           </div>
         </div>
@@ -111,6 +179,15 @@ export default function PhotoGalleryContent({ photos }: PhotoGalleryContentProps
           setSelectedStatus(value);
           updateSearchParams('status', value);
         }}
+        // Bulk selection props
+        filteredPhotosCount={filteredPhotos.length}
+        selectedCount={selectedPhotos.length}
+        onSelectAll={() => {
+          const allFilteredIds = filteredPhotos.map(photo => photo.id);
+          setSelectedPhotos(allFilteredIds);
+        }}
+        onDeselectAll={() => setSelectedPhotos([])}
+        isPending={isPending}
       />
 
       <main className="max-w-7xl mx-auto px-6 py-6">

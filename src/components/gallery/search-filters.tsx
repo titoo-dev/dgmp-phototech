@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, CheckSquare, Square } from 'lucide-react';
 
 type Props = {
   uniqueProjects: string[];
@@ -14,9 +15,29 @@ type Props = {
   onSearchChange: (value: string) => void;
   onProjectChange: (value: string) => void;
   onStatusChange: (value: string) => void;
+  // Bulk selection props
+  filteredPhotosCount: number;
+  selectedCount: number;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+  isPending: boolean;
 };
 
-export default function SearchFilters({ uniqueProjects, uniqueStatuses, searchTerm, selectedProject, selectedStatus, onSearchChange, onProjectChange, onStatusChange }: Props) {
+export default function SearchFilters({ 
+  uniqueProjects, 
+  uniqueStatuses, 
+  searchTerm, 
+  selectedProject, 
+  selectedStatus, 
+  onSearchChange, 
+  onProjectChange, 
+  onStatusChange,
+  filteredPhotosCount,
+  selectedCount,
+  onSelectAll,
+  onDeselectAll,
+  isPending
+}: Props) {
   const [local, setLocal] = useState(searchTerm);
 
   return (
@@ -71,6 +92,36 @@ export default function SearchFilters({ uniqueProjects, uniqueStatuses, searchTe
                 })}
               </SelectContent>
             </Select>
+
+            {/* Bulk selection controls */}
+            {filteredPhotosCount > 0 && (
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-300">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={selectedCount === filteredPhotosCount ? onDeselectAll : onSelectAll}
+                  disabled={isPending}
+                  className="text-xs"
+                >
+                  {selectedCount === filteredPhotosCount ? (
+                    <>
+                      <CheckSquare className="h-3 w-3 mr-1" />
+                      Tout désélectionner
+                    </>
+                  ) : (
+                    <>
+                      <Square className="h-3 w-3 mr-1" />
+                      Sélectionner tout
+                    </>
+                  )}
+                </Button>
+                {selectedCount > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {selectedCount} / {filteredPhotosCount} sélectionnés
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
