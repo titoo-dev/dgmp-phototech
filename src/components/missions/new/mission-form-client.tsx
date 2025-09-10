@@ -21,20 +21,22 @@ interface MissionFormClientProps {
 	teamLeaders: UserModel[];
 	contacts: ContactModel[];
 	projects: ProjectWithCompany[];
+	currentUser: UserModel;
 }
 
-export default function MissionFormClient({ teamLeaders, contacts, projects }: MissionFormClientProps) {
+export default function MissionFormClient({ teamLeaders, contacts, projects, currentUser }: MissionFormClientProps) {
 	const [state, formAction] = useActionState(createMissionAction, {});
 	const [isPending, startTransition] = useTransition();
 	const formRef = useRef<HTMLFormElement | null>(null);
 
 	const [formData, setFormData] = useState<Partial<MissionModel>>({
 		teamLeader: undefined,
+		teamLeaderId: currentUser.id,
 		members: [],
 		startDate: undefined,
 		endDate: undefined,
 		location: "",
-		agentCount: 0,
+		agentCount: 1, // Start with 1 since current user is already set as team leader
 		marketCount: 1,
 		status: "DRAFT",
 	});
@@ -62,11 +64,12 @@ export default function MissionFormClient({ teamLeaders, contacts, projects }: M
 			setMarkets([{ id: 1, name: 'Marché 1', photos: [], remarks: '', selectedProject: null }]);
 			setFormData({
 				teamLeader: undefined,
+				teamLeaderId: currentUser.id,
 				members: [],
 				startDate: undefined,
 				endDate: undefined,
 				location: "",
-				agentCount: 0,
+				agentCount: 1, // Reset to 1 since current user is team leader
 				marketCount: 1,
 				status: "DRAFT",
 			});
@@ -223,6 +226,7 @@ export default function MissionFormClient({ teamLeaders, contacts, projects }: M
 								contacts={contacts}
 								selectedContacts={selectedContacts}
 								onContactsChange={setSelectedContacts}
+								currentUser={currentUser}
 							/>
 						</div>
 

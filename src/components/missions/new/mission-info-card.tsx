@@ -7,7 +7,6 @@ import { MissionModel } from "@/models/mission-schema";
 import type { UserModel } from "@/models/user-schema";
 import type { ContactModel } from "@/models/contact-schema";
 import DatePickerField from "@/components/date-picker/date-picker-field";
-import { UserCombobox } from "@/components/combobox/user-combobox";
 import ContactCreationDialog from "./contact-creation-dialog";
 import ContactChips from "./contact-chips";
 
@@ -18,9 +17,10 @@ interface Props {
   contacts: ContactModel[];
   selectedContacts: ContactModel[];
   onContactsChange: (contacts: ContactModel[]) => void;
+  currentUser: UserModel;
 }
 
-export default function MissionInfoCard({ formData, setFormData, teamLeaders, contacts, selectedContacts, onContactsChange }: Props) {
+export default function MissionInfoCard({ formData, setFormData, teamLeaders, contacts, selectedContacts, onContactsChange, currentUser }: Props) {
   return (
 		<Card className="border-border/50 shadow-none">
 			<CardHeader>
@@ -34,14 +34,16 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 					<label className="text-sm font-medium text-foreground">
 						Chef de mission
 					</label>
-					<UserCombobox
-						users={teamLeaders}
-						name="teamLeaderId"
-						placeholder="Sélectionner un chef de mission"
-						onValueChange={(value) => 
-							setFormData((prev) => ({ ...prev, teamLeaderId: value }))
-						}
-					/>
+					<div className="relative">
+						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							name="teamLeaderId"
+							value={`${currentUser.name} (${currentUser.email})`}
+							className="pl-10 bg-muted/50"
+							readOnly
+						/>
+						<input type="hidden" name="teamLeaderId" value={currentUser.id} />
+					</div>
 				</div>
 
 				<div className="flex flex-col space-y-2">
