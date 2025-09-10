@@ -3,24 +3,27 @@
 import { useState } from 'react';
 import { Filter } from 'lucide-react';
 import PhotoCard from './photo-card';
-import PhotoModal from './photo-modal';
 import SearchFilters from './search-filters';
 import GalleryPagination from './gallery-pagination';
-import { generateMissionPhotos, type MissionPhoto } from './generate-mission-photos';
+import { PhotoViewerDialog } from './photo-viewer-dialog';
 import { useSearchParams, useRouter } from 'next/navigation';
+import type { GalleryPhoto } from '@/actions/gallery/get-gallery-photos-action';
 
-const missionPhotos = generateMissionPhotos(50);
 const PHOTOS_PER_PAGE = 18;
 
-export default function PhotoGalleryContent() {
+interface PhotoGalleryContentProps {
+  photos: GalleryPhoto[];
+}
+
+export default function PhotoGalleryContent({ photos }: PhotoGalleryContentProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedProject, setSelectedProject] = useState(searchParams.get('project') || 'all');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || 'all');
-  const [selectedPhoto, setSelectedPhoto] = useState<MissionPhoto | null>(null);
-  const [selectedPhotos, setSelectedPhotos] = useState<number[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
 
   const currentPage = parseInt(searchParams.get('page') || '1');
 
@@ -41,17 +44,17 @@ export default function PhotoGalleryContent() {
     router.push(`?${params.toString()}`);
   };
 
-  const filteredPhotos = missionPhotos.filter((photo) => {
+  const filteredPhotos = photos.filter((photo) => {
     const matchesSearch =
-      photo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.project.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.photographer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.observations.toLowerCase().includes(searchTerm.toLowerCase());
+      photo.missionProject.project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.missionProject.project.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.missionProject.mission.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.missionProject.mission.teamLeader.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.missionProject.project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (photo.missionProject.notes && photo.missionProject.notes.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesProject = selectedProject === 'all' || photo.project === selectedProject;
-    const matchesStatus = selectedStatus === 'all' || photo.status === selectedStatus;
+    const matchesProject = selectedProject === 'all' || photo.missionProject.project.title === selectedProject;
+    const matchesStatus = selectedStatus === 'all' || photo.missionProject.mission.status === selectedStatus;
 
     return matchesSearch && matchesProject && matchesStatus;
   });
@@ -59,10 +62,10 @@ export default function PhotoGalleryContent() {
   const totalPages = Math.ceil(filteredPhotos.length / PHOTOS_PER_PAGE);
   const paginatedPhotos = filteredPhotos.slice((currentPage - 1) * PHOTOS_PER_PAGE, currentPage * PHOTOS_PER_PAGE);
 
-  const uniqueProjects = [...new Set(missionPhotos.map((photo) => photo.project))];
-  const uniqueStatuses = [...new Set(missionPhotos.map((photo) => photo.status))];
+  const uniqueProjects = [...new Set(photos.map((photo) => photo.missionProject.project.title))];
+  const uniqueStatuses = [...new Set(photos.map((photo) => photo.missionProject.mission.status))];
 
-  const handleSelectPhoto = (id: number) => {
+  const handleSelectPhoto = (id: string) => {
     setSelectedPhotos((prevSelected) =>
       prevSelected.includes(id) ? prevSelected.filter((photoId) => photoId !== id) : [...prevSelected, id]
     );
@@ -130,7 +133,7 @@ export default function PhotoGalleryContent() {
         <GalleryPagination totalPages={totalPages} currentPage={currentPage} onChange={handlePageChange} />
       </main>
 
-      {selectedPhoto && <PhotoModal photo={selectedPhoto} onClose={() => setSelectedPhoto(null)} />}
+      <PhotoViewerDialog photo={selectedPhoto} isOpen={!!selectedPhoto} onClose={() => setSelectedPhoto(null)} />
     </div>
   );
 }

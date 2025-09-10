@@ -56,9 +56,19 @@ export default function SearchFilters({ uniqueProjects, uniqueStatuses, searchTe
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
-                {uniqueStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                ))}
+                {uniqueStatuses.map((status) => {
+                  const statusLabels = {
+                    DRAFT: "Brouillon",
+                    PENDING: "En attente", 
+                    COMPLETED: "Terminée",
+                    REJECTED: "Rejetée"
+                  } as const;
+                  return (
+                    <SelectItem key={status} value={status}>
+                      {statusLabels[status as keyof typeof statusLabels] || status}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
