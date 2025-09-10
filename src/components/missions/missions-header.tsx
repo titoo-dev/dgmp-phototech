@@ -1,13 +1,8 @@
 import { Button } from "@/components/ui/button"
-import { Plus, Kanban, List } from "lucide-react"
+import { Plus } from "lucide-react"
 import Link from "next/link";
 
-interface MissionHeaderProps {
-  viewMode: 'kanban' | 'list';
-  onViewModeChange: (mode: 'kanban' | 'list') => void;
-}
-
-export function MissionHeader({ viewMode, onViewModeChange }: MissionHeaderProps) {
+export function MissionHeader() {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -17,26 +12,6 @@ export function MissionHeader({ viewMode, onViewModeChange }: MissionHeaderProps
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <div className="flex items-center border rounded-lg p-1">
-          <Button
-            variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewModeChange('kanban')}
-            className="h-8"
-          >
-            <Kanban className="h-4 w-4 mr-1" />
-            Kanban
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onViewModeChange('list')}
-            className="h-8"
-          >
-            <List className="h-4 w-4 mr-1" />
-            Liste
-          </Button>
-        </div>
         <Button asChild>
           <Link href="/dashboard/missions/new">
             <Plus className="mr-2 h-4 w-4" />

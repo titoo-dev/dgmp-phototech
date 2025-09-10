@@ -1,46 +1,38 @@
 'use client';
 
-import { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { MissionModel } from '@/models/mission-schema';
 import {
 	Clock,
 	CheckCircle,
 	AlertCircle,
 } from 'lucide-react';
-import { MissionKanbanView } from '@/components/missions/missions-kanban-view';
 import { Badge } from '@/components/ui/badge';
 import { ReportHeader } from '@/components/missions/report-header';
 import { ReportSearch } from '@/components/missions/report-search';
 import { MissionListTable } from '@/components/missions/mission-list-table';
 import type { MissionWithRelations } from '../../actions/mission/get-missions-action';
-import { updateMissionStatusAction } from '@/actions/mission/update-mission-status-action';
-import { MissionStatus } from '@/lib/generated/prisma';
-import { toast } from 'sonner';
 
 interface MissionsClientProps {
   missions: MissionWithRelations[];
 }
 
-type MissionKanbanItem = {
+type MissionTableItem = {
   id: string;
   name: string;
-  column: string;
   data: MissionModel;
 };
 
 export function MissionsClient({ missions }: MissionsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
-  const [, startTransition] = useTransition();
   const [currentMissions, setCurrentMissions] = useState<MissionWithRelations[]>(missions);
 
   // Transform database missions to the format expected by components
   const missionsData = useMemo(() => {
-    return currentMissions.map((mission): MissionKanbanItem => ({
+    return currentMissions.map((mission): MissionTableItem => ({
       id: mission.id,
       name: `Mission #${mission.missionNumber}`,
-      column: mission.status,
       data: {
         id: mission.id,
         missionNumber: mission.missionNumber,
@@ -66,43 +58,7 @@ export function MissionsClient({ missions }: MissionsClientProps) {
     }));
   }, [currentMissions]);
 
-  // Calculate kanban columns with dynamic counts
-  const kanbanColumns = useMemo(() => [
-    {
-      id: 'DRAFT',
-      name: 'Brouillons',
-      count: missionsData.filter((m) => m.column === 'DRAFT').length,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-    },
-    {
-      id: 'PENDING',
-      name: 'En attente',
-      count: missionsData.filter((m) => m.column === 'PENDING').length,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-    },
-    {
-      id: 'COMPLETED',
-      name: 'Validés',
-      count: missionsData.filter((m) => m.column === 'COMPLETED').length,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-    },
-    {
-      id: 'REJECTED',
-      name: 'Refusés',
-      count: missionsData.filter((m) => m.column === 'REJECTED').length,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-    },
-  ], [missionsData]);
-
-  const [currentMissionsData, setCurrentMissionsData] = useState<MissionKanbanItem[]>(missionsData);
+  const [currentMissionsData, setCurrentMissionsData] = useState<MissionTableItem[]>(missionsData);
 
   // Update currentMissionsData when missionsData changes
   useEffect(() => {
@@ -122,38 +78,6 @@ export function MissionsClient({ missions }: MissionsClientProps) {
     }
   }, []);
 
-  const handleMissionsChange = (newMissions: MissionKanbanItem[]) => {
-    const changedMissions = newMissions.filter((newMission) => {
-      const originalMission = currentMissions.filter(m => m.id === newMission.id)[0];
-      return originalMission.status !== newMission.column;
-    });
-
-    // Update UI immediately for better UX
-    setCurrentMissionsData(newMissions);
-
-    // Process status updates
-    if (changedMissions.length > 0) {
-      startTransition(async () => {
-        for (const changedMission of changedMissions) {
-          try {
-            const newStatus = changedMission.column as MissionStatus;
-            const result = await updateMissionStatusAction(changedMission.id, newStatus);
-            if (!result.success) {
-              toast.error('Erreur', {
-                description: result.errors?._form?.[0] || 'Une erreur inattendue est survenue',
-                duration: 5000,
-              });
-            }
-          } catch (error) {
-            toast.error('Erreur', {
-              description: 'Une erreur inattendue est survenue',
-              duration: 5000,
-            });
-          }
-        }
-      });
-    }
-  };
 
   const filteredMissions = currentMissionsData.filter((mission) => {
     const missionData = mission.data as MissionModel;
@@ -209,7 +133,7 @@ export function MissionsClient({ missions }: MissionsClientProps) {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <ReportHeader viewMode={viewMode} onViewModeChange={setViewMode} />
+      <ReportHeader />
 
       <ReportSearch
         searchQuery={searchQuery}
@@ -218,22 +142,12 @@ export function MissionsClient({ missions }: MissionsClientProps) {
         onStatusFilterChange={setStatusFilter}
       />
 
-      {viewMode === 'kanban' ? (
-        <div className="relative">
-          <MissionKanbanView
-            columns={kanbanColumns}
-            missions={filteredMissions}
-            onMissionsChange={handleMissionsChange}
-            onMissionDeleted={refreshMissions}
-          />
-        </div>
-      ) : (
-        <MissionListTable 
-          missions={filteredMissions} 
-          searchQuery={searchQuery}
-          getStatusBadge={getStatusBadge} 
-        />
-      )}
+      <MissionListTable 
+        missions={filteredMissions} 
+        searchQuery={searchQuery}
+        getStatusBadge={getStatusBadge}
+        onMissionDeleted={refreshMissions}
+      />
     </div>
   );
 }
