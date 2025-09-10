@@ -167,8 +167,22 @@ import { AuthUser, getUserRole } from '@/lib/auth-utils';
  *   get:
  *     tags:
  *       - Missions
- *     summary: Get all missions
- *     description: Retrieve a list of all missions with their associated team leader, members, and project information
+ *     summary: Get missions based on user role
+ *     description: |
+ *       Retrieve missions based on user role:
+ *       - u1 users: Only missions where they are the team leader
+ *       - u2, u3, u4 users: All missions in the system
+ *       Returns missions with their associated team leader, members, and project information
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         description: Bearer token with user role (u1, u2, u3, or u4)
+ *         schema:
+ *           type: string
+ *           example: "Bearer your-jwt-token"
  *     responses:
  *       200:
  *         description: List of missions retrieved successfully
@@ -181,6 +195,16 @@ import { AuthUser, getUserRole } from '@/lib/auth-utils';
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Mission'
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "User not authenticated"
  *       500:
  *         description: Internal server error
  *         content:
@@ -318,6 +342,13 @@ export async function GET() {
     const result = await getMissionsAction();
     
     if (!result.success) {
+      // Check if it's an authentication error
+      if (result.error === 'User not authenticated') {
+        return NextResponse.json(
+          { error: result.error },
+          { status: 401 }
+        );
+      }
       return NextResponse.json(
         { error: result.error || 'Failed to fetch missions' },
         { status: 500 }

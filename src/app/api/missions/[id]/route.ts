@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { getMissionAction } from '@/actions/mission/get-mission-action';
 
 /**
  * @swagger
@@ -7,8 +8,14 @@ import { NextRequest, NextResponse } from 'next/server';
  *   get:
  *     tags:
  *       - Missions
- *     summary: Get a mission by ID
- *     description: Retrieve a specific mission by its ID with associated team leader, members, and project information
+ *     summary: Get a mission by ID (role-based access)
+ *     description: |
+ *       Retrieve a specific mission by its ID with role-based access control:
+ *       - u1 users: Can only access missions where they are the team leader
+ *       - u2, u3, u4 users: Can access any mission
+ *       Returns mission with associated team leader, members, and project information
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -24,6 +31,26 @@ import { NextRequest, NextResponse } from 'next/server';
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Mission'
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "User not authenticated"
+ *       403:
+ *         description: Forbidden - access denied for u1 users accessing other's missions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Access denied: You can only view your own missions"
  *       404:
  *         description: Mission not found
  *       500:
@@ -129,33 +156,33 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const mission = await prisma.mission.findUnique({
-      where: { id },
-      include: {
-        teamLeader: true,
-        members: true,
-        missionProjects: {
-          include: {
-            project: {
-              include: {
-                company: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!mission) {
-      return NextResponse.json(
-        { error: 'Mission not found' },
-        { status: 404 }
-      );
-    }
-
+    const mission = await getMissionAction(id);
     return NextResponse.json(mission);
   } catch (error) {
     console.error('Error fetching mission:', error);
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message === 'User not authenticated') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 401 }
+        );
+      }
+      if (error.message === 'Access denied: You can only view your own missions') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 403 }
+        );
+      }
+      if (error.message === 'Mission not found') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 404 }
+        );
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Failed to fetch mission' },
       { status: 500 }

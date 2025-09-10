@@ -1,13 +1,36 @@
 'use server'
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { getUserRole, AuthUser } from "@/lib/auth-utils";
 
 export async function getMissionsAction(): Promise<
     | { success: true; data: MissionWithRelations[] }
     | { success: false; error: string; data?: undefined }
 > {
     try {
+        // Get current user session
+        const session = await auth.api.getSession({
+            headers: await headers()
+        });
+
+        if (!session?.user) {
+            return {
+                success: false,
+                error: 'User not authenticated'
+            };
+        }
+
+        const userRole = getUserRole(session.user as AuthUser);
+        
+        // Role-based filtering: only u1 users see their own missions, others see all
+        const whereClause = userRole === 'u1' 
+            ? { teamLeaderId: session.user.id }
+            : {}; // u2, u3, u4 can see all missions
+
         const missions = await prisma.mission.findMany({
+            where: whereClause,
             include: {
                 teamLeader: true,
                 members: true,

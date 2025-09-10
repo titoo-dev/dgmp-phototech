@@ -5,6 +5,9 @@ import { getSessionAction } from '@/actions/get-session';
 import { UserModel } from '@/models/user-schema';
 import MissionFormClient from '@/components/missions/new/mission-form-client';
 
+
+export const dynamic = 'force-dynamic';
+
 export default async function NewMissionPage() {
 	const [teamLeadersResult, contactsResult, projectsResult, sessionResult] = await Promise.all([
 		getTeamLeadersAction(),
