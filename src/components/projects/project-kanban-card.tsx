@@ -26,14 +26,17 @@ import {
 import Link from "next/link"
 import { ProjectModel } from "@/models/project-schema"
 import { ProjectDetailsSheet } from "./project-details-sheet"
+import { DeleteProjectDialog } from "./delete-project-dialog"
 
 interface ProjectKanbanCardProps {
   projet: ProjectModel;
   className?: string;
+  onProjectDeleted?: () => void;
 }
 
-export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps) {
+export function ProjectKanbanCard({ projet, className, onProjectDeleted }: ProjectKanbanCardProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -89,6 +92,18 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
   const isOverdue = daysRemaining < 0
   const isDueSoon = daysRemaining <= 30 && daysRemaining >= 0
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteSuccess = () => {
+    setIsDeleteDialogOpen(false);
+    if (onProjectDeleted) {
+      onProjectDeleted();
+    }
+  };
+
   return (
     <div className={`bg-white rounded-lg border shadow-sm hover:shadow-md transition-all duration-200 ${getStatusColor(projet.status)} border-l-4 ${className}`}>
       <div className="p-4 space-y-3">
@@ -125,7 +140,10 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={handleDeleteClick}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Supprimer
               </DropdownMenuItem>
@@ -199,6 +217,20 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
           projectId={projet.id}
           isOpen={isSheetOpen}
           onClose={() => setIsSheetOpen(false)}
+        />
+      </div>
+
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DeleteProjectDialog
+          projectId={projet.id}
+          projectTitle={projet.title}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onDeleteSuccess={handleDeleteSuccess}
         />
       </div>
     </div>

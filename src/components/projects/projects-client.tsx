@@ -10,6 +10,7 @@ import type { ProjectModel } from '@/models/project-schema';
 import { updateProjectStatusAction } from '@/actions/project/update-project-status-action';
 import { ProjectStatus } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface ProjectsClientProps {
   projects: ProjectWithCompany[];
@@ -26,6 +27,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [, startTransition] = useTransition();
+  const router = useRouter();
 
   // Transform database projects to the format expected by components
   const projectsData = useMemo(() => {
@@ -100,6 +102,10 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
 
   const [currentProjectsData, setCurrentProjectsData] = useState<ProjectKanbanItem[]>(projectsData);
 
+  const handleProjectDeleted = () => {
+    router.refresh();
+  };
+
   const handleProjectsChange = (newProjects: ProjectKanbanItem[]) => {
     // Find projects that have changed status
     const changedProjects = newProjects.filter((newProject) => {
@@ -156,6 +162,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
           columns={kanbanColumns}
           projects={filteredProjects}
           onProjectsChange={handleProjectsChange}
+          onProjectDeleted={handleProjectDeleted}
         />
       ) : (
         <ProjectListTable 

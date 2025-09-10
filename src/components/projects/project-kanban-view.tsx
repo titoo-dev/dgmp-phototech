@@ -28,9 +28,10 @@ interface ProjectKanbanViewProps {
 	}>;
 	projects: ProjectKanbanItem[];
 	onProjectsChange: (projects: ProjectKanbanItem[]) => void;
+	onProjectDeleted?: () => void;
 }
 
-export function ProjectKanbanView({ columns, projects, onProjectsChange }: ProjectKanbanViewProps) {
+export function ProjectKanbanView({ columns, projects, onProjectsChange, onProjectDeleted }: ProjectKanbanViewProps) {
 	return (
 		<div className="h-[calc(100vh-400px)] min-h-[600px] overflow-hidden">
 			<KanbanProvider
@@ -75,7 +76,10 @@ export function ProjectKanbanView({ columns, projects, onProjectsChange }: Proje
 												column={item.column}
 												className="bg-transparent border-0 shadow-none p-0"
 											>
-												<ProjectKanbanCard projet={projet} />
+												<ProjectKanbanCard 
+												projet={projet} 
+												onProjectDeleted={onProjectDeleted}
+											/>
 											</KanbanCard>
 										);
 									}}
