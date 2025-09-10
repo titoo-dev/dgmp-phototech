@@ -40,6 +40,11 @@ export function ProjectCombobox({
   const [open, setOpen] = React.useState(false)
   const [selectedValue, setSelectedValue] = React.useState(value)
 
+  // Sync internal state with prop value
+  React.useEffect(() => {
+    setSelectedValue(value)
+  }, [value])
+
   const handleSelect = (currentValue: string) => {
     const newValue = currentValue === selectedValue ? "" : currentValue
     setSelectedValue(newValue)

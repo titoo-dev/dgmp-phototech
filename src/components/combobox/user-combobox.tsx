@@ -23,6 +23,7 @@ import {
 interface UserComboboxProps {
   users: UserModel[];
   value?: string;
+  defaultValue?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
   name?: string;
@@ -32,13 +33,14 @@ interface UserComboboxProps {
 export function UserCombobox({ 
   users, 
   value = "", 
+  defaultValue,
   onValueChange, 
   placeholder = "Sélectionner un utilisateur...",
   name,
   className 
 }: UserComboboxProps) {
   const [open, setOpen] = React.useState(false)
-  const [selectedValue, setSelectedValue] = React.useState(value)
+  const [selectedValue, setSelectedValue] = React.useState(defaultValue || value)
 
   const handleSelect = (currentValue: string) => {
     const newValue = currentValue === selectedValue ? "" : currentValue
