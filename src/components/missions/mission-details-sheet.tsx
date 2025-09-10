@@ -21,8 +21,7 @@ import {
     AlertCircle,
     Building2,
     FileText,
-    Camera,
-    ExternalLink
+    Camera
 } from "lucide-react";
 import { getMissionAction } from "@/actions/mission/get-mission-action";
 import Image from "next/image";
@@ -62,16 +61,6 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
         }
     };
 
-    const getAllMissionFiles = () => {
-        if (!mission?.missionProjects) return [];
-
-        return mission.missionProjects.flatMap(mp =>
-            mp.files.map(file => ({
-                ...file,
-                projectTitle: mp.project.title
-            }))
-        );
-    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -349,6 +338,34 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
                                                             <p className="text-sm text-muted-foreground">{missionProject.notes}</p>
                                                         </div>
                                                     )}
+
+                                                    {/* Photos du projet */}
+                                                    {missionProject.files && missionProject.files.length > 0 && (
+                                                        <div className="mt-4">
+                                                            <div className="flex items-center gap-2 mb-3">
+                                                                <Camera className="w-4 h-4 text-muted-foreground" />
+                                                                <span className="text-sm font-medium">Photos ({missionProject.files.length})</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                                {missionProject.files.map((file) => (
+                                                                    <div key={file.id} className="group relative aspect-square rounded-lg overflow-hidden border">
+                                                                        <Image
+                                                                            src={file.fileUrl}
+                                                                            alt={`Photo de ${missionProject.project.title}`}
+                                                                            fill
+                                                                            className="object-cover"
+                                                                        />
+                                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
+                                                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                                            {file.metadata && (
+                                                                                <p className="text-white text-xs truncate">{JSON.parse(file.metadata).originalName || 'Photo'}</p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -356,59 +373,6 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
                                 </Card>
                             )}
 
-                            {/* Photos de mission */}
-                            {(() => {
-                                const missionFiles = getAllMissionFiles();
-                                return (
-                                    <Card className='shadow-none'>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Camera className="w-5 h-5" />
-                                                Photos de mission ({missionFiles.length})
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            {missionFiles.length > 0 ? (
-                                                <>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                        {missionFiles.map((file) => (
-                                                            <div key={file.id} className="group relative aspect-square rounded-lg overflow-hidden border">
-                                                                <Image
-                                                                    src={file.fileUrl}
-                                                                    alt={`Photo de ${file.projectTitle}`}
-                                                                    fill
-                                                                    className="object-cover"
-                                                                />
-                                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
-                                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                                    <p className="text-white text-xs font-medium truncate">{file.projectTitle}</p>
-                                                                    {file.metadata && (
-                                                                        <p className="text-white/80 text-xs truncate">{JSON.parse(file.metadata).originalName || 'Photo'}</p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    {missionFiles.length > 4 && (
-                                                        <div className="mt-4 flex justify-center">
-                                                            <Button variant="outline" size="sm">
-                                                                Voir toutes les photos ({missionFiles.length})
-                                                                <ExternalLink className="w-4 h-4 ml-2" />
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <div className="text-center py-8 text-muted-foreground">
-                                                    <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                                    <p>Aucune photo disponible pour cette mission</p>
-                                                </div>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })()}
                         </div>
                     </div>
                 </ScrollArea>
