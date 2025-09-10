@@ -78,13 +78,6 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
     };
 
     const getStatusBadge = (status: string) => {
-        const variants = {
-            DRAFT: "default",
-            PENDING: "secondary",
-            COMPLETED: "default",
-            REJECTED: "destructive"
-        } as const;
-
         const colors = {
             DRAFT: "bg-blue-100 text-blue-800 border-blue-200",
             PENDING: "bg-yellow-100 text-yellow-800 border-yellow-200",
