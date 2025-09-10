@@ -119,7 +119,7 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
                 Voir détails
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/projects/${projet.id}/modifier`}>
+                <Link href={`/dashboard/projects/${projet.id}/modifier`}>
                   <Edit className="w-4 h-4 mr-2" />
                   Modifier
                 </Link>
