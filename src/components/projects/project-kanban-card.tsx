@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +25,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { ProjectModel } from "@/models/project-schema"
+import { ProjectDetailsSheet } from "./project-details-sheet"
 
 interface ProjectKanbanCardProps {
   projet: ProjectModel;
@@ -31,6 +33,8 @@ interface ProjectKanbanCardProps {
 }
 
 export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps) {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "uncontrolled":
@@ -93,18 +97,26 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
           <div className="flex items-center gap-2">
             {getStatusIcon(projet.status)}
           </div>
-          <DropdownMenu>
+          <div
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/projects/${projet.id}`}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Voir détails
-                </Link>
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSheetOpen(true);
+                }}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Voir détails
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/projects/${projet.id}/modifier`}>
@@ -118,7 +130,8 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
                 Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Titre et description */}
@@ -175,6 +188,18 @@ export function ProjectKanbanCard({ projet, className }: ProjectKanbanCardProps)
             {projet.nature}
           </Badge>
         </div>
+      </div>
+
+      <div
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ProjectDetailsSheet
+          projectId={projet.id}
+          isOpen={isSheetOpen}
+          onClose={() => setIsSheetOpen(false)}
+        />
       </div>
     </div>
   )
