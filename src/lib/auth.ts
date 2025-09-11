@@ -1,7 +1,7 @@
 import { User, betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "./generated/prisma";
-import { admin as adminPlugin } from "better-auth/plugins";
+import { admin as adminPlugin, openAPI } from "better-auth/plugins";
 import { ac, u1, u2, u3, u4 } from "./permissions/permissions";
 import { Resend } from "resend";
 import { VerificationTemplate } from "@/components/template/verification-template";
@@ -60,6 +60,7 @@ export const auth = betterAuth({
             defaultBanExpiresIn: 30,
             bannedUserMessage: 'Votre compte a été banni. Veuillez contacter l\'administrateur.',
             defaultBanReason: 'Banni par l\'administrateur.',
-        })
+        }),
+        openAPI(),
     ],
 });

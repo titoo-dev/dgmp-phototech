@@ -49,9 +49,10 @@ model User {
   banReason  String?
   banExpires DateTime?
 
+  missionsTeamLeader Mission[] @relation("TeamLeader")
+
   @@unique([email])
   @@map("user")
-  missionsTeamLeader Mission[] @relation("TeamLeader")
 }
 
 model Session {
@@ -101,17 +102,16 @@ model Verification {
   @@map("verification")
 }
 
-
 model Contact {
-  id        String    @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String
-  missionsMember     Mission[] @relation("Member")
+  id             String    @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String
+  missionsMember Mission[] @relation("Member")
 }
 
 model Company {
-  id            String      @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
   email         String
   phoneNumber   String
@@ -121,48 +121,48 @@ model Company {
 }
 
 model Project {
-  id          String        @id @default(cuid())
-  title       String
-  description String
-  startDate   DateTime
-  endDate     DateTime
-  status      ProjectStatus
-  companyId   String
-  company     Company @relation(fields: [companyId], references: [id])
-  nature      ProjectNature
+  id              String           @id @default(cuid())
+  title           String
+  description     String
+  startDate       DateTime
+  endDate         DateTime
+  status          ProjectStatus
+  companyId       String
+  company         Company          @relation(fields: [companyId], references: [id])
+  nature          ProjectNature
   missionProjects MissionProject[]
 }
 
 model Mission {
-  id           String               @id @default(cuid())
-  missionNumber String
-  teamLeader   User @relation("TeamLeader", fields: [teamLeaderId], references: [id])
-  teamLeaderId String
-  members      Contact[] @relation("Member")
-  startDate    DateTime
-  endDate      DateTime
-  location     String
-  agentCount   Int
-  marketCount Int
-  status       MissionStatus
+  id              String           @id @default(cuid())
+  missionNumber   String
+  teamLeader      User             @relation("TeamLeader", fields: [teamLeaderId], references: [id])
+  teamLeaderId    String
+  members         Contact[]        @relation("Member")
+  startDate       DateTime
+  endDate         DateTime
+  location        String
+  agentCount      Int
+  marketCount     Int
+  status          MissionStatus
   missionProjects MissionProject[]
 }
 
 model MissionFile {
-  id        String    @id @default(cuid())
-  fileUrl   String
-  metadata  String
-  createdAt DateTime @default(now())
+  id               String         @id @default(cuid())
+  fileUrl          String
+  metadata         String
+  createdAt        DateTime       @default(now())
   missionProjectId String
-  missionProject MissionProject @relation(fields: [missionProjectId], references: [id])
+  missionProject   MissionProject @relation(fields: [missionProjectId], references: [id])
 }
 
 model MissionProject {
-  id        String    @id @default(cuid())
+  id        String        @id @default(cuid())
   projectId String
-  project   Project @relation(fields: [projectId], references: [id])
+  project   Project       @relation(fields: [projectId], references: [id])
   files     MissionFile[]
   notes     String
   missionId String
-  mission Mission @relation(fields: [missionId], references: [id])
+  mission   Mission       @relation(fields: [missionId], references: [id])
 }
