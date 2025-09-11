@@ -37,7 +37,6 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 					<div className="relative">
 						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 						<Input
-							name="teamLeaderId"
 							value={`${currentUser.name} (${currentUser.email})`}
 							className="pl-10 bg-muted/50"
 							readOnly

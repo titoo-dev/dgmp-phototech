@@ -163,6 +163,9 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 			form.append('memberIds', contact.id);
 		});
 
+		// Ensure teamLeaderId is set correctly
+		form.set('teamLeaderId', currentUser.id);
+
 		// Add photo files for each market
 		markets.forEach(market => {
 			market.photos.forEach(photo => {
