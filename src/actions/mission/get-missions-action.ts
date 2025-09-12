@@ -23,10 +23,10 @@ export async function getMissionsAction(): Promise<
         }
 
         const userRole = getUserRole(session.user as AuthUser);
-        
+
         // Role-based filtering
         let whereClause = {};
-        
+
         if (userRole === 'u1') {
             // u1 users: only see their own missions
             whereClause = { teamLeaderId: session.user.id };
@@ -49,7 +49,8 @@ export async function getMissionsAction(): Promise<
                             include: {
                                 company: true
                             }
-                        }
+                        },
+                        files: true,
                     }
                 }
             },
@@ -103,6 +104,13 @@ export type MissionWithRelations = {
         projectId: string;
         notes: string;
         missionId: string;
+        files: Array<{
+            id: string;
+            fileUrl: string;
+            metadata: string;
+            createdAt: Date;
+            missionProjectId: string;
+        }>;
         project: {
             id: string;
             title: string;
