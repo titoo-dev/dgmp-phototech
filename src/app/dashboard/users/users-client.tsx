@@ -70,6 +70,7 @@ import { toast } from "sonner"
 import { banUserAction } from "@/actions/user/ban-user"
 import { unbanUserAction } from "@/actions/user/unban-user"
 import { removeUserAction } from "@/actions/user/remove-user"
+import { UserRole } from "@/lib/auth-utils"
 
 interface User {
     id: string
@@ -93,6 +94,7 @@ interface UsersClientProps {
         role?: string
         status?: string
     }
+    userRole: UserRole
 }
 
 export function UsersClient({
@@ -100,7 +102,8 @@ export function UsersClient({
     total,
     currentPage,
     totalPages,
-    searchParams
+    searchParams,
+    userRole
 }: UsersClientProps) {
     const router = useRouter()
     const searchParamsHook = useSearchParams()
@@ -465,20 +468,22 @@ export function UsersClient({
                                 className="pl-8"
                             />
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-muted-foreground" />
-                            <Select value={roleFilter} onValueChange={handleRoleFilter} disabled={isPending}>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Filtrer par rôle" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Tous les rôles</SelectItem>
-                                    <SelectItem value="u1">Agent terrain</SelectItem>
-                                    <SelectItem value="u2">Responsable</SelectItem>
-                                    <SelectItem value="u3">Rédacteur</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {userRole !== "u2" && (
+                            <div className="flex items-center gap-2">
+                                <Filter className="w-4 h-4 text-muted-foreground" />
+                                <Select value={roleFilter} onValueChange={handleRoleFilter} disabled={isPending}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Filtrer par rôle" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tous les rôles</SelectItem>
+                                        <SelectItem value="u1">Agent terrain</SelectItem>
+                                        <SelectItem value="u2">Responsable</SelectItem>
+                                        <SelectItem value="u3">Rédacteur</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         <div className="flex items-center gap-2">
                             <Filter className="w-4 h-4 text-muted-foreground" />
                             <Select value={statusFilter} onValueChange={handleStatusFilter} disabled={isPending}>

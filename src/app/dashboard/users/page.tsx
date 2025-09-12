@@ -5,9 +5,9 @@ import {
   UserPlus
 } from "lucide-react"
 import Link from "next/link"
-import { listUsersAction, type ListUsersParams } from "@/actions/user/list-user"
+import { listUsersWithRoleFilterAction, type ListUsersParams } from "@/actions/user/get-users-action"
 import { UsersClient } from "./users-client"
-import { getSessionAction } from "@/actions/get-session"
+import { getAuth } from "@/actions/get-auth"
 import { redirect } from "next/navigation"
 
 export const dynamic = 'force-dynamic'
@@ -22,9 +22,9 @@ interface UtilisateursPageProps {
 }
 
 export default async function UtilisateursPage({ searchParams }: UtilisateursPageProps) {
-  const { session } = await getSessionAction()
+  const { user, isAuthenticated, userRole } = await getAuth()
   
-  if (!session?.user) {
+  if (!isAuthenticated || !user) {
     return redirect('/auth/signin')
   }
   
@@ -44,7 +44,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
     status: params.status,
   }
 
-  const result = await listUsersAction(paramsValues)
+  const result = await listUsersWithRoleFilterAction(paramsValues)
   
   if (result.error) {
     return (
@@ -86,6 +86,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
           currentPage={page}
           totalPages={totalPages}
           searchParams={params}
+          userRole={userRole}
         />
       </Suspense>
     </div>
