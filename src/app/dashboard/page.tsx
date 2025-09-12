@@ -14,8 +14,16 @@ import {
   AlertCircle
 } from "lucide-react"
 import Link from "next/link"
+import { getSessionAction } from "@/actions/get-session"
+import { redirect } from "next/navigation"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { session } = await getSessionAction()
+  
+  if (!session?.user) {
+    return redirect('/auth/signin')
+  }
+
   const stats = [
     {
       title: "Rapports de mission",

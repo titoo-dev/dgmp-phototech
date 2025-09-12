@@ -1,7 +1,15 @@
 import { getProjectsAction } from '@/actions/project/get-projects-action';
 import { ProjectsClient } from '@/components/projects/projects-client';
+import { getSessionAction } from '@/actions/get-session';
+import { redirect } from 'next/navigation';
 
 export default async function ProjetsPage() {
+	const { session } = await getSessionAction()
+	
+	if (!session?.user) {
+		return redirect('/auth/signin')
+	}
+
 	const result = await getProjectsAction();
 
 	if (!result.success || !result.data) {

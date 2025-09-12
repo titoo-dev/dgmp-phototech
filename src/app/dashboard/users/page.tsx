@@ -7,6 +7,8 @@ import {
 import Link from "next/link"
 import { listUsersAction, type ListUsersParams } from "@/actions/user/list-user"
 import { UsersClient } from "./users-client"
+import { getSessionAction } from "@/actions/get-session"
+import { redirect } from "next/navigation"
 
 interface UtilisateursPageProps {
   searchParams: Promise<{
@@ -18,6 +20,12 @@ interface UtilisateursPageProps {
 }
 
 export default async function UtilisateursPage({ searchParams }: UtilisateursPageProps) {
+  const { session } = await getSessionAction()
+  
+  if (!session?.user) {
+    return redirect('/auth/signin')
+  }
+  
   const params = await searchParams
   const page = parseInt(params.page || "1")
   const limit = 10

@@ -4,8 +4,16 @@ import { CompanyModel } from '@/models/company-schema';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import CompaniesList from '@/components/companies/companies-list';
+import { getSessionAction } from '@/actions/get-session';
+import { redirect } from 'next/navigation';
 
 export default async function EntreprisesPage() {
+	const { session } = await getSessionAction()
+	
+	if (!session?.user) {
+		return redirect('/auth/signin')
+	}
+	
 	const result = await getCompaniesAction();
 	const companies: CompanyModel[] = result.companies || [];
 

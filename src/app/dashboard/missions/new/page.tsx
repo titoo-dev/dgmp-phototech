@@ -4,7 +4,7 @@ import { getProjectsAction } from '@/actions/project/get-projects-action';
 import { getSessionAction } from '@/actions/get-session';
 import { UserModel } from '@/models/user-schema';
 import MissionFormClient from '@/components/missions/new/mission-form-client';
-
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +21,7 @@ export default async function NewMissionPage() {
 	}
 
 	if (!sessionResult.session?.user) {
-		throw new Error('User not authenticated');
+		return redirect('/auth/signin');
 	}
 
 	return (
