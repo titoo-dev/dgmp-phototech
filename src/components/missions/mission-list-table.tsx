@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
 	Table,
@@ -17,13 +16,16 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Calendar, MoreHorizontal, Eye, Edit, Trash2, Users, Plus, MapPin } from 'lucide-react';
+import { Calendar, MoreHorizontal, Eye, Edit, Trash2, Users, Plus, MapPin, Send, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { MissionModel } from '@/models/mission-schema';
-import { MissionStatusDropdown } from './mission-status-dropdown';
 import { DeleteMissionDialog } from './delete-mission-dialog';
 import { MissionDetailsSheet } from './mission-details-sheet';
 import { MissionStatus } from '@/lib/generated/prisma';
+import { getStatusDisplayName } from '@/lib/helpers/mission-status-helper';
+import { toast } from 'sonner';
+import { sendMissionReportAction } from '@/actions/mission/send-mission-report-action';
+import { AuthUser, UserRole } from '@/lib/auth-utils';
 
 type MissionTableItem = {
 	id: string;
@@ -36,10 +38,36 @@ interface MissionListTableProps {
 	searchQuery: string;
 	getStatusBadge: (status: string) => React.ReactNode;
 	onMissionDeleted?: () => void;
+	onMissionSent?: () => void;
+	user: AuthUser;
+	userRole: UserRole;
 }
 
-export function MissionListTable({ missions, searchQuery, getStatusBadge, onMissionDeleted }: MissionListTableProps) {
+export function MissionListTable({ missions, searchQuery, getStatusBadge, onMissionDeleted, onMissionSent, user, userRole }: MissionListTableProps) {
 	const [openSheetId, setOpenSheetId] = useState<string | null>(null);
+	const [isPending, startTransition] = useTransition();
+	const [sendingMissionId, setSendingMissionId] = useState<string | null>(null);
+
+	const handleSendMission = (missionId: string, missionNumber: string) => {
+		setSendingMissionId(missionId);
+		startTransition(async () => {
+			const result = await sendMissionReportAction(missionId);
+			
+			if (result.success) {
+				toast.success('Mission envoyée', {
+					description: result.message,
+					duration: 3000,
+				});
+				onMissionSent?.();
+			} else {
+				toast.error('Erreur', {
+					description: result.errors?._form?.[0] || 'Impossible d\'envoyer la mission',
+					duration: 5000,
+				});
+			}
+			setSendingMissionId(null);
+		});
+	};
 
 	return (
 		<>
@@ -54,6 +82,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 								<TableHead>Dates</TableHead>
 								<TableHead>Équipe</TableHead>
 								<TableHead>Statut</TableHead>
+								{userRole === 'u1' && <TableHead className="w-[100px]">Action</TableHead>}
 								<TableHead className="w-[70px]"></TableHead>
 							</TableRow>
 						</TableHeader>
@@ -100,12 +129,30 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 											</div>
 										</TableCell>
 										<TableCell>
-											<MissionStatusDropdown
-												missionId={missionData.id}
-												currentStatus={missionData.status as MissionStatus}
-												missionNumber={missionData.missionNumber}
-											/>
+											<span className="text-sm font-medium">
+												{getStatusDisplayName(missionData.status as MissionStatus)}
+											</span>
 										</TableCell>
+										{userRole === 'u1' && (
+											<TableCell>
+												{missionData.status === MissionStatus.DRAFT && (
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() => handleSendMission(missionData.id, missionData.missionNumber)}
+														disabled={sendingMissionId === missionData.id}
+														className="h-7 px-3 text-xs"
+													>
+														{sendingMissionId === missionData.id ? (
+															<Loader2 className="w-3 h-3 animate-spin mr-1" />
+														) : (
+															<Send className="w-3 h-3 mr-1" />
+														)}
+														Envoyer
+													</Button>
+												)}
+											</TableCell>
+										)}
 										<TableCell>
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>

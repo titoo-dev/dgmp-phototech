@@ -12,9 +12,12 @@ import { ReportHeader } from '@/components/missions/report-header';
 import { ReportSearch } from '@/components/missions/report-search';
 import { MissionListTable } from '@/components/missions/mission-list-table';
 import type { MissionWithRelations } from '../../actions/mission/get-missions-action';
+import { AuthUser, UserRole } from '@/lib/auth-utils';
 
 interface MissionsClientProps {
   missions: MissionWithRelations[];
+  user: AuthUser;
+  userRole: UserRole;
 }
 
 type MissionTableItem = {
@@ -23,7 +26,7 @@ type MissionTableItem = {
   data: MissionModel;
 };
 
-export function MissionsClient({ missions }: MissionsClientProps) {
+export function MissionsClient({ missions, user, userRole }: MissionsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentMissions, setCurrentMissions] = useState<MissionWithRelations[]>(missions);
@@ -147,6 +150,9 @@ export function MissionsClient({ missions }: MissionsClientProps) {
         searchQuery={searchQuery}
         getStatusBadge={getStatusBadge}
         onMissionDeleted={refreshMissions}
+        onMissionSent={refreshMissions}
+        user={user}
+        userRole={userRole}
       />
     </div>
   );

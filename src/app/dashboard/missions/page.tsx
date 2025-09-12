@@ -2,6 +2,7 @@ import { getMissionsAction } from '@/actions/mission/get-missions-action';
 import { MissionsClient } from '@/components/missions/missions-client';
 import { getSessionAction } from '@/actions/get-session';
 import { redirect } from 'next/navigation';
+import { AuthUser, getUserRole } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,5 +19,14 @@ export default async function MissionsPage() {
 		throw new Error('Failed to fetch missions');
 	}
 
-	return <MissionsClient missions={missionsResult.data} />;
+	const user = session.user as AuthUser;
+	const userRole = getUserRole(user);
+
+	return (
+		<MissionsClient 
+			missions={missionsResult.data} 
+			user={user}
+			userRole={userRole}
+		/>
+	);
 }
