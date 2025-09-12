@@ -16,7 +16,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Calendar, MoreHorizontal, Eye, Edit, Trash2, Users, Plus, MapPin, Send, Loader2 } from 'lucide-react';
+import { Calendar, MoreHorizontal, Eye, Edit, Trash2, Users, Plus, MapPin, Send, Loader2, CheckCircle, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { MissionModel } from '@/models/mission-schema';
 import { DeleteMissionDialog } from './delete-mission-dialog';
@@ -25,6 +25,8 @@ import { MissionStatus } from '@/lib/generated/prisma';
 import { getStatusDisplayName } from '@/lib/helpers/mission-status-helper';
 import { toast } from 'sonner';
 import { sendMissionReportAction } from '@/actions/mission/send-mission-report-action';
+import { validateMissionAction } from '@/actions/mission/validate-mission-action';
+import { ReviewMissionDialog } from './review-mission-dialog';
 import { AuthUser, UserRole } from '@/lib/auth-utils';
 
 type MissionTableItem = {
@@ -47,6 +49,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 	const [openSheetId, setOpenSheetId] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
 	const [sendingMissionId, setSendingMissionId] = useState<string | null>(null);
+	const [validatingMissionId, setValidatingMissionId] = useState<string | null>(null);
 
 	const handleSendMission = (missionId: string, missionNumber: string) => {
 		setSendingMissionId(missionId);
@@ -69,6 +72,27 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 		});
 	};
 
+	const handleValidateMission = (missionId: string, missionNumber: string) => {
+		setValidatingMissionId(missionId);
+		startTransition(async () => {
+			const result = await validateMissionAction(missionId);
+			
+			if (result.success) {
+				toast.success('Mission validée', {
+					description: result.message,
+					duration: 3000,
+				});
+				onMissionSent?.(); // Refresh missions
+			} else {
+				toast.error('Erreur', {
+					description: result.errors?._form?.[0] || 'Impossible de valider la mission',
+					duration: 5000,
+				});
+			}
+			setValidatingMissionId(null);
+		});
+	};
+
 	return (
 		<>
 			<Card className="shadow-none">
@@ -82,7 +106,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 								<TableHead>Dates</TableHead>
 								<TableHead>Équipe</TableHead>
 								<TableHead>Statut</TableHead>
-								{userRole === 'u1' && <TableHead className="w-[100px]">Action</TableHead>}
+								{(userRole === 'u1' || userRole === 'u2') && <TableHead className="w-[200px]">Actions</TableHead>}
 								<TableHead className="w-[70px]"></TableHead>
 							</TableRow>
 						</TableHeader>
@@ -133,24 +157,63 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 												{getStatusDisplayName(missionData.status as MissionStatus)}
 											</span>
 										</TableCell>
-										{userRole === 'u1' && (
+										{(userRole === 'u1' || userRole === 'u2') && (
 											<TableCell>
-												{missionData.status === MissionStatus.DRAFT && (
-													<Button
-														size="sm"
-														variant="outline"
-														onClick={() => handleSendMission(missionData.id, missionData.missionNumber)}
-														disabled={sendingMissionId === missionData.id}
-														className="h-7 px-3 text-xs"
-													>
-														{sendingMissionId === missionData.id ? (
-															<Loader2 className="w-3 h-3 animate-spin mr-1" />
-														) : (
-															<Send className="w-3 h-3 mr-1" />
-														)}
-														Envoyer
-													</Button>
-												)}
+												<div className="flex items-center gap-2">
+													{/* u1 actions */}
+													{userRole === 'u1' && missionData.status === MissionStatus.DRAFT && (
+														<Button
+															size="sm"
+															variant="outline"
+															onClick={() => handleSendMission(missionData.id, missionData.missionNumber)}
+															disabled={sendingMissionId === missionData.id}
+															className="h-7 px-3 text-xs"
+														>
+															{sendingMissionId === missionData.id ? (
+																<Loader2 className="w-3 h-3 animate-spin mr-1" />
+															) : (
+																<Send className="w-3 h-3 mr-1" />
+															)}
+															Envoyer
+														</Button>
+													)}
+													
+													{/* u2 actions */}
+													{userRole === 'u2' && missionData.status === MissionStatus.PENDING && (
+														<>
+															<Button
+																size="sm"
+																variant="outline"
+																onClick={() => handleValidateMission(missionData.id, missionData.missionNumber)}
+																disabled={validatingMissionId === missionData.id}
+																className="h-7 px-3 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+															>
+																{validatingMissionId === missionData.id ? (
+																	<Loader2 className="w-3 h-3 animate-spin mr-1" />
+																) : (
+																	<CheckCircle className="w-3 h-3 mr-1" />
+																)}
+																Valider
+															</Button>
+															
+															<ReviewMissionDialog
+																missionId={missionData.id}
+																missionNumber={missionData.missionNumber}
+																onReviewSuccess={() => onMissionSent?.()}
+																trigger={
+																	<Button
+																		size="sm"
+																		variant="outline"
+																		className="h-7 px-3 text-xs bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+																	>
+																		<MessageSquare className="w-3 h-3 mr-1" />
+																		Réviser
+																	</Button>
+																}
+															/>
+														</>
+													)}
+												</div>
 											</TableCell>
 										)}
 										<TableCell>
@@ -225,6 +288,9 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 					missionId={mission.id}
 					isOpen={openSheetId === mission.id}
 					onClose={() => setOpenSheetId(null)}
+					user={user}
+					userRole={userRole}
+					onMissionUpdated={() => onMissionSent?.()}
 				/>
 			))}
 		</>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -21,23 +21,37 @@ import {
     AlertCircle,
     Building2,
     FileText,
-    Camera
+    Camera,
+    Send,
+    MessageSquare,
+    Loader2
 } from "lucide-react";
 import { getMissionAction } from "@/actions/mission/get-mission-action";
+import { sendMissionReportAction } from "@/actions/mission/send-mission-report-action";
+import { validateMissionAction } from "@/actions/mission/validate-mission-action";
+import { ReviewMissionDialog } from "./review-mission-dialog";
+import { MissionStatus } from "@/lib/generated/prisma";
+import { AuthUser, UserRole } from "@/lib/auth-utils";
+import { toast } from "sonner";
 import Image from "next/image";
 
 interface MissionDetailsSheetProps {
     missionId: string | null;
     isOpen: boolean;
     onClose: () => void;
+    user?: AuthUser;
+    userRole?: UserRole;
+    onMissionUpdated?: () => void;
 }
 
 type MissionWithDetails = Awaited<ReturnType<typeof getMissionAction>>;
 
-export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetailsSheetProps) {
+export function MissionDetailsSheet({ missionId, isOpen, onClose, user, userRole, onMissionUpdated }: MissionDetailsSheetProps) {
     const [mission, setMission] = useState<MissionWithDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isPending, startTransition] = useTransition();
+    const [actionType, setActionType] = useState<'send' | 'validate' | null>(null);
 
     useEffect(() => {
         if (isOpen && missionId) {
@@ -59,6 +73,59 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSendMission = () => {
+        if (!mission) return;
+        
+        setActionType('send');
+        startTransition(async () => {
+            const result = await sendMissionReportAction(mission.id);
+            
+            if (result.success) {
+                toast.success('Mission envoyée', {
+                    description: result.message,
+                    duration: 3000,
+                });
+                loadMissionDetails(); // Refresh mission details
+                onMissionUpdated?.();
+            } else {
+                toast.error('Erreur', {
+                    description: result.errors?._form?.[0] || 'Impossible d\'envoyer la mission',
+                    duration: 5000,
+                });
+            }
+            setActionType(null);
+        });
+    };
+
+    const handleValidateMission = () => {
+        if (!mission) return;
+        
+        setActionType('validate');
+        startTransition(async () => {
+            const result = await validateMissionAction(mission.id);
+            
+            if (result.success) {
+                toast.success('Mission validée', {
+                    description: result.message,
+                    duration: 3000,
+                });
+                loadMissionDetails(); // Refresh mission details
+                onMissionUpdated?.();
+            } else {
+                toast.error('Erreur', {
+                    description: result.errors?._form?.[0] || 'Impossible de valider la mission',
+                    duration: 5000,
+                });
+            }
+            setActionType(null);
+        });
+    };
+
+    const handleReviewSuccess = () => {
+        loadMissionDetails(); // Refresh mission details
+        onMissionUpdated?.();
     };
 
 
@@ -188,6 +255,65 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
                                         {getStatusBadge(mission.status)}
                                     </div>
                                 </div>
+                                
+                                {/* Action buttons */}
+                                <div className="flex items-center gap-2">
+                                    {/* u1 actions */}
+                                    {userRole === 'u1' && mission.status === MissionStatus.DRAFT && (
+                                        <Button
+                                            onClick={handleSendMission}
+                                            disabled={isPending}
+                                            className="bg-blue-600 hover:bg-blue-700"
+                                        >
+                                            {isPending && actionType === 'send' ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                    Envoi...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send className="w-4 h-4 mr-2" />
+                                                    Envoyer
+                                                </>
+                                            )}
+                                        </Button>
+                                    )}
+                                    
+                                    {/* u2 actions */}
+                                    {userRole === 'u2' && mission.status === MissionStatus.PENDING && (
+                                        <>
+                                            <Button
+                                                onClick={handleValidateMission}
+                                                disabled={isPending}
+                                                className="bg-green-600 hover:bg-green-700"
+                                            >
+                                                {isPending && actionType === 'validate' ? (
+                                                    <>
+                                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                        Validation...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                                        Valider
+                                                    </>
+                                                )}
+                                            </Button>
+                                            
+                                            <ReviewMissionDialog
+                                                missionId={mission.id}
+                                                missionNumber={mission.missionNumber}
+                                                onReviewSuccess={handleReviewSuccess}
+                                                trigger={
+                                                    <Button variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
+                                                        <MessageSquare className="w-4 h-4 mr-2" />
+                                                        Réviser
+                                                    </Button>
+                                                }
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </SheetHeader>
 
@@ -273,6 +399,41 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose }: MissionDetai
                                                         </div>
                                                     </div>
                                                 ))}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Comments section - placeholder for future implementation */}
+                            {(userRole === 'u2' || userRole === 'u1') && (
+                                <Card className='shadow-none'>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <MessageSquare className="w-5 h-5" />
+                                            Commentaires
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            <div className="text-sm text-muted-foreground">
+                                                {mission.status === MissionStatus.REJECTED ? (
+                                                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                                                        <p className="font-medium text-red-800 mb-2">Mission renvoyée pour révision</p>
+                                                        <p className="text-red-700">
+                                                            Cette mission a été renvoyée pour révision. Veuillez consulter les commentaires reçus par email et apporter les modifications nécessaires.
+                                                        </p>
+                                                    </div>
+                                                ) : mission.status === MissionStatus.COMPLETED ? (
+                                                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                                        <p className="font-medium text-green-800 mb-2">Mission validée ✅</p>
+                                                        <p className="text-green-700">
+                                                            Cette mission a été validée avec succès.
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <p>Aucun commentaire pour le moment.</p>
+                                                )}
                                             </div>
                                         </div>
                                     </CardContent>
