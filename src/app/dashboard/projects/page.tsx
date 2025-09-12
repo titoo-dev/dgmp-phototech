@@ -3,6 +3,8 @@ import { ProjectsClient } from '@/components/projects/projects-client';
 import { getSessionAction } from '@/actions/get-session';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProjetsPage() {
 	const { session } = await getSessionAction()
 	

@@ -10,6 +10,8 @@ import { UsersClient } from "./users-client"
 import { getSessionAction } from "@/actions/get-session"
 import { redirect } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+
 interface UtilisateursPageProps {
   searchParams: Promise<{
     page?: string

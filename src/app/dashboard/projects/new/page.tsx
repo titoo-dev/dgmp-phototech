@@ -3,6 +3,8 @@ import ProjectFormClient from '@/components/projects/new/project-form-client';
 import { getSessionAction } from '@/actions/get-session';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewProjectPage() {
 	const { session } = await getSessionAction()
 	

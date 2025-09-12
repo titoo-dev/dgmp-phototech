@@ -2,6 +2,8 @@ import { getSessionAction } from "@/actions/get-session"
 import { redirect } from "next/navigation"
 import NewUserClient from "./new-user-client"
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewUserPage() {
   const { session } = await getSessionAction()
   
