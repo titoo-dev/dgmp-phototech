@@ -1,5 +1,7 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { getUserRole, type AuthUser } from '@/lib/auth-utils';
 
 /**
  * @swagger
@@ -7,19 +9,77 @@ import { NextRequest, NextResponse } from 'next/server';
  *   get:
  *     tags:
  *       - Projects
- *     summary: Get all projects
- *     description: Retrieve a list of all projects with their associated company information
+ *     summary: Get all projects with enhanced data
+ *     description: |
+ *       Retrieve a list of all projects with their associated company information and mission projects.
+ *       Includes mission project counts and statuses for each project, ordered by start date (newest first).
+ *       Requires authentication.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         description: Bearer token for authentication
+ *         schema:
+ *           type: string
+ *           example: "Bearer your-jwt-token"
  *     responses:
  *       200:
  *         description: List of projects retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Project'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     allOf:
+ *                       - $ref: '#/components/schemas/Project'
+ *                       - type: object
+ *                         properties:
+ *                           missionProjects:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: string
+ *                                   example: "clx123abc"
+ *                                 mission:
+ *                                   type: object
+ *                                   properties:
+ *                                     status:
+ *                                       type: string
+ *                                       enum: [DRAFT, PENDING, COMPLETED, REJECTED]
+ *                                       example: "COMPLETED"
+ *       401:
+ *         description: Unauthorized - user not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Unauthorized"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   example: "Failed to fetch projects"
  *   post:
  *     tags:
  *       - Projects
@@ -82,18 +142,51 @@ import { NextRequest, NextResponse } from 'next/server';
  *       500:
  *         description: Internal server error
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const projects = await prisma.project.findMany({
       include: {
         company: true,
+        // Include mission projects count for each project
+        missionProjects: {
+          select: {
+            id: true,
+            mission: {
+              select: {
+                status: true,
+              }
+            }
+          }
+        }
       },
+      orderBy: {
+        startDate: 'desc'
+      }
     });
-    return NextResponse.json(projects);
+
+    return NextResponse.json({
+      success: true,
+      data: projects
+    });
   } catch (error) {
     console.error('Error fetching projects:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      {
+        success: false,
+        error: 'Failed to fetch projects'
+      },
       { status: 500 }
     );
   }
