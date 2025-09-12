@@ -56,21 +56,20 @@ export async function createMissionAction(
 ): Promise<CreateMissionState> {
 
   const raw = {
-    missionNumber: formData.get("missionNumber"),
     teamLeaderId: formData.get("teamLeaderId"),
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
     location: formData.get("location"),
     status: formData.get("status"),
-    agentCount: formData.get("agentCount"),
-    marketCount: formData.get("marketCount"),
     memberIds: formData.getAll("memberIds"),
     projectsData: formData.get("projectsData"),
-    marketData: formData.get("marketData"),
   };
 
+
+  console.log('Raw data:', raw);
+
   // If missionNumber not provided, generate one
-  const missionNumber = raw.missionNumber ? String(raw.missionNumber) : generateMissionNumber();
+  const missionNumber = generateMissionNumber();
 
   // Parse projects data
   let projectsData: Array<{ projectId: string, notes: string, marketName: string }> = [];
@@ -82,15 +81,16 @@ export async function createMissionAction(
     console.error('Failed to parse projects data:', error);
   }
 
-  // Parse market data with photos
-  let marketData: Array<{ name: string, remarks: string, photoCount: number, projectId: string | null }> = [];
-  try {
-    if (raw.marketData) {
-      marketData = JSON.parse(raw.marketData as string);
-    }
-  } catch (error) {
-    console.error('Failed to parse market data:', error);
-  }
+  // Remove duplicates from memberIds
+  const uniqueMemberIds = Array.isArray(raw.memberIds) 
+    ? [...new Set(raw.memberIds.map(id => String(id)))]
+    : [];
+
+  // Auto-calculate agentCount (members + 1 team leader)
+  const agentCount = uniqueMemberIds.length + 1;
+
+  // Auto-calculate marketCount from projectsData length
+  const marketCount = projectsData.length;
 
   // Extract photo files from FormData
   const photoFiles: { [marketName: string]: File[] } = {};
@@ -112,9 +112,9 @@ export async function createMissionAction(
     endDate: raw.endDate ? new Date(raw.endDate as string) : undefined,
     location: raw.location ? String(raw.location) : undefined,
     status: raw.status ? String(raw.status) : 'DRAFT',
-    agentCount: raw.agentCount ? Number(raw.agentCount) : 0,
-    marketCount: raw.marketCount ? Number(raw.marketCount) : 0,
-    members: Array.isArray(raw.memberIds) ? raw.memberIds.map(id => String(id)) : [],
+    agentCount: agentCount,
+    marketCount: marketCount,
+    members: uniqueMemberIds,
   };
 
   console.log('Parsed data:', parsed);

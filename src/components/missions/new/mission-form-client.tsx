@@ -136,7 +136,6 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 		const form = new FormData(formRef.current);
 		
 		// Add computed fields
-		form.set('marketCount', String(markets.length));
 		form.set('status', 'DRAFT');
 		
 		// Add projects data as JSON (from markets)
@@ -158,9 +157,10 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 		}));
 		form.set('marketData', JSON.stringify(marketData));
 
-		// Add contact IDs
-		selectedContacts.forEach(contact => {
-			form.append('memberIds', contact.id);
+		// Add contact IDs (ensure uniqueness)
+		const uniqueContactIds = [...new Set(selectedContacts.map(contact => contact.id))];
+		uniqueContactIds.forEach(contactId => {
+			form.append('memberIds', contactId);
 		});
 
 		// Ensure teamLeaderId is set correctly
