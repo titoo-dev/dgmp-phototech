@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Building, Building2, Camera, FolderOpen, Home, LogOut, Users } from "lucide-react"
+import { Building, Building2, Camera, FolderOpen, Home, LogOut, Users, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
@@ -39,6 +39,7 @@ const navigationIcons: Record<string, React.ComponentType<{ className?: string }
   "/dashboard/projects": Building2,
   "/dashboard/companies": Building,
   "/dashboard/users": Users,
+  "/dashboard/profile": User,
 };
 
 export function AppSidebar({ navigationItems, ...props }: React.ComponentProps<typeof Sidebar> & { navigationItems: NavigationGroup[] }) {

@@ -106,6 +106,7 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
     "/dashboard/companies/new": ["u3", "u4"],
     "/dashboard/users": ["u4"],
     "/dashboard/users/new": ["u4"],
+    "/dashboard/profile": ["u1", "u2", "u3", "u4"],
   };
   
   // Check for pattern matches (e.g., company modifier routes)

@@ -44,6 +44,16 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 					permission: "canManageUsers",
 				},
 			].filter((item) => hasPermission(item.permission as keyof RolePermissions)),
+		},
+		{
+			title: "Compte",
+			items: [
+				{
+					title: "Mon Profil",
+					url: "/dashboard/profile",
+					permission: null, // Tous les utilisateurs peuvent accéder à leur profil
+				},
+			],
 		}
 	]
 
