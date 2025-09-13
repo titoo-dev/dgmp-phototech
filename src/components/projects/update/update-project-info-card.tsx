@@ -88,8 +88,11 @@ export default function UpdateProjectInfoCard({
                 placeholder="Sélectionner une date"
                 error={state.errors?.startDate?.[0]}
                 required
-                defaultValue={formData.startDate}
-                onChange={(date) => setFormData(prev => ({ ...prev, startDate: date }))}
+                value={formData.startDate ? formData.startDate.toISOString().split('T')[0] : ''}
+                onChange={(dateString) => setFormData(prev => ({ 
+                  ...prev, 
+                  startDate: dateString ? new Date(dateString) : undefined 
+                }))}
               />
 
               <DatePickerField
@@ -99,8 +102,11 @@ export default function UpdateProjectInfoCard({
                 placeholder="Sélectionner une date"
                 error={state.errors?.endDate?.[0]}
                 required
-                defaultValue={formData.endDate}
-                onChange={(date) => setFormData(prev => ({ ...prev, endDate: date }))}
+                value={formData.endDate ? formData.endDate.toISOString().split('T')[0] : ''}
+                onChange={(dateString) => setFormData(prev => ({ 
+                  ...prev, 
+                  endDate: dateString ? new Date(dateString) : undefined 
+                }))}
               />
             </div>
 

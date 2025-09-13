@@ -23,8 +23,9 @@ interface DatePickerFieldProps {
 	required?: boolean;
 	disabled?: boolean;
 	className?: string;
+	value?: string; // ISO string format for controlled component
 	defaultValue?: Date;
-	onChange?: (date: Date | undefined) => void;
+	onChange?: (date: string | undefined) => void; // Returns ISO string
 }
 
 export default function DatePickerField({
@@ -36,16 +37,39 @@ export default function DatePickerField({
 	required = false,
 	disabled = false,
 	className,
+	value,
 	defaultValue,
 	onChange,
 }: DatePickerFieldProps) {
-	const [date, setDate] = React.useState<Date | undefined>(defaultValue);
+	// Convert string value to Date for internal state
+	const initialDate = React.useMemo(() => {
+		if (value) {
+			const parsed = new Date(value);
+			return isNaN(parsed.getTime()) ? undefined : parsed;
+		}
+		return defaultValue;
+	}, [value, defaultValue]);
+
+	const [date, setDate] = React.useState<Date | undefined>(initialDate);
 	const [open, setOpen] = React.useState(false);
+
+	// Sync internal state with controlled value
+	React.useEffect(() => {
+		if (value !== undefined) {
+			const parsed = value ? new Date(value) : undefined;
+			if (parsed && !isNaN(parsed.getTime())) {
+				setDate(parsed);
+			} else if (!value) {
+				setDate(undefined);
+			}
+		}
+	}, [value]);
 
 	const handleSelect = (newDate: Date | undefined) => {
 		setDate(newDate);
 		setOpen(false);
-		onChange?.(newDate);
+		// Return ISO string format for consistency
+		onChange?.(newDate ? format(newDate, 'yyyy-MM-dd') : undefined);
 	};
 
 	return (

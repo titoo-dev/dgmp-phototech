@@ -51,11 +51,11 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 						name="startDate"
 						label="Date de début"
 						placeholder="Sélectionner une date"
-						defaultValue={formData.startDate}
-						onChange={(date) =>
+						value={formData.startDate ? formData.startDate.toISOString().split('T')[0] : ''}
+						onChange={(dateString) =>
 							setFormData((prev) => ({
 								...prev,
-								startDate: date,
+								startDate: dateString ? new Date(dateString) : undefined,
 							}))
 						}
 					/>
@@ -65,9 +65,12 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 						name="endDate"
 						label="Date de fin"
 						placeholder="Sélectionner une date"
-						defaultValue={formData.endDate}
-						onChange={(date) =>
-							setFormData((prev) => ({ ...prev, endDate: date }))
+						value={formData.endDate ? formData.endDate.toISOString().split('T')[0] : ''}
+						onChange={(dateString) =>
+							setFormData((prev) => ({ 
+								...prev, 
+								endDate: dateString ? new Date(dateString) : undefined 
+							}))
 						}
 					/>
 				</div>

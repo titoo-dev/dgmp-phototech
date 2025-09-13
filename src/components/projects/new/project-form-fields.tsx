@@ -1,12 +1,14 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import type { CompanyModel } from "@/models/company-schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, Building, FileText, Package, Target } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { AlertCircle, Building, FileText, Package, Target, Plus } from "lucide-react"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import DatePickerField from "@/components/date-picker/date-picker-field"
 
@@ -24,12 +26,24 @@ type FormState = {
   message?: string
 }
 
+type FormDraftData = {
+  title: string;
+  startDate: string;
+  endDate: string;
+  companyId: string;
+  description: string;
+  nature: string;
+  status: string;
+};
+
 interface ProjectFormFieldsProps {
   state: FormState;
   companies: CompanyModel[];
+  formData: FormDraftData;
+  onFieldChange: (field: keyof FormDraftData, value: string) => void;
 }
 
-export default function ProjectFormFields({ state, companies }: ProjectFormFieldsProps) {
+export default function ProjectFormFields({ state, companies, formData, onFieldChange }: ProjectFormFieldsProps) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
@@ -51,7 +65,16 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
               </Label>
               <div className="relative">
                 <FileText className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="title" name="title" type="text" placeholder="ex: Construction du pont de Libreville" className="pl-10 h-12" aria-invalid={!!state.errors?.title} />
+                <Input 
+                  id="title" 
+                  name="title" 
+                  type="text" 
+                  placeholder="ex: Construction du pont de Libreville" 
+                  className="pl-10 h-12" 
+                  value={formData.title}
+                  onChange={(e) => onFieldChange('title', e.target.value)}
+                  aria-invalid={!!state.errors?.title} 
+                />
               </div>
               {state.errors?.title && (
                 <p className="text-sm text-destructive flex items-center gap-1">
@@ -68,6 +91,8 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
                     name="startDate"
                     label="Date de début"
                     placeholder="Sélectionner une date"
+                    value={formData.startDate}
+                    onChange={(value) => onFieldChange('startDate', value || '')}
                     error={state.errors?.startDate?.[0]}
                     required
                 />
@@ -77,6 +102,8 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
                     name="endDate"
                     label="Date de fin"
                     placeholder="Sélectionner une date"
+                    value={formData.endDate}
+                    onChange={(value) => onFieldChange('endDate', value || '')}
                     error={state.errors?.endDate?.[0]}
                     required
                 />
@@ -84,13 +111,33 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
 
             {/* Company */}
             <div className="space-y-2">
-              <Label htmlFor="companyId" className="text-sm font-medium text-foreground">
-                Entreprise responsable
-                <span className="text-destructive ml-1">*</span>
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="companyId" className="text-sm font-medium text-foreground">
+                  Entreprise responsable
+                  <span className="text-destructive ml-1">*</span>
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs"
+                  asChild
+                >
+                  <Link href="/dashboard/companies/new">
+                    <Plus className="h-3 w-3" />
+                    Nouvelle entreprise
+                  </Link>
+                </Button>
+              </div>
               <div className="relative">
                 <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10 pointer-events-none" />
-                <Select name="companyId">
+                <Select 
+                  name="companyId" 
+                  value={formData.companyId} 
+                  defaultValue={formData.companyId}
+                  onValueChange={(value) => onFieldChange('companyId', value)}
+                  key={`company-${formData.companyId}`}
+                >
                   <SelectTrigger className="pl-10 h-12 w-full text-left" aria-invalid={!!state.errors?.companyId}>
                     <SelectValue placeholder="Sélectionner une entreprise" />
                   </SelectTrigger>
@@ -121,7 +168,15 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
                 Description du projet
                 <span className="text-destructive ml-1">*</span>
               </Label>
-              <Textarea id="description" name="description" placeholder="Décrivez en détail les objectifs et spécifications du projet..." className="min-h-[120px] resize-none" aria-invalid={!!state.errors?.description} />
+              <Textarea 
+                id="description" 
+                name="description" 
+                placeholder="Décrivez en détail les objectifs et spécifications du projet..." 
+                className="min-h-[120px] resize-none" 
+                value={formData.description}
+                onChange={(e) => onFieldChange('description', e.target.value)}
+                aria-invalid={!!state.errors?.description} 
+              />
               {state.errors?.description && (
                 <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
@@ -151,7 +206,13 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
               </Label>
               <div className="relative">
                 <Package className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Select name="nature">
+                <Select 
+                  name="nature" 
+                  value={formData.nature} 
+                  defaultValue={formData.nature}
+                  onValueChange={(value) => onFieldChange('nature', value)}
+                  key={`nature-${formData.nature}`}
+                >
                   <SelectTrigger className="pl-10 h-12 w-full text-left">
                     <SelectValue placeholder="Sélectionner la nature" />
                   </SelectTrigger>
@@ -181,7 +242,13 @@ export default function ProjectFormFields({ state, companies }: ProjectFormField
               </Label>
               <div className="relative">
                 <Target className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Select name="status">
+                <Select 
+                  name="status" 
+                  value={formData.status} 
+                  defaultValue={formData.status}
+                  onValueChange={(value) => onFieldChange('status', value)}
+                  key={`status-${formData.status}`}
+                >
                   <SelectTrigger className="pl-10 h-12 w-full text-left">
                     <SelectValue placeholder="Sélectionner le statut" />
                   </SelectTrigger>
