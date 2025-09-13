@@ -7,9 +7,19 @@ import { ReactNode } from "react";
 import { RolePermissions } from "@/lib/auth-utils";
 
 export default async function ClientLayout({ children }: { children: ReactNode }) {
-	const { hasPermission } = await getAuth();
+	const { hasPermission, user, userRole } = await getAuth();
 
 	const navigationItems = [
+		{
+			title: "Compte",
+			items: [
+				{
+					title: "Mon Profil",
+					url: "/dashboard/profile",
+					permission: null, // Tous les utilisateurs peuvent accéder à leur profil
+				},
+			],
+		},
 		{
 			title: "Menu",
 			items: [
@@ -45,21 +55,12 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 				},
 			].filter((item) => hasPermission(item.permission as keyof RolePermissions)),
 		},
-		{
-			title: "Compte",
-			items: [
-				{
-					title: "Mon Profil",
-					url: "/dashboard/profile",
-					permission: null, // Tous les utilisateurs peuvent accéder à leur profil
-				},
-			],
-		}
+		
 	]
 
 	return (
 		<SidebarProvider>
-			<AppSidebar navigationItems={navigationItems} />
+			<AppSidebar navigationItems={navigationItems} user={user} userRole={userRole} />
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
 					<SidebarTrigger className="-ml-1" />

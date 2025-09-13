@@ -21,6 +21,8 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
+import { UserInfo } from "./user-info";
+import { AuthUser, UserRole } from "@/lib/auth-utils";
 
 interface NavigationItem {
   title: string;
@@ -42,7 +44,16 @@ const navigationIcons: Record<string, React.ComponentType<{ className?: string }
   "/dashboard/profile": User,
 };
 
-export function AppSidebar({ navigationItems, ...props }: React.ComponentProps<typeof Sidebar> & { navigationItems: NavigationGroup[] }) {
+export function AppSidebar({ 
+  navigationItems, 
+  user, 
+  userRole, 
+  ...props 
+}: React.ComponentProps<typeof Sidebar> & { 
+  navigationItems: NavigationGroup[];
+  user: AuthUser | null;
+  userRole: UserRole;
+}) {
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
   const router = useRouter();
@@ -61,12 +72,13 @@ export function AppSidebar({ navigationItems, ...props }: React.ComponentProps<t
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2 p-1.5">
+            <div className="flex items-center gap-2 p-1.5 mb-3">
               <Building2 className="size-5" />
               <span className="text-base font-semibold">Phototech</span>
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
+        <UserInfo user={user} userRole={userRole} />
       </SidebarHeader>
       <SidebarContent>
         {navigationItems.map((group) => (

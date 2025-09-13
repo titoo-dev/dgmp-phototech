@@ -124,6 +124,21 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
   return allowedRoles.includes(userRole);
 }
 
+export function getRoleDisplayName(userRole: UserRole): string {
+  switch (userRole) {
+    case "u1":
+      return "Photographe";
+    case "u2":
+      return "Chef d'équipe";
+    case "u3":
+      return "Manager";
+    case "u4":
+      return "Administrateur";
+    default:
+      return "Utilisateur";
+  }
+}
+
 export function getRedirectPath(user: AuthUser | null): string {
   const userRole = getUserRole(user);
   
