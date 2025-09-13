@@ -37,40 +37,42 @@ export function MissionSearch({
           className="pl-10"
         />
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Statut
-            {statusFilter !== "all" && (
-              <span className="ml-1 text-xs bg-primary text-primary-foreground px-1 rounded">
-                1
-              </span>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[180px]">
-          <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onStatusFilterChange("all")}>
-            Tous les statuts
-          </DropdownMenuItem>
-          {userRole !== 'u2' && (
-            <DropdownMenuItem onClick={() => onStatusFilterChange("DRAFT")}>
-              Brouillons
+      {userRole !== 'u3' && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Statut
+              {statusFilter !== "all" && (
+                <span className="ml-1 text-xs bg-primary text-primary-foreground px-1 rounded">
+                  1
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[180px]">
+            <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onStatusFilterChange("all")}>
+              Tous les statuts
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={() => onStatusFilterChange("PENDING")}>
-            En attente
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("COMPLETED")}>
-            Validés
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("REJECTED")}>
-            Refusés
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {userRole !== 'u2' && (
+              <DropdownMenuItem onClick={() => onStatusFilterChange("DRAFT")}>
+                Brouillons
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => onStatusFilterChange("PENDING")}>
+              En attente
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onStatusFilterChange("COMPLETED")}>
+              Validés
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onStatusFilterChange("REJECTED")}>
+              Refusés
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   )
 }
