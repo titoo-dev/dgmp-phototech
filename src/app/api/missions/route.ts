@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMissionsAction } from '@/actions/mission/get-missions-action';
-import { createMissionAction } from '@/actions/mission/create-mission-action';
 import { auth } from '@/lib/auth';
 import { AuthUser, getUserRole } from '@/lib/auth-utils';
+import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions/mission/create-mission-mobile-action';
 
 /**
  * @swagger
@@ -370,6 +370,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
     const session = await auth.api.getSession({
       headers: request.headers,
     });
@@ -381,6 +382,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check user role
     const userRole = getUserRole(session.user as AuthUser);
     if (userRole !== 'u1') {
       return NextResponse.json(
@@ -389,20 +391,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const formData = await request.formData();
+    // Parse JSON payload
+    let payload: CreateMissionMobilePayload;
+    try {
+      payload = await request.json();
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid JSON payload' },
+        { status: 400 }
+      );
+    }
 
-    const result = await createMissionAction({}, formData);
+    // Validate required fields
+    if (!payload.teamLeaderId || !payload.startDate || !payload.endDate || !payload.location) {
+      return NextResponse.json(
+        { error: 'Missing required fields: teamLeaderId, startDate, endDate, location' },
+        { status: 400 }
+      );
+    }
+
+    // Create mission using mobile action
+    const result = await createMissionMobileAction(payload);
     
     if (!result.success) {
       return NextResponse.json(
-        { error: result.errors?._form?.[0] || 'Failed to create mission' },
+        { 
+          error: 'Validation failed',
+          details: result.errors 
+        },
         { status: 400 }
       );
     }
 
     return NextResponse.json(result.data, { status: 201 }); 
   } catch (error) {
-    console.error('Error creating mission:', error);
+    console.error('Error creating mission from mobile:', error);
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('payload too large')) {
+        return NextResponse.json(
+          { error: 'Request payload too large' },
+          { status: 413 }
+        );
+      }
+      
+      if (error.message.includes('Only image files are allowed')) {
+        return NextResponse.json(
+          { error: 'Only image files are allowed' },
+          { status: 400 }
+        );
+      }
+    }
+
     return NextResponse.json(
       { error: 'Failed to create mission' },
       { status: 500 }
