@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Building } from "lucide-react";
+import { X, Building, Plus } from "lucide-react";
 import PhotoGrid from "./photo-grid";
 import { Market, Photo } from "./types";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,10 +45,24 @@ export default function MarketCard({ market, marketsCount, projects, onRemoveMar
 			<CardContent className="space-y-4">
 				{/* Sélection de projet */}
 				<div className="flex flex-col space-y-2">
-					<label className="text-sm font-medium text-foreground">
-						Projet à contrôler
-						<span className="text-destructive ml-1">*</span>
-					</label>
+					<div className="flex items-center justify-between">
+						<label className="text-sm font-medium text-foreground">
+							Projet à contrôler
+							<span className="text-destructive ml-1">*</span>
+						</label>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							className="h-8 gap-1.5 text-xs"
+							asChild
+						>
+							<Link href="/dashboard/projects/new">
+								<Plus className="h-3 w-3" />
+								Nouveau projet
+							</Link>
+						</Button>
+					</div>
 					<ProjectCombobox
 						projects={projects}
 						value={market.selectedProject?.id || ""}

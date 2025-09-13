@@ -24,6 +24,22 @@ interface MissionFormClientProps {
 	currentUser: UserModel;
 }
 
+const STORAGE_KEY = 'mission-form-draft';
+
+type MissionDraftData = {
+	startDate: string;
+	endDate: string;
+	location: string;
+	selectedContactIds: string[];
+	markets: {
+		id: number;
+		name: string;
+		remarks: string;
+		selectedProjectId: string | null;
+		photoCount: number;
+	}[];
+};
+
 export default function MissionFormClient({ teamLeaders, contacts, projects, currentUser }: MissionFormClientProps) {
 	const [state, formAction] = useActionState(createMissionAction, {});
 	const [isPending, startTransition] = useTransition();
@@ -43,12 +59,92 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 		{ id: 1, name: "Marché 1", photos: [], remarks: "", selectedProject: null },
 	]);
 
+	// Load data from localStorage on mount
+	useEffect(() => {
+		const savedData = localStorage.getItem(STORAGE_KEY);
+		if (savedData) {
+			try {
+				const parsedData = JSON.parse(savedData) as MissionDraftData;
+				
+				// Restore form data
+				setFormData(prev => ({
+					...prev,
+					startDate: parsedData.startDate ? new Date(parsedData.startDate) : undefined,
+					endDate: parsedData.endDate ? new Date(parsedData.endDate) : undefined,
+					location: parsedData.location || '',
+				}));
+
+				// Restore selected contacts
+				const restoredContacts = contacts.filter(contact => 
+					parsedData.selectedContactIds.includes(contact.id)
+				);
+				setSelectedContacts(restoredContacts);
+
+				// Restore markets
+				const restoredMarkets = parsedData.markets.map(marketData => {
+					const selectedProject = marketData.selectedProjectId 
+						? projects.find(p => p.id === marketData.selectedProjectId) || null
+						: null;
+					
+					return {
+						id: marketData.id,
+						name: marketData.name,
+						remarks: marketData.remarks,
+						selectedProject,
+						photos: [] // Photos are not saved in localStorage
+					};
+				});
+				setMarkets(restoredMarkets);
+
+				// Show notification that data was restored
+				if (parsedData.startDate || parsedData.endDate || parsedData.location || 
+					parsedData.selectedContactIds.length > 0 || parsedData.markets.length > 1) {
+					toast.info('Données du formulaire restaurées', {
+						description: 'Vos données précédemment saisies ont été récupérées.',
+						duration: 3000,
+					});
+				}
+			} catch (error) {
+				console.error('Error parsing saved mission form data:', error);
+				localStorage.removeItem(STORAGE_KEY);
+			}
+		}
+	}, [contacts, projects]);
+
+	// Save data to localStorage whenever form data changes
+	useEffect(() => {
+		const draftData: MissionDraftData = {
+			startDate: formData.startDate ? formData.startDate.toISOString().split('T')[0] : '',
+			endDate: formData.endDate ? formData.endDate.toISOString().split('T')[0] : '',
+			location: formData.location || '',
+			selectedContactIds: selectedContacts.map(contact => contact.id),
+			markets: markets.map(market => ({
+				id: market.id,
+				name: market.name,
+				remarks: market.remarks,
+				selectedProjectId: market.selectedProject?.id || null,
+				photoCount: market.photos.length
+			}))
+		};
+
+		// Only save if there's meaningful data
+		const hasData = draftData.startDate || draftData.endDate || draftData.location || 
+						draftData.selectedContactIds.length > 0 || draftData.markets.length > 1 ||
+						draftData.markets.some(m => m.remarks || m.selectedProjectId);
+
+		if (hasData) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(draftData));
+		}
+	}, [formData, selectedContacts, markets]);
+
 	useEffect(() => {
 		if (state.success) {
 			toast.success('Mission créée avec succès', {
 				description: 'La mission a été ajoutée à la base de données.',
 				duration: 4000,
 			});
+			// Clear localStorage on success
+			localStorage.removeItem(STORAGE_KEY);
 			formRef.current?.reset();
 			setSelectedContacts([]);
 			setMarkets([{ id: 1, name: 'Marché 1', photos: [], remarks: '', selectedProject: null }]);
