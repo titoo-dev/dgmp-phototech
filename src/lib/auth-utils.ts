@@ -127,11 +127,11 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
 export function getRoleDisplayName(userRole: UserRole): string {
   switch (userRole) {
     case "u1":
-      return "Photographe";
+      return "Agent";
     case "u2":
-      return "Chef d'équipe";
+      return "Responsable";
     case "u3":
-      return "Manager";
+      return "Rédacteur";
     case "u4":
       return "Administrateur";
     default:
