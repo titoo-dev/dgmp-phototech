@@ -55,7 +55,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 		setSendingMissionId(missionId);
 		startTransition(async () => {
 			const result = await sendMissionReportAction(missionId);
-			
+
 			if (result.success) {
 				toast.success('Mission envoyée', {
 					description: result.message,
@@ -76,7 +76,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 		setValidatingMissionId(missionId);
 		startTransition(async () => {
 			const result = await validateMissionAction(missionId);
-			
+
 			if (result.success) {
 				toast.success('Mission validée', {
 					description: result.message,
@@ -177,7 +177,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 															Envoyer
 														</Button>
 													)}
-													
+
 													{/* u2 actions */}
 													{userRole === 'u2' && missionData.status === MissionStatus.PENDING && (
 														<>
@@ -195,7 +195,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 																)}
 																Valider
 															</Button>
-															
+
 															<ReviewMissionDialog
 																missionId={missionData.id}
 																missionNumber={missionData.missionNumber}
@@ -217,9 +217,9 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 											</TableCell>
 										)}
 										<TableCell>
-											{userRole === 'u2' ? (
-												<Button 
-													variant="ghost" 
+											{userRole === 'u2' || missionData.status !== MissionStatus.DRAFT ? (
+												<Button
+													variant="ghost"
 													className="h-8 w-8 p-0"
 													onClick={() => setOpenSheetId(missionData.id)}
 												>
@@ -249,7 +249,7 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 															missionNumber={missionData.missionNumber}
 															onDeleteSuccess={onMissionDeleted}
 															trigger={
-																<DropdownMenuItem 
+																<DropdownMenuItem
 																	className="text-red-600 focus:text-red-600 focus:bg-red-50"
 																	onSelect={(e) => e.preventDefault()}
 																>
@@ -267,13 +267,13 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 							})}
 						</TableBody>
 					</Table>
-					
+
 					{missions.length === 0 && (
 						<div className="text-center py-8">
 							<Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
 							<h3 className="text-lg font-semibold mb-2">Aucune mission trouvée</h3>
 							<p className="text-muted-foreground mb-4">
-								{searchQuery 
+								{searchQuery
 									? "Essayez de modifier vos critères de recherche"
 									: "Commencez par créer votre première mission"
 								}
