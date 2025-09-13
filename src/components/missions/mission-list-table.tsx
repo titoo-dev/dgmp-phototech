@@ -217,40 +217,50 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 											</TableCell>
 										)}
 										<TableCell>
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button variant="ghost" className="h-8 w-8 p-0">
-														<MoreHorizontal className="h-4 w-4" />
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
-													<DropdownMenuItem onClick={() => setOpenSheetId(missionData.id)}>
-														<Eye className="w-4 h-4 mr-2" />
-														Voir
-													</DropdownMenuItem>
-													<DropdownMenuItem asChild>
-														<Link href={`/dashboard/missions/${missionData.id}/modifier`}>
-															<Edit className="w-4 h-4 mr-2" />
-															Modifier
-														</Link>
-													</DropdownMenuItem>
-													<DropdownMenuSeparator />
-													<DeleteMissionDialog
-														missionId={missionData.id}
-														missionNumber={missionData.missionNumber}
-														onDeleteSuccess={onMissionDeleted}
-														trigger={
-															<DropdownMenuItem 
-																className="text-red-600 focus:text-red-600 focus:bg-red-50"
-																onSelect={(e) => e.preventDefault()}
-															>
-																<Trash2 className="w-4 h-4 mr-2" />
-																Supprimer
-															</DropdownMenuItem>
-														}
-													/>
-												</DropdownMenuContent>
-											</DropdownMenu>
+											{userRole === 'u2' ? (
+												<Button 
+													variant="ghost" 
+													className="h-8 w-8 p-0"
+													onClick={() => setOpenSheetId(missionData.id)}
+												>
+													<Eye className="h-4 w-4" />
+												</Button>
+											) : (
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button variant="ghost" className="h-8 w-8 p-0">
+															<MoreHorizontal className="h-4 w-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent align="end">
+														<DropdownMenuItem onClick={() => setOpenSheetId(missionData.id)}>
+															<Eye className="w-4 h-4 mr-2" />
+															Voir
+														</DropdownMenuItem>
+														<DropdownMenuItem asChild>
+															<Link href={`/dashboard/missions/${missionData.id}/modifier`}>
+																<Edit className="w-4 h-4 mr-2" />
+																Modifier
+															</Link>
+														</DropdownMenuItem>
+														<DropdownMenuSeparator />
+														<DeleteMissionDialog
+															missionId={missionData.id}
+															missionNumber={missionData.missionNumber}
+															onDeleteSuccess={onMissionDeleted}
+															trigger={
+																<DropdownMenuItem 
+																	className="text-red-600 focus:text-red-600 focus:bg-red-50"
+																	onSelect={(e) => e.preventDefault()}
+																>
+																	<Trash2 className="w-4 h-4 mr-2" />
+																	Supprimer
+																</DropdownMenuItem>
+															}
+														/>
+													</DropdownMenuContent>
+												</DropdownMenu>
+											)}
 										</TableCell>
 									</TableRow>
 								);
