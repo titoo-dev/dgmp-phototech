@@ -37,6 +37,8 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canViewMissions: true,
     canCreateMissions: true,
     canViewProjects: true,
+    canViewGallery: true,
+    canViewCompanies: false,
   },
   u2: {
     canViewMissions: true,
