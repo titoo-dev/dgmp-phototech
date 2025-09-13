@@ -13,6 +13,8 @@ import { ReportSearch } from '@/components/missions/report-search';
 import { MissionListTable } from '@/components/missions/mission-list-table';
 import type { MissionWithRelations } from '../../actions/mission/get-missions-action';
 import { AuthUser, UserRole } from '@/lib/auth-utils';
+import { getStatusDisplayName, getStatusBadgeClasses } from '@/lib/helpers/mission-status-helper';
+import { MissionStatus } from '@/lib/generated/prisma';
 
 interface MissionsClientProps {
   missions: MissionWithRelations[];
@@ -99,39 +101,30 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusIcon = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-      return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Validé
-          </Badge>
-        );
+        return <CheckCircle className="w-3 h-3 mr-1" />;
       case 'PENDING':
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            <Clock className="w-3 h-3 mr-1" />
-            En attente
-          </Badge>
-        );
+        return <Clock className="w-3 h-3 mr-1" />;
       case 'DRAFT':
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Brouillon
-          </Badge>
-        );
       case 'REJECTED':
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Refusé
-        </Badge>
-      );
+        return <AlertCircle className="w-3 h-3 mr-1" />;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return null;
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    return (
+      <Badge 
+        variant="outline" 
+        className={getStatusBadgeClasses(status as MissionStatus)}
+      >
+        {getStatusIcon(status)}
+        {getStatusDisplayName(status as MissionStatus)}
+      </Badge>
+    );
   };
 
   return (

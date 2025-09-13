@@ -22,7 +22,8 @@ import { MissionModel } from '@/models/mission-schema';
 import { DeleteMissionDialog } from './delete-mission-dialog';
 import { MissionDetailsSheet } from './mission-details-sheet';
 import { MissionStatus } from '@/lib/generated/prisma';
-import { getStatusDisplayName } from '@/lib/helpers/mission-status-helper';
+import { getStatusDisplayName, getStatusBadgeVariant, getStatusBadgeClasses } from '@/lib/helpers/mission-status-helper';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { sendMissionReportAction } from '@/actions/mission/send-mission-report-action';
 import { validateMissionAction } from '@/actions/mission/validate-mission-action';
@@ -153,9 +154,12 @@ export function MissionListTable({ missions, searchQuery, getStatusBadge, onMiss
 											</div>
 										</TableCell>
 										<TableCell>
-											<span className="text-sm font-medium">
+											<Badge 
+												variant="outline" 
+												className={getStatusBadgeClasses(missionData.status as MissionStatus)}
+											>
 												{getStatusDisplayName(missionData.status as MissionStatus)}
-											</span>
+											</Badge>
 										</TableCell>
 										{(userRole === 'u1' || userRole === 'u2') && (
 											<TableCell>

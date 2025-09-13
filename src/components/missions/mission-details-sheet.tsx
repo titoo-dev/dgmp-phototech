@@ -33,6 +33,7 @@ import { ReviewMissionDialog } from "./review-mission-dialog";
 import { MissionStatus } from "@/lib/generated/prisma";
 import { AuthUser, UserRole } from "@/lib/auth-utils";
 import { toast } from "sonner";
+import { getStatusDisplayName, getStatusBadgeClasses } from '@/lib/helpers/mission-status-helper';
 import Image from "next/image";
 
 interface MissionDetailsSheetProps {
@@ -145,24 +146,13 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose, user, userRole
     };
 
     const getStatusBadge = (status: string) => {
-        const colors = {
-            DRAFT: "bg-blue-100 text-blue-800 border-blue-200",
-            PENDING: "bg-yellow-100 text-yellow-800 border-yellow-200",
-            COMPLETED: "bg-green-100 text-green-800 border-green-200",
-            REJECTED: "bg-red-100 text-red-800 border-red-200"
-        } as const;
-
-        const labels = {
-            DRAFT: "Brouillon",
-            PENDING: "En attente",
-            COMPLETED: "Terminée",
-            REJECTED: "Rejetée"
-        } as const;
-
         return (
-            <Badge className={`${colors[status as keyof typeof colors]} border`}>
+            <Badge 
+                variant="outline" 
+                className={getStatusBadgeClasses(status as MissionStatus)}
+            >
                 {getStatusIcon(status)}
-                <span className="ml-1">{labels[status as keyof typeof labels]}</span>
+                <span className="ml-1">{getStatusDisplayName(status as MissionStatus)}</span>
             </Badge>
         );
     };
