@@ -1,6 +1,9 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { getMissionAction } from '@/actions/mission/get-mission-action';
+import { deleteMissionAction } from '@/actions/mission/delete-mission-action';
+import { auth } from '@/lib/auth';
+import { AuthUser, getUserRole } from '@/lib/auth-utils';
 
 /**
  * @swagger
@@ -250,11 +253,39 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await prisma.mission.delete({
-      where: { id },
+    
+    const session = await auth.api.getSession({
+      headers: request.headers,
     });
 
-    return NextResponse.json({ message: 'Mission deleted successfully' });
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userRole = getUserRole(session.user as AuthUser);
+    
+    if (!['u1', 'u4'].includes(userRole)) {
+      return NextResponse.json(
+        { error: 'Forbidden - Only u1, u4 users can delete missions' },
+        { status: 403 }
+      );
+    }
+    
+    const result = await deleteMissionAction(id);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.errors?._form?.[0] || 'Failed to delete mission' },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ 
+      message: result.message || 'Mission deleted successfully' 
+    });
   } catch (error) {
     console.error('Error deleting mission:', error);
     return NextResponse.json(
