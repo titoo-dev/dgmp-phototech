@@ -30,11 +30,14 @@ export async function getMissionsAction(): Promise<
         if (userRole === 'u1') {
             // u1 users: only see their own missions
             whereClause = { teamLeaderId: session.user.id };
+        } else if (userRole === 'u2') {
+            // u2 users: see all missions except DRAFT
+            whereClause = { status: { not: 'DRAFT' } };
         } else if (userRole === 'u3') {
             // u3 users: only see completed missions
             whereClause = { status: 'COMPLETED' };
         } else {
-            // u2 and u4 users: see all missions
+            // u4 users: see all missions
             whereClause = {};
         }
 

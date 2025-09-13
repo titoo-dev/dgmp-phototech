@@ -102,7 +102,7 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
   const getStatusBadge = (status: string) => {
     switch (status.toUpperCase()) {
       case 'COMPLETED':
-        return (
+      return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
             <CheckCircle className="w-3 h-3 mr-1" />
             Validé
@@ -127,8 +127,8 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
             <AlertCircle className="w-3 h-3 mr-1" />
             Refusé
-          </Badge>
-        );
+        </Badge>
+      );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -143,6 +143,7 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
         onSearchChange={setSearchQuery}
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
+        userRole={userRole}
       />
 
       <MissionListTable 

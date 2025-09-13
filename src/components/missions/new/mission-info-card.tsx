@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Users, Building } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 import { MissionModel } from "@/models/mission-schema";
 import type { UserModel } from "@/models/user-schema";
 import type { ContactModel } from "@/models/contact-schema";
@@ -30,21 +31,6 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">
-				<div className="flex flex-col space-y-2">
-					<label className="text-sm font-medium text-foreground">
-						Chef de mission
-					</label>
-					<div className="relative">
-						<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							value={`${currentUser.name} (${currentUser.email})`}
-							className="pl-10 bg-muted/50"
-							readOnly
-						/>
-						<input type="hidden" name="teamLeaderId" value={currentUser.id} />
-					</div>
-				</div>
-
 				<div className="flex flex-col space-y-2">
 					<div className="flex items-center justify-between">
 						<label className="text-sm font-medium text-foreground">
@@ -104,42 +90,6 @@ export default function MissionInfoCard({ formData, setFormData, teamLeaders, co
 								}))
 							}
 						/>
-					</div>
-				</div>
-
-				<div className="grid gap-4 sm:grid-cols-2">
-					<div className="flex flex-col space-y-2">
-						<label className="text-sm font-medium text-foreground">
-							Nombre d&apos;agents
-						</label>
-						<div className="relative">
-							<Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-							<Input
-								name="agentCount"
-								type="number"
-								min="1"
-								value={(formData.teamLeaderId ? 1 : 0) + selectedContacts.length}
-								className="pl-10 bg-muted/50"
-								readOnly
-							/>
-						</div>
-					</div>
-
-					<div className="flex flex-col space-y-2">
-						<label className="text-sm font-medium text-foreground">
-							Nombre de marchés
-						</label>
-						<div className="relative">
-							<Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-							<Input
-								name="marketCount"
-								type="number"
-								min="1"
-								value={formData.marketCount}
-								className="pl-10 bg-muted/50"
-								readOnly
-							/>
-						</div>
 					</div>
 				</div>
 			</CardContent>

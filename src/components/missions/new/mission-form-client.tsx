@@ -30,25 +30,15 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 	const formRef = useRef<HTMLFormElement | null>(null);
 
 	const [formData, setFormData] = useState<Partial<MissionModel>>({
-		teamLeader: undefined,
-		teamLeaderId: currentUser.id,
 		members: [],
 		startDate: undefined,
 		endDate: undefined,
 		location: "",
-		agentCount: 1, // Start with 1 since current user is already set as team leader
-		marketCount: 1,
 		status: "DRAFT",
 	});
 
 	const [selectedContacts, setSelectedContacts] = useState<ContactModel[]>([]);
 
-	// Auto-update agent count based on team leader + contacts
-	useEffect(() => {
-		const teamLeaderCount = formData.teamLeaderId ? 1 : 0;
-		const agentCount = teamLeaderCount + selectedContacts.length;
-		setFormData(prev => ({ ...prev, agentCount }));
-	}, [formData.teamLeaderId, selectedContacts.length, setFormData]);
 	const [markets, setMarkets] = useState<Market[]>([
 		{ id: 1, name: "Marché 1", photos: [], remarks: "", selectedProject: null },
 	]);
@@ -63,14 +53,10 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 			setSelectedContacts([]);
 			setMarkets([{ id: 1, name: 'Marché 1', photos: [], remarks: '', selectedProject: null }]);
 			setFormData({
-				teamLeader: undefined,
-				teamLeaderId: currentUser.id,
 				members: [],
 				startDate: undefined,
 				endDate: undefined,
 				location: "",
-				agentCount: 1, // Reset to 1 since current user is team leader
-				marketCount: 1,
 				status: "DRAFT",
 			});
 		} else if (state.errors?._form) {
@@ -90,13 +76,11 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 			selectedProject: null,
 		};
 		setMarkets([...markets, newMarket]);
-		setFormData((prev) => ({ ...prev, marketCount: markets.length + 1 }));
 	};
 
 	const handleRemoveMarket = (marketId: number) => {
 		if (markets.length > 1) {
 			setMarkets(markets.filter((market) => market.id !== marketId));
-			setFormData((prev) => ({ ...prev, marketCount: markets.length - 1 }));
 		}
 	};
 

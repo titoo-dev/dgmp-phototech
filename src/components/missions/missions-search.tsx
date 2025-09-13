@@ -9,19 +9,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Search, Filter } from "lucide-react"
+import { UserRole } from "@/lib/auth-utils"
 
 interface MissionSearchProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
+  userRole: UserRole;
 }
 
 export function MissionSearch({ 
   searchQuery, 
   onSearchChange, 
   statusFilter, 
-  onStatusFilterChange 
+  onStatusFilterChange,
+  userRole
 }: MissionSearchProps) {
   return (
     <div className="flex items-center gap-4 max-w-xl">
@@ -52,9 +55,11 @@ export function MissionSearch({
           <DropdownMenuItem onClick={() => onStatusFilterChange("all")}>
             Tous les statuts
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onStatusFilterChange("DRAFT")}>
-            Brouillons
-          </DropdownMenuItem>
+          {userRole !== 'u2' && (
+            <DropdownMenuItem onClick={() => onStatusFilterChange("DRAFT")}>
+              Brouillons
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => onStatusFilterChange("PENDING")}>
             En attente
           </DropdownMenuItem>
