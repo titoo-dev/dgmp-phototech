@@ -237,74 +237,7 @@ import { MissionStatus } from '@/lib/generated/prisma';
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - teamLeaderId
- *               - startDate
- *               - endDate
- *               - location
- *               - memberIds
- *               - projectsData
- *             properties:
- *               teamLeaderId:
- *                 type: string
- *                 description: ID of the team leader responsible for this mission
- *                 example: "user-123"
- *               startDate:
- *                 type: string
- *                 format: date-time
- *                 description: Mission start date
- *                 example: "2024-01-01T00:00:00Z"
- *               endDate:
- *                 type: string
- *                 format: date-time
- *                 description: Mission end date
- *                 example: "2024-01-15T00:00:00Z"
- *               location:
- *                 type: string
- *                 description: Mission location
- *                 example: "Paris, France"
- *               status:
- *                 type: string
- *                 description: Mission status (defaults to DRAFT)
- *                 enum: [DRAFT, PENDING, COMPLETED, REJECTED]
- *                 example: "DRAFT"
- *               memberIds:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Array of team member IDs
- *                 example: ["contact-1", "contact-2"]
- *               projectsData:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     projectId:
- *                       type: string
- *                       description: ID of the project
- *                       example: "proj-1"
- *                     notes:
- *                       type: string
- *                       description: Project notes
- *                       example: "Project specific notes"
- *                     marketName:
- *                       type: string
- *                       description: Name of the market
- *                       example: "Market A"
- *                 description: Array of project data objects
- *               imageFiles:
- *                 type: object
- *                 additionalProperties:
- *                   type: array
- *                   items:
- *                     type: string
- *                     format: uri
- *                 description: |
- *                   Object mapping market names to arrays of image URLs.
- *                   Images should be uploaded first via /api/image endpoint.
- *                 example: 
- *                   "Market A": ["https://blob.url/image1.jpg", "https://blob.url/image2.jpg"]
+ *             $ref: '#/components/schemas/CreateMissionRequest'
  *         multipart/form-data:
  *           schema:
  *             type: object
@@ -354,47 +287,31 @@ import { MissionStatus } from '@/lib/generated/prisma';
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Mission'
+ *               $ref: '#/components/schemas/CreateMissionResponse'
  *       400:
  *         description: Bad request - validation errors
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Failed to create mission"
+ *               $ref: '#/components/schemas/ValidationError'
  *       401:
  *         description: Unauthorized - no valid session
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Unauthorized"
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: Forbidden - insufficient permissions
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Forbidden - Only u1 users can create missions"
+ *               $ref: '#/components/schemas/Error'
  *       500:
  *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Failed to create mission"
+ *               $ref: '#/components/schemas/Error'
  */
 // Helper function to generate mission number
 function generateMissionNumber() {
