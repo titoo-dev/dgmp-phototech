@@ -5,7 +5,6 @@ import { useState, useTransition, useEffect, useRef, useActionState } from 'reac
 import { updateMissionAction } from '@/actions/mission/update-mission-action';
 import { toast } from 'sonner';
 import { MissionModel } from '@/models/mission-schema';
-import type { UserModel } from '@/models/user-schema';
 import type { ContactModel } from '@/models/contact-schema';
 import UpdateMissionHeader from '@/components/missions/update/update-mission-header';
 import UpdateMissionInfoCard from '@/components/missions/update/update-mission-info-card';
@@ -19,14 +18,12 @@ import { useRouter } from 'next/navigation';
 
 interface UpdateMissionFormClientProps {
 	mission: Awaited<ReturnType<typeof getMissionAction>>;
-	teamLeaders: UserModel[];
 	contacts: ContactModel[];
 	projects: ProjectWithCompany[];
 }
 
 export default function UpdateMissionFormClient({ 
 	mission, 
-	teamLeaders, 
 	contacts, 
 	projects 
 }: UpdateMissionFormClientProps) {
@@ -36,24 +33,13 @@ export default function UpdateMissionFormClient({
 	const router = useRouter();
 
 	const [formData, setFormData] = useState<Partial<MissionModel>>({
-		teamLeaderId: mission.teamLeaderId,
 		members: mission.members,
 		startDate: mission.startDate,
 		endDate: mission.endDate,
 		location: mission.location,
-		agentCount: mission.agentCount,
-		marketCount: mission.marketCount,
-		status: mission.status,
 	});
 
 	const [selectedContacts, setSelectedContacts] = useState<ContactModel[]>(mission.members || []);
-
-	// Auto-update agent count based on team leader + contacts
-	useEffect(() => {
-		const teamLeaderCount = formData.teamLeaderId ? 1 : 0;
-		const agentCount = teamLeaderCount + selectedContacts.length;
-		setFormData(prev => ({ ...prev, agentCount }));
-	}, [formData.teamLeaderId, selectedContacts.length, setFormData]);
 
 	// Initialize markets from mission data
 	const [markets, setMarkets] = useState<Market[]>(() => {
@@ -119,13 +105,11 @@ export default function UpdateMissionFormClient({
 			selectedProject: null,
 		};
 		setMarkets([...markets, newMarket]);
-		setFormData((prev) => ({ ...prev, marketCount: markets.length + 1 }));
 	};
 
 	const handleRemoveMarket = (marketId: number) => {
 		if (markets.length > 1) {
 			setMarkets(markets.filter((market) => market.id !== marketId));
-			setFormData((prev) => ({ ...prev, marketCount: markets.length - 1 }));
 		}
 	};
 
@@ -164,9 +148,6 @@ export default function UpdateMissionFormClient({
 		
 		// Add mission ID
 		form.set('id', mission.id);
-		
-		// Add computed fields
-		form.set('marketCount', String(markets.length));
 		
 		// Add projects data as JSON (from markets)
 		const projectsData = markets
@@ -207,14 +188,13 @@ export default function UpdateMissionFormClient({
 		}
 
 		// Validate required fields
-		const teamLeaderId = form.get('teamLeaderId');
 		const startDate = form.get('startDate');
 		const endDate = form.get('endDate');
 		const location = form.get('location');
 		
-		if (!teamLeaderId || !startDate || !endDate || !location) {
+		if (!startDate || !endDate || !location) {
 			toast.error('Champs requis manquants', {
-				description: 'Veuillez remplir tous les champs obligatoires (chef de mission, dates, lieu).',
+				description: 'Veuillez remplir tous les champs obligatoires (dates, lieu).',
 				duration: 5000,
 			});
 			return;
@@ -237,7 +217,6 @@ export default function UpdateMissionFormClient({
 	return (
 		<>
 			<UpdateMissionHeader 
-				mission={mission}
 				isPending={isPending} 
 			/>
 			<div className="mx-auto max-w-7xl px-6 py-8">
@@ -245,10 +224,8 @@ export default function UpdateMissionFormClient({
 					<div className="grid gap-8 lg:grid-cols-2">
 						<div className="space-y-6">
 							<UpdateMissionInfoCard 
-								mission={mission}
 								formData={formData} 
 								setFormData={setFormData}
-								teamLeaders={teamLeaders}
 								contacts={contacts}
 								selectedContacts={selectedContacts}
 								onContactsChange={setSelectedContacts}

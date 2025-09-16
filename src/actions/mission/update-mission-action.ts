@@ -4,43 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UpdateMissionFormSchema, type UpdateMissionForm } from "../../models/mission-schema";
 import prisma from "@/lib/prisma";
-import { MissionStatus } from "@/lib/generated/prisma";
-import { put } from '@vercel/blob';
+import { uploadPhotoFile } from "./create-mission-action";
 
 export type UpdateMissionState = {
   errors?: Record<string, string[]>;
   success?: boolean;
   data?: UpdateMissionForm | Record<string, unknown>;
 };
-
-async function uploadPhotoFile(file: File): Promise<{ url: string; metadata: any }> {
-  // Validate file type (images only)
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Only image files are allowed');
-  }
-
-  // Generate a unique filename
-  const fileExtension = file.name.split('.').pop() || 'jpg';
-  const filename = `mission-photo.${fileExtension}`;
-
-  // Upload to Vercel Blob
-  const blob = await put(filename, file, {
-    access: 'public',
-    addRandomSuffix: true,
-    multipart: true,
-  });
-
-  return {
-    url: blob.url,
-    metadata: {
-      success: true,
-      filename: blob.pathname,
-      size: file.size,
-      type: file.type,
-      ...blob,
-    }
-  };
-}
 
 export async function updateMissionAction(
   prevState: UpdateMissionState,
@@ -49,12 +19,9 @@ export async function updateMissionAction(
 
   const raw = {
     id: formData.get("id"),
-    missionNumber: formData.get("missionNumber"),
-    teamLeaderId: formData.get("teamLeaderId"),
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
     location: formData.get("location"),
-    status: formData.get("status"),
     agentCount: formData.get("agentCount"),
     marketCount: formData.get("marketCount"),
     memberIds: formData.getAll("memberIds"),
@@ -96,17 +63,27 @@ export async function updateMissionAction(
     }
   }
 
+  // Remove duplicates from memberIds
+  const uniqueMemberIds = Array.isArray(raw.memberIds) 
+    ? [...new Set(raw.memberIds.map(id => String(id)))]
+    : [];
+
+  // Auto-calculate agentCount (members + 1 team leader) if not provided
+  const calculatedAgentCount = uniqueMemberIds.length + 1;
+
+  // Auto-calculate marketCount from projectsData length if not provided
+  const calculatedMarketCount = raw.marketCount 
+    ? Number(raw.marketCount)
+    : projectsData.length;
+
   const parsed = {
     id: raw.id ? String(raw.id) : undefined,
-    teamLeaderId: raw.teamLeaderId ? String(raw.teamLeaderId) : undefined,
     startDate: raw.startDate ? new Date(raw.startDate as string) : undefined,
     endDate: raw.endDate ? new Date(raw.endDate as string) : undefined,
     location: raw.location ? String(raw.location) : undefined,
-    status: raw.status ? String(raw.status) : undefined,
-    agentCount: raw.agentCount ? Number(raw.agentCount) : undefined,
-    marketCount: raw.marketCount ? Number(raw.marketCount) : undefined,
-    members: Array.isArray(raw.memberIds) ? raw.memberIds.map(id => String(id)) : [],
-    missionNumber: raw.missionNumber ? String(raw.missionNumber) : undefined,
+    agentCount: calculatedAgentCount,
+    marketCount: calculatedMarketCount,
+    members: uniqueMemberIds,
   };
 
   console.log('Parsed update data:', parsed);
@@ -146,36 +123,13 @@ export async function updateMissionAction(
       };
     }
 
-    // Check for duplicate mission number (if changed)
-    if (data.missionNumber && data.missionNumber !== existing.missionNumber) {
-      const conflict = await prisma.mission.findFirst({
-        where: {
-          missionNumber: data.missionNumber,
-          id: { not: data.id },
-        },
-      });
-
-      if (conflict) {
-        return {
-          errors: {
-            _form: ['Une mission avec ce numéro existe déjà'],
-          },
-          success: false,
-          data: parsed,
-        };
-      }
-    }
-
     // Prepare update data
     const updateData: any = {};
-    if (data.missionNumber !== undefined) updateData.missionNumber = data.missionNumber;
-    if (data.teamLeaderId !== undefined) updateData.teamLeader = { connect: { id: data.teamLeaderId } };
     if (data.startDate !== undefined) updateData.startDate = data.startDate;
     if (data.endDate !== undefined) updateData.endDate = data.endDate;
     if (data.location !== undefined) updateData.location = data.location;
     if (data.agentCount !== undefined) updateData.agentCount = data.agentCount;
     if (data.marketCount !== undefined) updateData.marketCount = data.marketCount;
-    if (data.status !== undefined) updateData.status = data.status as MissionStatus;
 
     // Update members if provided
     if (parsed.members !== undefined) {

@@ -44,15 +44,12 @@ export const UpdateMissionSchema = MissionSchema.partial().required({ id: true }
 // Schema for updating a mission via form data
 export const UpdateMissionFormSchema = z.object({
     id: z.string().cuid(),
-    missionNumber: z.string().min(1, "Le numéro de mission est obligatoire").optional(),
-    teamLeaderId: z.string().optional(),
     startDate: z.date().optional(),
     endDate: z.date().optional(),
     location: z.string().min(1, "Le lieu est obligatoire").max(255).optional(),
     agentCount: z.number().int().min(0, "Le nombre d'agents ne peut pas être négatif").optional(),
     marketCount: z.number().int().min(0, "Le nombre de marchés ne peut pas être négatif").optional(),
-    status: z.enum(['DRAFT', 'PENDING', 'COMPLETED', 'REJECTED']).optional(),
-    members: z.array(ContactSchema).optional(),
+    members: z.array(z.string()).optional().default([]),
 }).refine(
     (data) => !data.endDate || !data.startDate || data.endDate >= data.startDate,
     {

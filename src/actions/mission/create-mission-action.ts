@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { CreateMissionSchema, type CreateMission } from "../../models/mission-schema";
 import prisma from "@/lib/prisma";
-import { MissionStatus } from "@/lib/generated/prisma";
 import { put } from '@vercel/blob';
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 
 export type CreateMissionState = {
@@ -21,7 +22,7 @@ function generateMissionNumber() {
   return `MIS-${year}-${stamp}`;
 }
 
-async function uploadPhotoFile(file: File): Promise<{ url: string; metadata: any }> {
+export async function uploadPhotoFile(file: File): Promise<{ url: string; metadata: any }> {
   // Validate file type (images only)
   if (!file.type.startsWith('image/')) {
     throw new Error('Only image files are allowed');
@@ -55,12 +56,15 @@ export async function createMissionAction(
   formData: FormData
 ): Promise<CreateMissionState> {
 
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
   const raw = {
-    teamLeaderId: formData.get("teamLeaderId"),
+    teamLeaderId: session?.user?.id as string,
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
     location: formData.get("location"),
-    status: formData.get("status"),
     memberIds: formData.getAll("memberIds"),
     projectsData: formData.get("projectsData"),
   };
@@ -111,7 +115,6 @@ export async function createMissionAction(
     startDate: raw.startDate ? new Date(raw.startDate as string) : undefined,
     endDate: raw.endDate ? new Date(raw.endDate as string) : undefined,
     location: raw.location ? String(raw.location) : undefined,
-    status: raw.status ? String(raw.status) : 'DRAFT',
     agentCount: agentCount,
     marketCount: marketCount,
     members: uniqueMemberIds,
@@ -133,8 +136,6 @@ export async function createMissionAction(
   const data = validation.data as CreateMission;
 
   try {
-    // Prisma expects MissionStatus enum values (uppercase). Ensure status is set accordingly.
-    const statusValue = (data.status as unknown as MissionStatus) || ("DRAFT" as MissionStatus);
 
     const mission = await prisma.mission.create({
       data: {
@@ -146,7 +147,7 @@ export async function createMissionAction(
         startDate: data.startDate,
         endDate: data.endDate,
         location: data.location,
-        status: statusValue,
+        status: 'DRAFT',
         agentCount: data.agentCount,
         marketCount: data.marketCount,
       },
