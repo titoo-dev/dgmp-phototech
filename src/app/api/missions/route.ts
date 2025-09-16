@@ -3,6 +3,10 @@ import { getMissionsAction } from '@/actions/mission/get-missions-action';
 import { auth } from '@/lib/auth';
 import { AuthUser, getUserRole } from '@/lib/auth-utils';
 import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions/mission/create-mission-mobile-action';
+import { createMissionAction } from '@/actions/mission/create-mission-action';
+import { CreateMissionSchema, type CreateMission } from '@/models/mission-schema';
+import prisma from '@/lib/prisma';
+import { MissionStatus } from '@/lib/generated/prisma';
 
 /**
  * @swagger
@@ -221,12 +225,86 @@ import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions
  *     tags:
  *       - Missions
  *     summary: Create a new mission
- *     description: Create a new mission with team members, projects, and optional file uploads. Requires u1 role authentication.
+ *     description: |
+ *       Create a new mission with team members, projects, and optional image references. 
+ *       Supports both JSON (API clients) and FormData (web forms) payloads.
+ *       For JSON payloads, images should be uploaded separately via /api/image endpoint and referenced by URL.
+ *       Requires u1 role authentication.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - teamLeaderId
+ *               - startDate
+ *               - endDate
+ *               - location
+ *               - memberIds
+ *               - projectsData
+ *             properties:
+ *               teamLeaderId:
+ *                 type: string
+ *                 description: ID of the team leader responsible for this mission
+ *                 example: "user-123"
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Mission start date
+ *                 example: "2024-01-01T00:00:00Z"
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Mission end date
+ *                 example: "2024-01-15T00:00:00Z"
+ *               location:
+ *                 type: string
+ *                 description: Mission location
+ *                 example: "Paris, France"
+ *               status:
+ *                 type: string
+ *                 description: Mission status (defaults to DRAFT)
+ *                 enum: [DRAFT, PENDING, COMPLETED, REJECTED]
+ *                 example: "DRAFT"
+ *               memberIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of team member IDs
+ *                 example: ["contact-1", "contact-2"]
+ *               projectsData:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     projectId:
+ *                       type: string
+ *                       description: ID of the project
+ *                       example: "proj-1"
+ *                     notes:
+ *                       type: string
+ *                       description: Project notes
+ *                       example: "Project specific notes"
+ *                     marketName:
+ *                       type: string
+ *                       description: Name of the market
+ *                       example: "Market A"
+ *                 description: Array of project data objects
+ *               imageFiles:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: uri
+ *                 description: |
+ *                   Object mapping market names to arrays of image URLs.
+ *                   Images should be uploaded first via /api/image endpoint.
+ *                 example: 
+ *                   "Market A": ["https://blob.url/image1.jpg", "https://blob.url/image2.jpg"]
  *         multipart/form-data:
  *           schema:
  *             type: object
@@ -236,10 +314,6 @@ import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions
  *               - endDate
  *               - location
  *             properties:
- *               missionNumber:
- *                 type: string
- *                 description: Mission number (auto-generated if not provided)
- *                 example: "MIS-2024-001"
  *               teamLeaderId:
  *                 type: string
  *                 description: ID of the team leader responsible for this mission
@@ -258,33 +332,16 @@ import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions
  *                 type: string
  *                 description: Mission location
  *                 example: "Paris, France"
- *               status:
- *                 type: string
- *                 description: Mission status (defaults to DRAFT)
- *                 enum: [DRAFT, PENDING, COMPLETED, REJECTED]
- *                 example: "DRAFT"
- *               agentCount:
- *                 type: integer
- *                 description: Number of agents participating
- *                 example: 5
- *               marketCount:
- *                 type: integer
- *                 description: Number of markets to visit
- *                 example: 3
  *               memberIds:
  *                 type: array
  *                 items:
  *                   type: string
  *                 description: Array of team member IDs
- *                 example: ["member-1", "member-2"]
+ *                 example: ["contact-1", "contact-2"]
  *               projectsData:
  *                 type: string
  *                 description: JSON string containing project data
  *                 example: '[{"projectId":"proj-1","notes":"Project notes","marketName":"Market A"}]'
- *               marketData:
- *                 type: string
- *                 description: JSON string containing market data
- *                 example: '[{"name":"Market A","remarks":"Market remarks","photoCount":2,"projectId":"proj-1"}]'
  *               photos_marketName:
  *                 type: array
  *                 items:
@@ -339,6 +396,188 @@ import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions
  *                   type: string
  *                   example: "Failed to create mission"
  */
+// Helper function to generate mission number
+function generateMissionNumber() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const stamp = now.getTime().toString().slice(-6);
+  return `MIS-${year}-${stamp}`;
+}
+
+// New API payload type for missions with external image URLs
+export type CreateMissionApiPayload = {
+  teamLeaderId: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  status?: string;
+  memberIds: string[];
+  projectsData: Array<{ 
+    projectId: string; 
+    notes: string; 
+    marketName: string;
+  }>;
+  // Images are referenced by their URLs from the /api/image endpoint
+  imageFiles?: { [marketName: string]: string[] }; // Array of image URLs per market
+};
+
+// Handle JSON-based mission creation (API/mobile clients)
+async function handleJsonMissionCreation(request: NextRequest, session: any) {
+  // Parse JSON payload
+  let payload: CreateMissionApiPayload;
+  try {
+    payload = await request.json();
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Invalid JSON payload' },
+      { status: 400 }
+    );
+  }
+
+  // Validate required fields
+  if (!payload.teamLeaderId || !payload.startDate || !payload.endDate || !payload.location) {
+    return NextResponse.json(
+      { error: 'Missing required fields: teamLeaderId, startDate, endDate, location' },
+      { status: 400 }
+    );
+  }
+
+  // Generate mission number
+  const missionNumber = generateMissionNumber();
+
+  // Remove duplicates from memberIds
+  const uniqueMemberIds = [...new Set(payload.memberIds.map(id => String(id)))];
+
+  // Auto-calculate agentCount (members + 1 team leader)
+  const agentCount = uniqueMemberIds.length + 1;
+
+  // Auto-calculate marketCount from projectsData length
+  const marketCount = payload.projectsData.length;
+
+  const parsed = {
+    teamLeaderId: payload.teamLeaderId,
+    startDate: new Date(payload.startDate),
+    endDate: new Date(payload.endDate),
+    location: payload.location,
+    agentCount: agentCount,
+    marketCount: marketCount,
+    members: uniqueMemberIds,
+  };
+
+  console.log('Parsed API data:', parsed);
+
+  const validation = CreateMissionSchema.safeParse(parsed);
+
+  if (!validation.success) {
+    console.log('Validation errors:', validation.error.flatten().fieldErrors);
+    return NextResponse.json(
+      { 
+        error: 'Validation failed',
+        details: validation.error.flatten().fieldErrors 
+      },
+      { status: 400 }
+    );
+  }
+
+  const data = validation.data as CreateMission;
+
+  try {
+    // Create mission
+    const mission = await prisma.mission.create({
+      data: {
+        missionNumber: missionNumber as string,
+        teamLeader: { connect: { id: data.teamLeaderId } },
+        members: data.members && data.members.length > 0 ? {
+          connect: data.members.map(memberId => ({ id: memberId }))
+        } : undefined,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        location: data.location,
+        status: 'DRAFT' as MissionStatus,
+        agentCount: data.agentCount,
+        marketCount: data.marketCount,
+      },
+      include: {
+        teamLeader: true,
+        members: true,
+      },
+    });
+
+    // Create MissionProject entries and link images
+    if (payload.projectsData.length > 0) {
+      const missionProjects = await Promise.all(
+        payload.projectsData.map(projectData =>
+          prisma.missionProject.create({
+            data: {
+              missionId: mission.id,
+              projectId: projectData.projectId,
+              notes: projectData.notes,
+            },
+          })
+        )
+      );
+
+      // Link existing image URLs to mission projects
+      if (payload.imageFiles) {
+        for (const projectData of payload.projectsData) {
+          const missionProject = missionProjects.find(mp => mp.projectId === projectData.projectId);
+          if (!missionProject) continue;
+
+          const marketImages = payload.imageFiles[projectData.marketName] || [];
+          
+          for (const imageUrl of marketImages) {
+            try {
+              await prisma.missionFile.create({
+                data: {
+                  fileUrl: imageUrl,
+                  metadata: JSON.stringify({
+                    success: true,
+                    source: 'api',
+                    marketName: projectData.marketName,
+                    uploadedAt: new Date().toISOString(),
+                  }),
+                  missionProjectId: missionProject.id,
+                },
+              });
+            } catch (error) {
+              console.error('Failed to link image:', error);
+              // Continue with other images even if one fails
+            }
+          }
+        }
+      }
+    }
+
+    return NextResponse.json(mission, { status: 201 });
+  } catch (error) {
+    console.error('Error creating mission via API:', error);
+    return NextResponse.json(
+      { error: 'Failed to create mission' },
+      { status: 500 }
+    );
+  }
+}
+
+// Handle FormData-based mission creation (web forms)
+async function handleFormDataMissionCreation(request: NextRequest, session: any) {
+  const formData = await request.formData();
+  
+  // Use existing FormData action
+  const result = await createMissionAction({}, formData);
+  
+  if (!result.success) {
+    return NextResponse.json(
+      { 
+        error: 'Validation failed',
+        details: result.errors 
+      },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json(result.data, { status: 201 });
+}
+
 export async function GET() {
   try {
     const result = await getMissionsAction();
@@ -391,41 +630,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse JSON payload
-    let payload: CreateMissionMobilePayload;
-    try {
-      payload = await request.json();
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid JSON payload' },
-        { status: 400 }
-      );
-    }
-
-    // Validate required fields
-    if (!payload.teamLeaderId || !payload.startDate || !payload.endDate || !payload.location) {
-      return NextResponse.json(
-        { error: 'Missing required fields: teamLeaderId, startDate, endDate, location' },
-        { status: 400 }
-      );
-    }
-
-    // Create mission using mobile action
-    const result = await createMissionMobileAction(payload);
+    // Determine if this is FormData (web) or JSON (API/mobile)
+    const contentType = request.headers.get('content-type') || '';
     
-    if (!result.success) {
-      return NextResponse.json(
-        { 
-          error: 'Validation failed',
-          details: result.errors 
-        },
-        { status: 400 }
-      );
+    if (contentType.includes('multipart/form-data')) {
+      // Handle FormData (traditional web form submission)
+      return await handleFormDataMissionCreation(request, session);
+    } else {
+      // Handle JSON payload (API/mobile)
+      return await handleJsonMissionCreation(request, session);
     }
-
-    return NextResponse.json(result.data, { status: 201 }); 
   } catch (error) {
-    console.error('Error creating mission from mobile:', error);
+    console.error('Error creating mission:', error);
     
     // Handle specific error types
     if (error instanceof Error) {
