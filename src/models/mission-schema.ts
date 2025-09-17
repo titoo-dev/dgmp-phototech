@@ -30,11 +30,8 @@ export const MissionSchema = z.object({
 
 // Schema for creating a new mission (without id and auto-generated fields)
 export const CreateMissionSchema = MissionSchema
-    .omit({ id: true, missionNumber: true, teamLeader: true, members: true })
+    .omit({ id: true, missionNumber: true, teamLeaderId: true, members: true, status: true, teamLeader: true })
     .extend({
-        // creation should supply teamLeaderId to connect an existing User
-        teamLeaderId: z.string(),
-        // members should be array of contact IDs for creation
         members: z.array(z.string()).optional().default([]),
     });
 
