@@ -140,7 +140,7 @@ export async function createMissionAction(
     const mission = await prisma.mission.create({
       data: {
         missionNumber: missionNumber as string,
-        teamLeader: { connect: { id: data.teamLeaderId } },
+        teamLeader: { connect: { id: session?.user?.id as string } },
         members: data.members && data.members.length > 0 ? {
           connect: data.members.map(memberId => ({ id: memberId }))
         } : undefined,

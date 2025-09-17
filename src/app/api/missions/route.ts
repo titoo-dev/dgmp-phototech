@@ -323,25 +323,23 @@ function generateMissionNumber() {
 
 // New API payload type for missions with external image URLs
 export type CreateMissionApiPayload = {
-  teamLeaderId: string;
   startDate: string;
   endDate: string;
   location: string;
-  status?: string;
   memberIds: string[];
   projectsData: Array<{ 
     projectId: string; 
     notes: string; 
     marketName: string;
   }>;
-  // Images are referenced by their URLs from the /api/image endpoint
-  imageFiles?: { [marketName: string]: string[] }; // Array of image URLs per market
+  imageFiles?: { [marketName: string]: string[] };
 };
 
 // Handle JSON-based mission creation (API/mobile clients)
 async function handleJsonMissionCreation(request: NextRequest, session: any) {
   // Parse JSON payload
   let payload: CreateMissionApiPayload;
+
   try {
     payload = await request.json();
   } catch (error) {
@@ -352,9 +350,9 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
   }
 
   // Validate required fields
-  if (!payload.teamLeaderId || !payload.startDate || !payload.endDate || !payload.location) {
+  if (!payload.startDate || !payload.endDate || !payload.location) {
     return NextResponse.json(
-      { error: 'Missing required fields: teamLeaderId, startDate, endDate, location' },
+      { error: 'Missing required fields: startDate, endDate, location' },
       { status: 400 }
     );
   }
@@ -372,7 +370,6 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
   const marketCount = payload.projectsData.length;
 
   const parsed = {
-    teamLeaderId: payload.teamLeaderId,
     startDate: new Date(payload.startDate),
     endDate: new Date(payload.endDate),
     location: payload.location,
@@ -403,7 +400,7 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
     const mission = await prisma.mission.create({
       data: {
         missionNumber: missionNumber as string,
-        teamLeader: { connect: { id: data.teamLeaderId } },
+        teamLeader: { connect: { id: session?.user?.id as string } },
         members: data.members && data.members.length > 0 ? {
           connect: data.members.map(memberId => ({ id: memberId }))
         } : undefined,
@@ -475,25 +472,6 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
   }
 }
 
-// Handle FormData-based mission creation (web forms)
-async function handleFormDataMissionCreation(request: NextRequest, session: any) {
-  const formData = await request.formData();
-  
-  // Use existing FormData action
-  const result = await createMissionAction({}, formData);
-  
-  if (!result.success) {
-    return NextResponse.json(
-      { 
-        error: 'Validation failed',
-        details: result.errors 
-      },
-      { status: 400 }
-    );
-  }
-
-  return NextResponse.json(result.data, { status: 201 });
-}
 
 export async function GET() {
   try {
@@ -546,17 +524,9 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-
-    // Determine if this is FormData (web) or JSON (API/mobile)
-    const contentType = request.headers.get('content-type') || '';
     
-    if (contentType.includes('multipart/form-data')) {
-      // Handle FormData (traditional web form submission)
-      return await handleFormDataMissionCreation(request, session);
-    } else {
-      // Handle JSON payload (API/mobile)
-      return await handleJsonMissionCreation(request, session);
-    }
+    return await handleJsonMissionCreation(request, session);
+
   } catch (error) {
     console.error('Error creating mission:', error);
     
