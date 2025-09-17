@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMissionsAction } from '@/actions/mission/get-missions-action';
 import { auth } from '@/lib/auth';
 import { AuthUser, getUserRole } from '@/lib/auth-utils';
-import { CreateMissionMobilePayload, createMissionMobileAction } from '@/actions/mission/create-mission-mobile-action';
-import { createMissionAction } from '@/actions/mission/create-mission-action';
 import { CreateMissionSchema, type CreateMission } from '@/models/mission-schema';
 import prisma from '@/lib/prisma';
 import { MissionStatus } from '@/lib/generated/prisma';
