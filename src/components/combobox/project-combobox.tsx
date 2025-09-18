@@ -33,7 +33,7 @@ export function ProjectCombobox({
   projects, 
   value = "", 
   onValueChange, 
-  placeholder = "Sélectionner un projet...",
+  placeholder = "Sélectionner un marché...",
   name,
   className 
 }: ProjectComboboxProps) {
@@ -77,9 +77,9 @@ export function ProjectCombobox({
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
           <Command>
-            <CommandInput placeholder="Rechercher un projet..." className="h-9" />
+            <CommandInput placeholder="Rechercher un marché..." className="h-9" />
             <CommandList>
-              <CommandEmpty>Aucun projet trouvé.</CommandEmpty>
+              <CommandEmpty>Aucun marché trouvé.</CommandEmpty>
               <CommandGroup>
                 {projects.map((project) => (
                   <CommandItem

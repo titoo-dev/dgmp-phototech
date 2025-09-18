@@ -3,17 +3,17 @@ import { CompanySchema } from './company-schema';
 
 export const ProjectSchema = z.object({
     id: z.string().cuid(),
-    title: z.string().min(1, "Le titre du projet est obligatoire").max(255),
+    title: z.string().min(1, "Le titre du marché est obligatoire").max(255),
     startDate: z.coerce.date({ message: "La date de début est obligatoire" }),
     endDate: z.coerce.date({ message: "La date de fin est obligatoire" }),
     company: CompanySchema,
     companyId: z.string().cuid(),
     description: z.string().min(1, "La description est obligatoire"),
     nature: z.enum(['SUPPLY', 'SERVICES', 'INTELLECTUAL', 'PROGRAM', 'MIXED', 'CONTROLLED_EXPENSES'], {
-        message: "La nature du projet est obligatoire"
+        message: "La nature du marché est obligatoire"
     }),
     status: z.enum(['UNCONTROLLED', 'CONTROLLED_IN_PROGRESS', 'CONTROLLED_DELIVERED', 'CONTROLLED_OTHER', 'DISPUTED'], {
-        message: "Le statut du projet est obligatoire"
+        message: "Le statut du marché est obligatoire"
     })
 }).refine(
     (data) => data.endDate > data.startDate,
@@ -23,7 +23,7 @@ export const ProjectSchema = z.object({
     }
 );
 
-// Schema for creating a new project (without id)
+// Schema for creating a new marché (without id)
 export const CreateProjectSchema = ProjectSchema.omit({
     id: true
 }).extend({
@@ -32,17 +32,17 @@ export const CreateProjectSchema = ProjectSchema.omit({
     company: true
 });
 
-// Schema for updating a project (all fields optional except id)
+// Schema for updating a marché (all fields optional except id)
 export const UpdateProjectSchema = ProjectSchema.partial().required({ id: true }).extend({
     companyId: z.string().cuid().optional()
 }).omit({
     company: true
 });
 
-// Schema for updating a project via form data
+// Schema for updating a marché via form data
 export const UpdateProjectFormSchema = z.object({
     id: z.string().cuid(),
-    title: z.string().min(1, "Le titre du projet est obligatoire").max(255).optional(),
+    title: z.string().min(1, "Le titre du marché est obligatoire").max(255).optional(),
     description: z.string().min(1, "La description est obligatoire").optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),

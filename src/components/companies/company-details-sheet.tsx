@@ -232,13 +232,13 @@ export function CompanyDetailsSheet({ companyId, isOpen, onClose }: CompanyDetai
                                 </CardContent>
                             </Card>
 
-                            {/* Projets associés */}
+                            {/* Marchés associés */}
                             {company.projects && company.projects.length > 0 ? (
                                 <Card className='shadow-none'>
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <Building2 className="w-5 h-5" />
-                                            Projets ({company.projects.length})
+                                            Marchés ({company.projects.length})
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -283,13 +283,13 @@ export function CompanyDetailsSheet({ companyId, isOpen, onClose }: CompanyDetai
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <Building2 className="w-5 h-5" />
-                                            Projets (0)
+                                            Marchés (0)
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-center py-8 text-muted-foreground">
                                             <Building2 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                            <p>Aucun projet associé à cette entreprise</p>
+                                            <p>Aucun marché associé à cette entreprise</p>
                                         </div>
                                     </CardContent>
                                 </Card>

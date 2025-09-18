@@ -21,7 +21,7 @@ interface BreadcrumbSegment {
 
 const segmentLabels: Record<string, string> = {
 	dashboard: 'Tableau de bord',
-	projects: 'Projets',
+	projects: 'Marchés',
 	reports: 'Rapports de mission',
 	missions: 'Missions',
 	companies: 'Entreprises',

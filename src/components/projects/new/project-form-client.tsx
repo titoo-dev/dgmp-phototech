@@ -86,8 +86,8 @@ export default function ProjectFormClient({ companies }: ProjectFormClientProps)
 	// Clear localStorage on successful submission
 	useEffect(() => {
 		if (state.success) {
-			toast.success('Projet créé avec succès', {
-				description: 'Le projet a été ajouté à la base de données.',
+			toast.success('Marché créé avec succès', {
+				description: 'Le marché a été ajouté à la base de données.',
 				duration: 4000,
 			});
 			localStorage.removeItem(STORAGE_KEY);

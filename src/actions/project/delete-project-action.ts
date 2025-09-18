@@ -16,12 +16,12 @@ export async function deleteProjectAction(
     // Validate input
     if (!projectId || typeof projectId !== 'string') {
       return {
-        errors: { _form: ['ID de projet invalide'] },
+        errors: { _form: ['ID de marché invalide'] },
         success: false,
       };
     }
 
-    // Check if project exists and get project title for the success message
+    // Check if market exists and get project title for the success message
     const existingProject = await prisma.project.findUnique({
       where: { id: projectId },
       select: { 
@@ -40,15 +40,15 @@ export async function deleteProjectAction(
 
     if (!existingProject) {
       return {
-        errors: { _form: ['Projet introuvable'] },
+        errors: { _form: ['Marché introuvable'] },
         success: false,
       };
     }
 
-    // Check if project is associated with missions
+    // Check if market is associated with missions
     if (existingProject.missionProjects.length > 0) {
       return {
-        errors: { _form: ['Impossible de supprimer ce projet car il est associé à des missions'] },
+        errors: { _form: ['Impossible de supprimer ce marché car il est associé à des missions'] },
         success: false,
       };
     }
@@ -64,12 +64,12 @@ export async function deleteProjectAction(
 
     return {
       success: true,
-      message: `Projet "${existingProject.title}" supprimé avec succès`,
+      message: `Marché "${existingProject.title}" supprimé avec succès`,
     };
   } catch (error) {
-    console.error('Error deleting project:', error);
+    console.error('Error deleting market:', error);
     return {
-      errors: { _form: ['Une erreur est survenue lors de la suppression du projet'] },
+      errors: { _form: ['Une erreur est survenue lors de la suppression du marché'] },
       success: false,
     };
   }

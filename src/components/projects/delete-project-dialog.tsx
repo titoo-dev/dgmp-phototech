@@ -45,7 +45,7 @@ export function DeleteProjectDialog({
       const result = await deleteProjectAction(projectId);
       
       if (result.success) {
-        toast.success('Projet supprimé', {
+        toast.success('Marché supprimé', {
           description: result.message,
           duration: 3000,
         });
@@ -55,7 +55,7 @@ export function DeleteProjectDialog({
         }
       } else {
         toast.error('Erreur', {
-          description: result.errors?._form?.[0] || 'Impossible de supprimer le projet',
+          description: result.errors?._form?.[0] || 'Impossible de supprimer le marché',
           duration: 5000,
         });
       }
@@ -71,9 +71,9 @@ export function DeleteProjectDialog({
       )}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer le projet "{projectTitle}"</AlertDialogTitle>
+          <AlertDialogTitle>Supprimer le marché "{projectTitle}"</AlertDialogTitle>
           <AlertDialogDescription>
-            Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
+            Êtes-vous sûr de vouloir supprimer ce marché ? Cette action est irréversible.
             {/* Note: If the project is associated with missions, the deletion will be prevented */}
           </AlertDialogDescription>
         </AlertDialogHeader>

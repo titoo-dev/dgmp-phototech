@@ -40,7 +40,7 @@ export function ProjectListTable({ projects, searchQuery }: ProjectListTableProp
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Projet</TableHead>
+							<TableHead>Marché</TableHead>
 							<TableHead>Entreprise</TableHead>
 							<TableHead>Nature</TableHead>
 							<TableHead>Dates</TableHead>
@@ -123,18 +123,18 @@ export function ProjectListTable({ projects, searchQuery }: ProjectListTableProp
 				{projects.length === 0 && (
 					<div className="text-center py-8">
 						<Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-						<h3 className="text-lg font-semibold mb-2">Aucun projet trouvé</h3>
+						<h3 className="text-lg font-semibold mb-2">Aucun marché trouvé</h3>
 						<p className="text-muted-foreground mb-4">
 							{searchQuery 
 								? "Essayez de modifier vos critères de recherche"
-								: "Commencez par créer votre premier projet"
+								: "Commencez par créer votre premier marché"
 							}
 						</p>
 						{!searchQuery && (
 							<Button asChild>
 								<Link href="/projects/nouveau">
 									<Plus className="w-4 h-4 mr-2" />
-									Créer un projet
+									Créer un marché
 								</Link>
 							</Button>
 						)}

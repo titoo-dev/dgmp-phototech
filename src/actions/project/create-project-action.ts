@@ -69,9 +69,9 @@ export async function createProjectAction(
             data: project,
         };
     } catch (error) {
-        console.error("Error creating project:", error);
+        console.error("Error creating market:", error);
         return {
-            errors: { _form: ["Une erreur est survenue lors de la création du projet"] },
+            errors: { _form: ["Une erreur est survenue lors de la création du marché"] },
             success: false,
             data,
         };

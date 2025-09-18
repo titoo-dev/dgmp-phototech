@@ -37,7 +37,7 @@ export default function UpdateProjectFormClient({
 
 	useEffect(() => {
 		if (state.success) {
-			toast.success('Projet mis à jour avec succès', {
+			toast.success('Marché mis à jour avec succès', {
 				description: 'Les modifications ont été enregistrées.',
 				duration: 4000,
 			});
@@ -56,10 +56,10 @@ export default function UpdateProjectFormClient({
 
 		const form = new FormData(formRef.current);
 		
-		// Add project ID
+		// Add marché ID
 		form.set('id', project.id);
 
-		console.log('Form data being submitted for project update:');
+		console.log('Form data being submitted for marché update:');
 		for (const [key, value] of form.entries()) {
 			console.log(key, value);
 		}

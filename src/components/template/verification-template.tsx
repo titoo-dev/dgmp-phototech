@@ -107,7 +107,7 @@ export function VerificationTemplate({ firstName, url }: VerificationTemplatePro
           }}>
             <li>Gestion des rapports de mission</li>
             <li>Upload et organisation des photos</li>
-            <li>Suivi des projets de contrôle</li>
+            <li>Suivi des contrôles des marchés</li>
             <li>Extraction de contenus pour publications</li>
           </ul>
         </div>

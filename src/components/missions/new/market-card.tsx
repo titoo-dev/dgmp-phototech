@@ -43,11 +43,11 @@ export default function MarketCard({ market, marketsCount, projects, onRemoveMar
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				{/* Sélection de projet */}
+				{/* Sélection de marché */}
 				<div className="flex flex-col space-y-2">
 					<div className="flex items-center justify-between">
 						<label className="text-sm font-medium text-foreground">
-							Projet à contrôler
+							Marché à contrôler
 							<span className="text-destructive ml-1">*</span>
 						</label>
 						<Button
@@ -59,7 +59,7 @@ export default function MarketCard({ market, marketsCount, projects, onRemoveMar
 						>
 							<Link href="/dashboard/projects/new">
 								<Plus className="h-3 w-3" />
-								Nouveau projet
+								Nouveau marché
 							</Link>
 						</Button>
 					</div>
@@ -67,7 +67,7 @@ export default function MarketCard({ market, marketsCount, projects, onRemoveMar
 						projects={projects}
 						value={market.selectedProject?.id || ""}
 						onValueChange={(projectId) => onProjectChange(market.id, projectId)}
-						placeholder="Sélectionner un projet..."
+						placeholder="Sélectionner un marché..."
 					/>
 					{market.selectedProject && (
 						<div className="p-3 bg-muted/30 rounded-md">

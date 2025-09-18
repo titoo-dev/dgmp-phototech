@@ -52,15 +52,15 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Target className="h-5 w-5 text-primary" />
-              Informations du projet
+              Informations du marché
             </CardTitle>
-            <CardDescription>Renseignez les informations principales du projet</CardDescription>
+            <CardDescription>Renseignez les informations principales du marché</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium text-foreground">
-                Titre du projet
+                Titre du marché
                 <span className="text-destructive ml-1">*</span>
               </Label>
               <div className="relative">
@@ -165,13 +165,13 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium text-foreground">
-                Description du projet
+                Description du marché
                 <span className="text-destructive ml-1">*</span>
               </Label>
               <Textarea 
                 id="description" 
                 name="description" 
-                placeholder="Décrivez en détail les objectifs et spécifications du projet..." 
+                placeholder="Décrivez en détail les objectifs et spécifications du marché..." 
                 className="min-h-[120px] resize-none" 
                 value={formData.description}
                 onChange={(e) => onFieldChange('description', e.target.value)}
@@ -193,15 +193,15 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Package className="h-5 w-5 text-primary" />
-              Classification du projet
+              Classification du marché
             </CardTitle>
-            <CardDescription>Nature et statut du projet de marché public</CardDescription>
+            <CardDescription>Nature et statut du marché public</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Nature */}
             <div className="space-y-2">
               <Label htmlFor="nature" className="text-sm font-medium text-foreground">
-                Nature du projet
+                Nature du marché
                 <span className="text-destructive ml-1">*</span>
               </Label>
               <div className="relative">
@@ -237,7 +237,7 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
             {/* Status */}
             <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium text-foreground">
-                Statut du projet
+                Statut du marché
                 <span className="text-destructive ml-1">*</span>
               </Label>
               <div className="relative">
@@ -269,13 +269,13 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
               )}
             </div>
 
-            {/* Project Info Card */}
+            {/* Marché Info Card */}
             <div className="rounded-lg bg-muted/30 p-4">
               <h4 className="font-medium text-sm text-foreground mb-2">Information sur les statuts</h4>
               <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• <strong>Non contrôlé :</strong> Projet en attente de contrôle</li>
+                <li>• <strong>Non contrôlé :</strong> Marché en attente de contrôle</li>
                 <li>• <strong>Contrôlé - En cours :</strong> Contrôle en progression</li>
-                <li>• <strong>Contrôlé - Livré :</strong> Projet livré et vérifié</li>
+                <li>• <strong>Contrôlé - Livré :</strong> Marché livré et vérifié</li>
                 <li>• <strong>Contrôlé - Autre :</strong> Contrôle spécial</li>
                 <li>• <strong>En Litige :</strong> Problème détecté</li>
               </ul>

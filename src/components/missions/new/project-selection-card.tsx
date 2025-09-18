@@ -66,7 +66,7 @@ export default function ProjectSelectionCard({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Projets contrôlés</h2>
+        <h2 className="text-lg font-semibold text-foreground">Marchés contrôlés</h2>
         <Button
           type="button"
           variant="outline"
@@ -76,18 +76,18 @@ export default function ProjectSelectionCard({
           disabled={availableProjects.length === 0}
         >
           <Plus className="h-4 w-4" />
-          Ajouter un projet
+          Ajouter un marché
         </Button>
       </div>
 
-      {/* Add new project selector */}
+      {/* Add new market selector */}
       {openProjectId?.startsWith('new-') && (
         <Card className="border-dashed">
           <CardContent className="pt-6">
             <div className="space-y-4">
               <ProjectCombobox
                 projects={availableProjects}
-                placeholder="Sélectionner un projet à contrôler..."
+                placeholder="Sélectionner un marché à contrôler..."
                 onValueChange={(value) => handleSelectProject(value, openProjectId)}
               />
               <Button
@@ -128,11 +128,11 @@ export default function ProjectSelectionCard({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Project Notes */}
+            {/* Market Notes */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Notes du contrôle</label>
+              <label className="text-sm font-medium">Notes du contrôle du marché</label>
               <Textarea
-                placeholder="Ajouter des notes sur le contrôle de ce projet..."
+                placeholder="Ajouter des notes sur le contrôle de ce marché..."
                 value={selectedProject.notes}
                 onChange={(e) => handleNotesChange(selectedProject.id, e.target.value)}
                 rows={3}
@@ -160,7 +160,7 @@ export default function ProjectSelectionCard({
         <Card className="border-dashed">
           <CardContent className="pt-6 pb-6 text-center">
             <p className="text-muted-foreground">
-              Aucun projet sélectionné. Cliquez sur "Ajouter un projet" pour commencer.
+              Aucun marché sélectionné. Cliquez sur "Ajouter un marché" pour commencer.
             </p>
           </CardContent>
         </Card>

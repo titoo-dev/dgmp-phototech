@@ -61,10 +61,10 @@ export default function SearchFilters({
           <div className="flex gap-2">
             <Select value={selectedProject} onValueChange={(value) => onProjectChange(value)}>
               <SelectTrigger className="w-48 border-gray-300">
-                <SelectValue placeholder="Tous les projets" />
+                <SelectValue placeholder="Tous les marchés" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les projets</SelectItem>
+                <SelectItem value="all">Tous les marchés</SelectItem>
                 {uniqueProjects.map((project) => (
                   <SelectItem key={project} value={project}>{project}</SelectItem>
                 ))}

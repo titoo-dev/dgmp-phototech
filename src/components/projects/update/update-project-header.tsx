@@ -29,7 +29,7 @@ export default function UpdateProjectHeader({ project, isPending }: UpdateProjec
 						</Button>
 						<div>
 							<h1 className="text-lg font-semibold">
-								Modifier le projet
+								Modifier le marché
 							</h1>
 							<p className="text-sm text-muted-foreground">
 								{project.title} • {project.company.name}

@@ -36,9 +36,9 @@ export default async function HomePage() {
       color: "text-blue-600"
     },
     {
-      title: "Projets actifs",
+      title: "Marchés actifs",
       value: "23",
-      description: "Projets en cours",
+      description: "Marchés en cours",
       icon: Building2,
       trend: "+5%",
       color: "text-green-600"
@@ -208,7 +208,7 @@ export default async function HomePage() {
               <Button variant="outline" className="justify-start h-12" asChild>
                 <Link href="/projects">
                   <Building2 className="w-4 h-4 mr-2" />
-                  Gérer les projects
+                  Gérer les marchés
                 </Link>
               </Button>
               <Button variant="outline" className="justify-start h-12" asChild>

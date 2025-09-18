@@ -43,11 +43,11 @@ export async function deleteCompanyAction(
             };
         }
 
-        // Check if company has associated projects
+        // Check if company has associated markets
         if (existingCompany.projects.length > 0) {
             return {
                 success: false,
-                error: 'Impossible de supprimer cette entreprise car elle a des projets associés. Veuillez d\'abord supprimer ou réassigner les projets.',
+                error: 'Impossible de supprimer cette entreprise car elle a des marchés associés. Veuillez d\'abord supprimer ou réassigner les marchés.',
             };
         }
 

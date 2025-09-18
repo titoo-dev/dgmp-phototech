@@ -14,12 +14,12 @@ export function NoProjectsFound({ searchQuery, onClearSearch }: NoProjectsFoundP
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
       <Search className="w-16 h-16 text-muted-foreground/50 mb-4" />
       <h3 className="text-xl font-semibold mb-2">
-        Aucun projet trouvé
+        Aucun marché trouvé
       </h3>
       <p className="text-muted-foreground mb-6 max-w-md">
         {searchQuery 
-          ? `Aucun projet ne correspond à "${searchQuery}". Essayez de modifier vos critères de recherche.`
-          : "Aucun projet n'est disponible pour le moment."
+          ? `Aucun marché ne correspond à "${searchQuery}". Essayez de modifier vos critères de recherche.`
+          : "Aucun marché n'est disponible pour le moment."
         }
       </p>
       <div className="flex items-center gap-3">
@@ -31,7 +31,7 @@ export function NoProjectsFound({ searchQuery, onClearSearch }: NoProjectsFoundP
         <Button asChild>
           <Link href="/projects/nouveau">
             <Building2 className="w-4 h-4 mr-2" />
-            Créer un projet
+            Créer un marché
           </Link>
         </Button>
       </div>

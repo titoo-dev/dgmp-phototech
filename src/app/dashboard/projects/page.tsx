@@ -19,7 +19,7 @@ export default async function ProjetsPage() {
 			<div className="container mx-auto p-6">
 				<div className="text-center py-12">
 					<h2 className="text-xl font-semibold text-red-600 mb-2">
-						Error loading projects
+						Error loading markets
 					</h2>
 					<p className="text-gray-600">
 						{result.error || 'An unexpected error occurred'}

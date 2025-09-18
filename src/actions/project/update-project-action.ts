@@ -70,7 +70,7 @@ export async function updateProjectAction(
 
     if (!existing) {
       return {
-        errors: { _form: ['Projet introuvable'] },
+        errors: { _form: ['Marché introuvable'] },
         success: false,
         data: parsed,
       };
@@ -112,9 +112,9 @@ export async function updateProjectAction(
       data: project,
     };
   } catch (error) {
-    console.error('Error updating project:', error);
+    console.error('Error updating market:', error);
     return {
-      errors: { _form: ['Une erreur est survenue lors de la mise à jour du projet'] },
+      errors: { _form: ['Une erreur est survenue lors de la mise à jour du marché'] },
       success: false,
       data: parsed,
     };

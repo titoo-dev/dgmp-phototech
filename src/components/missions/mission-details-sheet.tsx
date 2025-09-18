@@ -430,13 +430,13 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose, user, userRole
                                 </Card>
                             )}
 
-                            {/* Projets associés */}
+                            {/* Marchés associés */}
                             {mission.missionProjects && mission.missionProjects.length > 0 && (
                                 <Card className='shadow-none'>
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <Building2 className="w-5 h-5" />
-                                            Projets associés ({mission.missionProjects.length})
+                                            Marchés associés ({mission.missionProjects.length})
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -483,7 +483,7 @@ export function MissionDetailsSheet({ missionId, isOpen, onClose, user, userRole
                                                         </div>
                                                     )}
 
-                                                    {/* Photos du projet */}
+                                                    {/* Photos du marché */}
                                                     {missionProject.files && missionProject.files.length > 0 && (
                                                         <div className="mt-4">
                                                             <div className="flex items-center gap-2 mb-3">

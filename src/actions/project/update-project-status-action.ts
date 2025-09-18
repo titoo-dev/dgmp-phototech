@@ -18,7 +18,7 @@ export async function updateProjectStatusAction(
     // Validate inputs
     if (!projectId || typeof projectId !== 'string') {
       return {
-        errors: { _form: ['ID de projet invalide'] },
+        errors: { _form: ['ID de marché invalide'] },
         success: false,
       };
     }
@@ -38,7 +38,7 @@ export async function updateProjectStatusAction(
 
     if (!existingProject) {
       return {
-        errors: { _form: ['Projet introuvable'] },
+        errors: { _form: ['Marché introuvable'] },
         success: false,
       };
     }
@@ -55,12 +55,12 @@ export async function updateProjectStatusAction(
 
     return {
       success: true,
-      message: `Statut du projet "${existingProject.title}" mis à jour avec succès`,
+      message: `Statut du marché "${existingProject.title}" mis à jour avec succès`,
     };
   } catch (error) {
-    console.error('Error updating project status:', error);
+    console.error('Error updating market status:', error);
     return {
-      errors: { _form: ['Une erreur est survenue lors de la mise à jour du statut'] },
+      errors: { _form: ['Une erreur est survenue lors de la mise à jour du statut du marché'] },
       success: false,
     };
   }

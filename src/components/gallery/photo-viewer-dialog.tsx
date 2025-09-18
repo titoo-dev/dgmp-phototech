@@ -185,7 +185,7 @@ export function PhotoViewerDialog({ photo, isOpen, onClose }: PhotoViewerDialogP
              </Button>
           </div>
 
-          {/* Details Section */}
+          {/* Market Details Section */}
           <div className="space-y-4">
             {/* Mission Details */}
             <Card className="shadow-none">
@@ -233,13 +233,13 @@ export function PhotoViewerDialog({ photo, isOpen, onClose }: PhotoViewerDialogP
 
             <Separator />
 
-            {/* Project Details */}
+            {/* Market Details */}
             <Card className="shadow-none">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    Projet associé
+                    Marché associé
                   </div>
                   <div className="flex gap-2">
                     {getProjectStatusBadge(photo.missionProject.project.status)}

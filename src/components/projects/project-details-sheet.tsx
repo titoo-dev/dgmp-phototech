@@ -202,7 +202,7 @@ export function ProjectDetailsSheet({ projectId, isOpen, onClose }: ProjectDetai
                     <div className="flex flex-col items-center justify-center h-96 space-y-4">
                         <AlertCircle className="w-12 h-12 text-red-500" />
                         <p className="text-lg font-medium text-gray-900">Erreur de chargement</p>
-                        <p className="text-sm text-gray-600">{error || 'Projet introuvable'}</p>
+                        <p className="text-sm text-gray-600">{error || 'Marché introuvable'}</p>
                         <Button onClick={loadProjectDetails} variant="outline">
                             Réessayer
                         </Button>
@@ -402,7 +402,7 @@ export function ProjectDetailsSheet({ projectId, isOpen, onClose }: ProjectDetai
                                     <CardContent>
                                         <div className="text-center py-8 text-muted-foreground">
                                             <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                            <p>Aucune mission associée à ce projet</p>
+                                            <p>Aucune mission associée à ce marché</p>
                                         </div>
                                     </CardContent>
                                 </Card>

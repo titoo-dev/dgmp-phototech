@@ -40,7 +40,7 @@ export function ProjectHeader({ viewMode, onViewModeChange }: ProjectHeaderProps
 				<Button asChild>
 					<Link href="/dashboard/projects/new">
 						<Plus className="w-4 h-4" />
-						Nouveau projet
+						Nouveau marché
 					</Link>
 				</Button>
 			</div>

@@ -18,13 +18,13 @@ export default function ProjectHeader({
               <Briefcase className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Nouveau projet</h1>
-              <p className="text-sm text-muted-foreground">Créer un nouveau projet de marché public</p>
+              <h1 className="text-2xl font-bold text-foreground">Nouveau marché</h1>
+              <p className="text-sm text-muted-foreground">Créer un nouveau marché public</p>
             </div>
           </div>
           <Button type="submit" form="project-form" disabled={isPending} className="gap-2">
             <Save className="h-4 w-4" />
-            {isPending ? 'Enregistrement...' : 'Enregistrer le projet'}
+            {isPending ? 'Enregistrement...' : 'Enregistrer le marché'}
           </Button>
         </div>
       </div>

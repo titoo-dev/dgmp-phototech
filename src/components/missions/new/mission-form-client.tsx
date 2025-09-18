@@ -218,7 +218,7 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 		// Add computed fields
 		form.set('status', 'DRAFT');
 		
-		// Add projects data as JSON (from markets)
+		// Add markets data as JSON (from markets)
 		const projectsData = markets
 			.filter(market => market.selectedProject)
 			.map(market => ({
@@ -283,8 +283,8 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 
 		const marketsWithProjects = markets.filter(market => market.selectedProject);
 		if (marketsWithProjects.length === 0) {
-			toast.error('Aucun projet sélectionné', {
-				description: 'Veuillez sélectionner au moins un projet pour un marché.',
+			toast.error('Aucun marché sélectionné', {
+				description: 'Veuillez sélectionner au moins un marché pour un marché.',
 				duration: 5000,
 			});
 			return;
