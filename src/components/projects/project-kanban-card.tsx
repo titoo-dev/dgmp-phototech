@@ -72,6 +72,25 @@ export function ProjectKanbanCard({ projet, className, onProjectDeleted }: Proje
     }
   }
 
+  const getNatureFrench = (nature: string) => {
+    switch (nature) {
+      case 'SUPPLY':
+        return 'Fourniture'
+      case 'SERVICES':
+        return 'Services'
+      case 'INTELLECTUAL':
+        return 'Prestations intellectuelles'
+      case 'PROGRAM':
+        return 'Programme'
+      case 'MIXED':
+        return 'Mixte'
+      case 'CONTROLLED_EXPENSES':
+        return 'Dépenses contrôlées'
+      default:
+        return nature
+    }
+  }
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -203,7 +222,7 @@ export function ProjectKanbanCard({ projet, className, onProjectDeleted }: Proje
         {/* Footer avec nature et statut */}
         <div className="flex items-center justify-between pt-2 border-t gap-2">
           <Badge variant="outline" className="text-xs break-words">
-            {projet.nature}
+            {getNatureFrench(projet.nature)}
           </Badge>
         </div>
       </div>
