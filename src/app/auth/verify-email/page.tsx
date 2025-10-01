@@ -16,14 +16,14 @@ const VerifyEmailPage = () => {
               MarketScan
             </CardTitle>
             <CardDescription className="text-center text-base">
-              Secure MarketScan Management System
+              Système de Gestion Sécurisé MarketScan
             </CardDescription>
           </CardHeader>
 
           <CardContent className="pb-8 text-center space-y-6">
             <div className="space-y-3">
               <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-                We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.
+                Nous avons envoyé un lien de vérification à votre adresse email. Veuillez consulter votre boîte de réception et cliquer sur le lien pour vérifier votre compte.
               </p>
             </div>
           </CardContent>
@@ -31,7 +31,7 @@ const VerifyEmailPage = () => {
 
         <div className="mt-8 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2024 MarketScan DGMP. All rights reserved.
+            © 2024 MarketScan DGMP. Tous droits réservés.
           </p>
         </div>
       </div>

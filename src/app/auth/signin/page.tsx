@@ -29,7 +29,7 @@ const SignInPage = () => {
       toast.error(state.error);
     }
     if (state.success && state.redirect) {
-      toast.success("Sign in successful! Redirecting...");
+      toast.success("Connexion réussie ! Redirection...");
       router.push(state.redirect);
     }
   }, [state.error, state.success]);
@@ -39,16 +39,16 @@ const SignInPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign in to your account
+            Connectez-vous à votre compte
           </CardTitle>
           {process.env.DISABLE_SIGN_UP === "true" && (
             <CardDescription className="text-center">
-              Or{" "}
+              Ou{" "}
               <Link
                 href="/auth/signup"
                 className="font-medium text-primary hover:underline"
               >
-                create a new account
+                créer un nouveau compte
               </Link>
             </CardDescription>
           )}
@@ -61,7 +61,7 @@ const SignInPage = () => {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Entrez votre email"
                 autoComplete="email"
                 required
                 aria-invalid={!!state.fieldErrors?.email}
@@ -74,12 +74,12 @@ const SignInPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
                 autoComplete="current-password"
                 required
                 aria-invalid={!!state.fieldErrors?.password}
@@ -101,7 +101,7 @@ const SignInPage = () => {
                 htmlFor="rememberMe" 
                 className="text-sm font-normal cursor-pointer"
               >
-                Remember me
+                Se souvenir de moi
               </Label>
             </div>
 
@@ -112,7 +112,7 @@ const SignInPage = () => {
               className="w-full"
               disabled={isPending}
             >
-              {isPending ? "Signing in..." : "Sign in"}
+              {isPending ? "Connexion..." : "Se connecter"}
             </Button>
           </form>
         </CardContent>

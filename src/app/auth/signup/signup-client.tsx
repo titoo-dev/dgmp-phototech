@@ -31,7 +31,7 @@ const SignUpClientPage = () => {
       toast.error(state.error);
     }
     if (state.success) {
-      toast.success("Account created successfully! Redirecting...");
+      toast.success("Compte créé avec succès ! Redirection...");
     }
   }, [state.error, state.success]);
 
@@ -40,27 +40,27 @@ const SignUpClientPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Create your account
+            Créez votre compte
           </CardTitle>
           <CardDescription className="text-center">
-            Or{" "}
+            Ou{" "}
             <Link
               href="/auth/signin"
               className="font-medium text-primary hover:underline"
             >
-              sign in to your existing account
+              connectez-vous à votre compte existant
             </Link>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form action={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Nom</Label>
               <Input
                 id="name"
                 name="name"
                 type="text"
-                placeholder="Enter your name"
+                placeholder="Entrez votre nom"
                 aria-invalid={!!state.fieldErrors?.name}
               />
               {state.fieldErrors?.name && (
@@ -76,7 +76,7 @@ const SignUpClientPage = () => {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Entrez votre email"
                 required
                 aria-invalid={!!state.fieldErrors?.email}
               />
@@ -88,12 +88,12 @@ const SignUpClientPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
                 required
                 aria-invalid={!!state.fieldErrors?.password}
               />
@@ -111,7 +111,7 @@ const SignUpClientPage = () => {
               className="w-full"
               disabled={isPending}
             >
-              {isPending ? "Creating account..." : "Create account"}
+              {isPending ? "Création du compte..." : "Créer un compte"}
             </Button>
           </form>
         </CardContent>
