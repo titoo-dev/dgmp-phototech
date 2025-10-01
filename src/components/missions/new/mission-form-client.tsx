@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Market, Photo } from '@/components/missions/new/types';
 import type { ProjectWithCompany } from '@/actions/project/get-projects-action';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -44,6 +45,7 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 	const [state, formAction] = useActionState(createMissionAction, {});
 	const [isPending, startTransition] = useTransition();
 	const formRef = useRef<HTMLFormElement | null>(null);
+	const router = useRouter();
 
 	const [formData, setFormData] = useState<Partial<MissionModel>>({
 		members: [],
@@ -155,13 +157,14 @@ export default function MissionFormClient({ teamLeaders, contacts, projects, cur
 				location: "",
 				status: "DRAFT",
 			});
+			router.push('/dashboard/missions');
 		} else if (state.errors?._form) {
 			toast.error('Erreur lors de la création', {
 				description: state.errors._form[0],
 				duration: 5000,
 			});
 		}
-	}, [state.success, state.errors]);
+	}, [state.success, state.errors, router]);
 
 	const handleAddMarket = () => {
 		const newMarket: Market = {
