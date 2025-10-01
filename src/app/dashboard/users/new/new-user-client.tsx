@@ -32,6 +32,7 @@ import {
 	Lock,
 	Eye,
 	EyeOff,
+	Phone,
 } from 'lucide-react';
 import { createUserAction } from '@/actions/user/create-user';
 
@@ -191,6 +192,35 @@ export default function NewUserClient() {
 											<p className="text-sm text-destructive flex items-center gap-1">
 												<AlertCircle className="w-4 h-4" />
 												{state.fieldErrors.email[0]}
+											</p>
+										)}
+									</div>
+
+									{/* Phone Number */}
+									<div className="space-y-2">
+										<Label
+											htmlFor="phoneNumber"
+											className="text-sm font-medium text-foreground"
+										>
+											Numéro de téléphone
+										</Label>
+										<div className="relative">
+											<Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+											<Input
+												id="phoneNumber"
+												name="phoneNumber"
+												type="tel"
+												placeholder="+241 XX XX XX XX"
+												className="pl-10 h-12"
+												aria-invalid={
+													!!state.fieldErrors?.phoneNumber
+												}
+											/>
+										</div>
+										{state.fieldErrors?.phoneNumber && (
+											<p className="text-sm text-destructive flex items-center gap-1">
+												<AlertCircle className="w-4 h-4" />
+												{state.fieldErrors.phoneNumber[0]}
 											</p>
 										)}
 									</div>

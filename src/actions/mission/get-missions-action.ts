@@ -92,6 +92,7 @@ export type MissionWithRelations = {
         email: string;
         emailVerified: boolean;
         image: string | null;
+        phoneNumber: string | null;
         createdAt: Date;
         updatedAt: Date;
         role: string | null;

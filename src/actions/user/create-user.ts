@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { getAuthErrorMessage } from "@/lib/errors/get-auth-error-message";
 import { headers } from "next/headers";
+import prisma from "@/lib/prisma";
 
 
 const createUserSchema = z.object({
@@ -11,6 +12,7 @@ const createUserSchema = z.object({
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   confirmPassword: z.string(),
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  phoneNumber: z.string().optional(),
   role: z.enum(["u1", "u2", "u3"]).optional().default("u1"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
@@ -25,6 +27,7 @@ export type CreateUserFormState = {
     password?: string[];
     confirmPassword?: string[];
     name?: string[];
+    phoneNumber?: string[];
     role?: string[];
   };
   user?: {
@@ -44,6 +47,7 @@ export const createUserAction = async (
       password: formData.get("password") as string,
       confirmPassword: formData.get("confirmPassword") as string,
       name: formData.get("name") as string,
+      phoneNumber: formData.get("phoneNumber") as string,
       role: formData.get("role") as string,
     };
 
@@ -56,7 +60,7 @@ export const createUserAction = async (
       };
     }
 
-    const { email, password, name, role } = validatedData.data;
+    const { email, password, name, phoneNumber, role } = validatedData.data;
 
     const newUser = await auth.api.signUpEmail({
         body: {
@@ -66,6 +70,14 @@ export const createUserAction = async (
           callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
         },
     });
+
+    // Update user with phone number if provided
+    if (phoneNumber && newUser.user.id) {
+      await prisma.user.update({
+        where: { id: newUser.user.id },
+        data: { phoneNumber },
+      });
+    }
 
     const data = await auth.api.setRole({
         body: {

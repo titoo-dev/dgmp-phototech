@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   email: z.string().email("Adresse email invalide"),
   emailVerified: z.boolean(),
   image: z.string().nullable(),
+  phoneNumber: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
   role: z.string().nullable(),

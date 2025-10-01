@@ -49,6 +49,7 @@ export async function getUsersAction(role?: string): Promise<GetUsersState> {
                 name: user.name,
                 email: user.email,
                 emailVerified: user.emailVerified,
+                phoneNumber: user.phoneNumber,
                 image: user.image,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,

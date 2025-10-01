@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { updateProfileAction, updateAvatarAction } from "@/actions/user/update-profile-action";
 import { toast } from "sonner";
-import { Camera, Loader2, Mail, User, Calendar, Shield } from "lucide-react";
+import { Camera, Loader2, Mail, User, Calendar, Shield, Phone } from "lucide-react";
 import { AuthUser, getUserRole } from "@/lib/auth-utils";
 
 interface ProfileFormProps {
@@ -33,6 +33,7 @@ type ProfileState = {
   fieldErrors?: {
     name?: string;
     email?: string;
+    phoneNumber?: string;
   };
 };
 
@@ -45,8 +46,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
     async (prevState: ProfileState, formData: FormData) => {
       const name = formData.get('name') as string;
       const email = formData.get('email') as string;
+      const phoneNumber = formData.get('phoneNumber') as string;
       
-      const result = await updateProfileAction({ name, email });
+      const result = await updateProfileAction({ name, email, phoneNumber });
       
       if (result.success) {
         toast.success("Profil mis à jour avec succès");
@@ -180,6 +182,27 @@ export function ProfileForm({ user }: ProfileFormProps) {
               />
               {state.fieldErrors?.email && (
                 <p className="text-sm text-red-500">{state.fieldErrors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  Numéro de téléphone
+                </div>
+              </Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                placeholder="+241 XX XX XX XX"
+                defaultValue={(user as any).phoneNumber || ""}
+                disabled={isPending}
+                className={state.fieldErrors?.phoneNumber ? "border-red-500" : ""}
+              />
+              {state.fieldErrors?.phoneNumber && (
+                <p className="text-sm text-red-500">{state.fieldErrors.phoneNumber}</p>
               )}
             </div>
 

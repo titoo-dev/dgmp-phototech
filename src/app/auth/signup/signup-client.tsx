@@ -104,7 +104,21 @@ const SignUpClientPage = () => {
               )}
             </div>
 
-
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Numéro de téléphone (optionnel)</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                placeholder="+241 XX XX XX XX"
+                aria-invalid={!!state.fieldErrors?.phoneNumber}
+              />
+              {state.fieldErrors?.phoneNumber && (
+                <p className="text-sm text-destructive">
+                  {state.fieldErrors.phoneNumber[0]}
+                </p>
+              )}
+            </div>
 
             <Button
               type="submit"

@@ -47,6 +47,7 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
           email: mission.teamLeader.email,
           emailVerified: mission.teamLeader.emailVerified,
           image: mission.teamLeader.image,
+          phoneNumber: mission.teamLeader.phoneNumber,
           createdAt: mission.teamLeader.createdAt,
           updatedAt: mission.teamLeader.updatedAt,
           role: mission.teamLeader.role,

@@ -9,6 +9,7 @@ import prisma from "@/lib/prisma";
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   email: z.string().email("Email invalide"),
+  phoneNumber: z.string().optional(),
 });
 
 const updateAvatarSchema = z.object({
@@ -58,6 +59,7 @@ export async function updateProfileAction(data: z.infer<typeof updateProfileSche
       data: {
         name: validatedData.name,
         email: validatedData.email,
+        phoneNumber: validatedData.phoneNumber || null,
         updatedAt: new Date(),
       },
     });
@@ -69,19 +71,22 @@ export async function updateProfileAction(data: z.infer<typeof updateProfileSche
         name: updatedUser.name,
         email: updatedUser.email,
         image: updatedUser.image,
+        phoneNumber: updatedUser.phoneNumber,
       },
     };
   } catch (error) {
     console.error("Erreur lors de la mise à jour du profil:", error);
     
     if (error instanceof z.ZodError) {
-      const fieldErrors: { name?: string; email?: string } = {};
+      const fieldErrors: { name?: string; email?: string; phoneNumber?: string } = {};
       
       error.issues.forEach((err) => {
         if (err.path[0] === 'name') {
           fieldErrors.name = err.message;
         } else if (err.path[0] === 'email') {
           fieldErrors.email = err.message;
+        } else if (err.path[0] === 'phoneNumber') {
+          fieldErrors.phoneNumber = err.message;
         }
       });
 
@@ -185,6 +190,7 @@ export async function getProfileAction() {
         name: true,
         email: true,
         image: true,
+        phoneNumber: true,
         role: true,
         createdAt: true,
         updatedAt: true,
