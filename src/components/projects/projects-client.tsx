@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
+import { useState, useMemo, useTransition, useEffect, useCallback } from 'react';
 import { ProjectHeader } from '@/components/projects/project-header';
 import { ProjectSearch } from '@/components/projects/project-search';
 import { ProjectKanbanView } from '@/components/projects/project-kanban-view';
@@ -10,7 +10,6 @@ import type { ProjectModel } from '@/models/project-schema';
 import { updateProjectStatusAction } from '@/actions/project/update-project-status-action';
 import { ProjectStatus } from '@/lib/generated/prisma';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 interface ProjectsClientProps {
   projects: ProjectWithCompany[];
@@ -27,11 +26,11 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [, startTransition] = useTransition();
-  const router = useRouter();
+  const [currentProjects, setCurrentProjects] = useState<ProjectWithCompany[]>(projects);
 
   // Transform database projects to the format expected by components
   const projectsData = useMemo(() => {
-    return projects.map((project): ProjectKanbanItem => ({
+    return currentProjects.map((project): ProjectKanbanItem => ({
       id: project.id,
       name: project.title,
       column: project.status,
@@ -54,7 +53,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
         },
       },
     }));
-  }, [projects]);
+  }, [currentProjects]);
 
   // Calculate kanban columns with dynamic counts
   const kanbanColumns = useMemo(() => [
@@ -102,14 +101,32 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
 
   const [currentProjectsData, setCurrentProjectsData] = useState<ProjectKanbanItem[]>(projectsData);
 
+  // Update currentProjectsData when projectsData changes
+  useEffect(() => {
+    setCurrentProjectsData(projectsData);
+  }, [projectsData]);
+
+  // Refresh projects data
+  const refreshProjects = useCallback(async () => {
+    try {
+      const response = await fetch('/api/projects');
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentProjects(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to refresh projects:', error);
+    }
+  }, []);
+
   const handleProjectDeleted = () => {
-    router.refresh();
+    refreshProjects();
   };
 
   const handleProjectsChange = (newProjects: ProjectKanbanItem[]) => {
     // Find projects that have changed status
     const changedProjects = newProjects.filter((newProject) => {
-      const originalProject = projects.filter(p => p.id === newProject.id)[0];
+      const originalProject = currentProjects.filter(p => p.id === newProject.id)[0];
       return originalProject.status !== newProject.column;
     });
 
