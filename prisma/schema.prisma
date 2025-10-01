@@ -106,16 +106,16 @@ model Contact {
   id             String    @id @default(cuid())
   firstName      String
   lastName       String
-  email          String
+  email          String    @unique
   missionsMember Mission[] @relation("Member")
 }
 
 model Company {
   id            String    @id @default(cuid())
   name          String
-  email         String
+  email         String    @unique
   phoneNumber   String
-  nif           String
+  nif           String    @unique
   employeeCount Int
   projects      Project[]
 }

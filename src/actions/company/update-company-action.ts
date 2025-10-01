@@ -83,18 +83,25 @@ export async function updateCompanyAction(
 		});
 
 		if (conflict) {
-			return {
-				errors: {
-					_form:
-						conflict.email === validated.email
-							? [
-									'Une entreprise avec cette adresse email existe déjà',
-							  ]
-							: ['Une entreprise avec ce NIF existe déjà'],
-				},
-				success: false,
-				data: validated,
-			};
+			if (conflict.email === validated.email) {
+				return {
+					errors: {
+						email: ['Une entreprise avec cette adresse email existe déjà'],
+					},
+					success: false,
+					data: validated,
+				};
+			}
+			
+			if (conflict.nif === validated.nif) {
+				return {
+					errors: {
+						nif: ['Une entreprise avec ce NIF existe déjà'],
+					},
+					success: false,
+					data: validated,
+				};
+			}
 		}
 
 		const updateData: Partial<UpdateCompanyForm> = {};

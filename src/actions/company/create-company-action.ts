@@ -71,15 +71,25 @@ export async function createCompanyAction(
         });
 
         if (existingCompany) {
-            return {
-                errors: {
-                    _form: existingCompany.email === validatedData.email 
-                        ? ["Une entreprise avec cette adresse email existe déjà"]
-                        : ["Une entreprise avec ce NIF existe déjà"],
-                },
-                success: false,
-                data: validatedData,
-            };
+            if (existingCompany.email === validatedData.email) {
+                return {
+                    errors: {
+                        email: ["Une entreprise avec cette adresse email existe déjà"],
+                    },
+                    success: false,
+                    data: validatedData,
+                };
+            }
+            
+            if (existingCompany.nif === validatedData.nif) {
+                return {
+                    errors: {
+                        nif: ["Une entreprise avec ce NIF existe déjà"],
+                    },
+                    success: false,
+                    data: validatedData,
+                };
+            }
         }
 
         // Create the company
