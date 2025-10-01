@@ -76,7 +76,7 @@ export default function ContactCreationDialog() {
         <form ref={formRef} onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">Prénom</Label>
+              <Label htmlFor="firstName">Prénom <span className="text-destructive ml-1">*</span></Label>
               <Input
                 id="firstName"
                 name="firstName"
@@ -89,7 +89,7 @@ export default function ContactCreationDialog() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="lastName">Nom</Label>
+              <Label htmlFor="lastName">Nom <span className="text-destructive ml-1">*</span></Label>
               <Input
                 id="lastName"
                 name="lastName"
@@ -102,7 +102,7 @@ export default function ContactCreationDialog() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email <span className="text-destructive ml-1">*</span></Label>
               <Input
                 id="email"
                 name="email"
