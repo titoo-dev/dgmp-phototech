@@ -6,9 +6,9 @@ export const getApiDocs = async () => {
     definition: {
       openapi: "3.0.0",
       info: {
-        title: "Phototech API",
+        title: "MarketScan API",
         version: "1.0.0",
-        description: "API documentation for Phototech project management system",
+        description: "API documentation for MarketScan project management system",
       },
       servers: [
         {

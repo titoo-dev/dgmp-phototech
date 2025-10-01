@@ -14,9 +14,9 @@ const prisma = new PrismaClient();
 const sendVerificationEmail = async ({ user, url }: { user: User, url: string }) => {
     const { data, error } = await resend.batch.send([
         {
-            from: 'PhotoTech <noreply@titosy.dev>',
+            from: 'MarketScan <noreply@titosy.dev>',
             to: [user.email],
-            subject: 'PhotoTech Email Verification',
+            subject: 'MarketScan Email Verification',
             react: VerificationTemplate({ firstName: user.name, url }),
         }
     ]);

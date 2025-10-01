@@ -74,7 +74,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <div className="flex items-center gap-2 p-1.5 mb-3">
               <Building2 className="size-5" />
-              <span className="text-base font-semibold">Phototech</span>
+              <span className="text-base font-semibold">MarketScan</span>
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

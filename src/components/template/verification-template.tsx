@@ -25,7 +25,7 @@ export function VerificationTemplate({ firstName, url }: VerificationTemplatePro
           fontWeight: 'bold',
           margin: '0 0 8px 0'
         }}>
-          PhotoTech DGMP
+          MarketScan DGMP
         </h1>
         <p style={{
           color: '#9ca3af',

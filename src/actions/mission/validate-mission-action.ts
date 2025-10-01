@@ -67,7 +67,7 @@ export async function validateMissionAction(
     // Send email notification to team leader
     try {
       await resend.batch.send([{
-        from: 'PhotoTech <noreply@titosy.dev>',
+        from: 'MarketScan <noreply@titosy.dev>',
         to: [existingMission.teamLeader.email],
         subject: `Mission validée - Mission #${existingMission.missionNumber}`,
         html: `
@@ -94,7 +94,7 @@ export async function validateMissionAction(
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
             <p style="color: #6c757d; font-size: 14px; text-align: center;">
-              PhotoTech - Système de gestion des missions
+              MarketScan - Système de gestion des missions
             </p>
           </div>
         `

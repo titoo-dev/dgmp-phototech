@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PhotoTech - Photography Technology Platform",
+  title: "MarketScan - Photography Technology Platform",
   description: "A modern platform for photography technology and services",
 };
 

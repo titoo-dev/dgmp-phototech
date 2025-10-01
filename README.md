@@ -1,4 +1,4 @@
-# PhotoTech - Photography Technology Platform
+# MarketScan - Photography Technology Platform
 
 A modern Next.js application with comprehensive authentication using Better Auth, featuring email/password and social login options.
 

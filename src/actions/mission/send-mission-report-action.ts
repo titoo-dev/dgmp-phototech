@@ -83,7 +83,7 @@ export async function sendMissionReportAction(
       const emailPromises = u2UsersResult.users
         .filter(user => user.emailVerified && !user.banned)
         .map(user => ({
-          from: 'PhotoTech <noreply@titosy.dev>',
+          from: 'MarketScan <noreply@titosy.dev>',
           to: [user.email],
           subject: `Nouvelle mission à valider - Mission #${existingMission.missionNumber}`,
           html: `
@@ -110,7 +110,7 @@ export async function sendMissionReportAction(
               
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
               <p style="color: #6c757d; font-size: 14px; text-align: center;">
-                PhotoTech - Système de gestion des missions
+                MarketScan - Système de gestion des missions
               </p>
             </div>
           `

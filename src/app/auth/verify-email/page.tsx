@@ -13,13 +13,13 @@ const VerifyEmailPage = () => {
               </div>
             </div>
             <CardTitle className="text-center text-2xl font-bold">
-              PhotoTech
+              MarketScan
             </CardTitle>
             <CardDescription className="text-center text-base">
-              Secure Photo Management System
+              Secure MarketScan Management System
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="pb-8 text-center space-y-6">
             <div className="space-y-3">
               <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -28,10 +28,10 @@ const VerifyEmailPage = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="mt-8 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2024 PhotoTech DGMP. All rights reserved.
+            © 2024 MarketScan DGMP. All rights reserved.
           </p>
         </div>
       </div>

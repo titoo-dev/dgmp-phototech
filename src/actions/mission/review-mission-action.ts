@@ -86,7 +86,7 @@ export async function reviewMissionAction(
     // Send email notification to team leader with review comment
     try {
       await resend.batch.send([{
-        from: 'PhotoTech <noreply@titosy.dev>',
+        from: 'MarketScan <noreply@titosy.dev>',
         to: [existingMission.teamLeader.email],
         subject: `Mission à réviser - Mission #${existingMission.missionNumber}`,
         html: `
@@ -120,7 +120,7 @@ export async function reviewMissionAction(
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
             <p style="color: #6c757d; font-size: 14px; text-align: center;">
-              PhotoTech - Système de gestion des missions
+              MarketScan - Système de gestion des missions
             </p>
           </div>
         `
