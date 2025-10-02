@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useTransition, useEffect } from "react";
+import { useActionState, useTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { signInAction, type SignInFormState } from "@/actions/sign-in";
@@ -10,12 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 const initialState: SignInFormState = {};
 
 const SignInPage = () => {
   const [state, formAction] = useActionState(signInAction, initialState);
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   
   const handleSubmit = (formData: FormData) => {
@@ -75,15 +77,31 @@ const SignInPage = () => {
 
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Entrez votre mot de passe"
-                autoComplete="current-password"
-                required
-                aria-invalid={!!state.fieldErrors?.password}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Entrez votre mot de passe"
+                  autoComplete="current-password"
+                  className="pr-10"
+                  required
+                  aria-invalid={!!state.fieldErrors?.password}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               {state.fieldErrors?.password && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.password[0]}

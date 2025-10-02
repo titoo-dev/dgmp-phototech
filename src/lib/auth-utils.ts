@@ -147,9 +147,9 @@ export function getRedirectPath(user: AuthUser | null): string {
     case "u4":
       return "/dashboard/users";
     case "u3":
-      return "/dashboard/companies";
+      return "/dashboard/gallery";
     case "u2":
-      return "/dashboard/projects";
+      return "/dashboard/missions";
     case "u1":
       return "/dashboard/missions";
     default:

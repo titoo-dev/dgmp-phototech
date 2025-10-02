@@ -11,16 +11,6 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 
 	const navigationItems = [
 		{
-			title: "Compte",
-			items: [
-				{
-					title: "Mon Profil",
-					url: "/dashboard/profile",
-					permission: null, // Tous les utilisateurs peuvent accéder à leur profil
-				},
-			],
-		},
-		{
 			title: "Menu",
 			items: [
 				{
@@ -55,7 +45,16 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 				},
 			].filter((item) => hasPermission(item.permission as keyof RolePermissions)),
 		},
-		
+		{
+			title: "Compte",
+			items: [
+				{
+					title: "Mon Profil",
+					url: "/dashboard/profile",
+					permission: null, // Tous les utilisateurs peuvent accéder à leur profil
+				},
+			],
+		},
 	]
 
 	return (
