@@ -43,28 +43,24 @@ A modern Next.js application with comprehensive authentication using Better Auth
    ```
 
 3. **Set up environment variables**
-   Create a `.env.local` file in the root directory:
+   Create a `.env.local` file in the root directory (or copy `.env.example`):
    ```env
    # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/phototech"
+   PRISMA_DATABASE_URL="postgresql://username:password@localhost:5432/marketscan"
 
-   # Better Auth
+   # Authentication
    BETTER_AUTH_SECRET="your-secret-key-here"
+   NEXT_PUBLIC_APP_URL="http://localhost:3000"
+   DISABLE_SIGN_UP="false"
 
-   # Google OAuth
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   # Email (Resend)
+   RESEND_API_KEY="your-resend-api-key"
 
-   # GitHub OAuth
-   GITHUB_CLIENT_ID="your-github-client-id"
-   GITHUB_CLIENT_SECRET="your-github-client-secret"
+   # File Storage (Vercel Blob)
+   BLOB_READ_WRITE_TOKEN="your-blob-token"
 
-   # Email (optional for email verification)
-   EMAIL_SERVER_HOST="smtp.gmail.com"
-   EMAIL_SERVER_PORT=587
-   EMAIL_SERVER_USER="your-email@gmail.com"
-   EMAIL_SERVER_PASSWORD="your-app-password"
-   EMAIL_FROM="noreply@yourdomain.com"
+   # Android App Download (optional)
+   ANDROID_APP_URL="https://play.google.com/store/apps/details?id=com.dgmp.marketscan"
    ```
 
 4. **Set up the database**

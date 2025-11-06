@@ -201,6 +201,7 @@ Required environment variables (see `.env.local` template in README):
 - `NEXT_PUBLIC_APP_URL` - Application URL
 - `DISABLE_SIGN_UP` - Optional: Set to "true" to disable public signup
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token
+- `ANDROID_APP_URL` - Optional: URL for Android app download (APK or Play Store link)
 
 ### Multi-Language Support
 
