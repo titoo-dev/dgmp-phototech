@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionAction } from "@/actions/get-session";
 import { getOrganization } from "@/actions/organization/get-organization";
-import { getAvailableAdmins } from "@/actions/organization/get-available-admins";
+import { getOrganizationInvitations } from "@/actions/organization/get-organization-invitations";
 import { EditOrganizationClient } from "./edit-organization-client";
 
 const EditOrganizationPage = async ({
@@ -23,9 +23,9 @@ const EditOrganizationPage = async ({
 
   const { id } = await params;
 
-  const [orgResult, adminsResult] = await Promise.all([
+  const [orgResult, invitationsResult] = await Promise.all([
     getOrganization(id),
-    getAvailableAdmins(),
+    getOrganizationInvitations(id),
   ]);
 
   if (!orgResult.success || !orgResult.data) {
@@ -38,12 +38,12 @@ const EditOrganizationPage = async ({
     );
   }
 
-  const availableAdmins = adminsResult.success && adminsResult.data ? adminsResult.data : [];
+  const invitations = invitationsResult.success && invitationsResult.data ? invitationsResult.data : [];
 
   return (
     <EditOrganizationClient
       organization={orgResult.data}
-      availableAdmins={availableAdmins}
+      initialInvitations={invitations}
     />
   );
 };

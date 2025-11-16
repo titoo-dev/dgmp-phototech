@@ -52,6 +52,9 @@ A modern Next.js application with comprehensive authentication using Better Auth
    BETTER_AUTH_SECRET="your-secret-key-here"
    NEXT_PUBLIC_APP_URL="http://localhost:3000"
    DISABLE_SIGN_UP="false"
+   
+   # Admin Setup (set to "true" only for initial setup, then disable)
+   ENABLE_ADMIN_SIGNUP="true"
 
    # Email (Resend)
    RESEND_API_KEY="your-resend-api-key"
@@ -141,7 +144,22 @@ phototech/
 1. **Home Page** (`/`) - Landing page with sign in/sign up links
 2. **Sign In** (`/auth/signin`) - Email/password and social login
 3. **Sign Up** (`/auth/signup`) - Create new account
-4. **Dashboard** (`/dashboard`) - Protected page for authenticated users
+4. **Admin Sign Up** (`/auth/admin-signup`) - Create admin account (U4/U5 roles) - **For initial setup only**
+5. **Dashboard** (`/dashboard`) - Protected page for authenticated users
+
+### Initial Setup - Creating the First Admin Account
+
+For the first time setup, you need to create an admin account:
+
+1. Set `ENABLE_ADMIN_SIGNUP="true"` in your `.env.local` file
+2. Navigate to `http://localhost:3000/auth/admin-signup`
+3. Create your admin account with either:
+   - **U5 (Gestionnaire organisation)** - Organization manager role
+   - **U4 (Administrateur système)** - System administrator role
+4. After creating your admin account, set `ENABLE_ADMIN_SIGNUP="false"` to disable this route
+5. Use the admin account to invite other users to organizations
+
+**⚠️ Important**: The admin signup page should only be enabled during initial setup. Disable it after creating your first admin account for security purposes.
 
 ## Database Schema
 

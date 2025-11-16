@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Mail } from "lucide-react";
 
 const initialState: SignUpFormState = {};
 
@@ -16,6 +17,10 @@ const SignUpClientPage = () => {
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const invitationId = searchParams.get("invitationId");
+  const prefillEmail = searchParams.get("email");
   
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {
@@ -40,20 +45,35 @@ const SignUpClientPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Créez votre compte
+            {invitationId ? "Créez votre compte pour rejoindre l'organisation" : "Créez votre compte"}
           </CardTitle>
           <CardDescription className="text-center">
-            Ou{" "}
-            <Link
-              href="/auth/signin"
-              className="font-medium text-primary hover:underline"
-            >
-              connectez-vous à votre compte existant
-            </Link>
+            {invitationId ? (
+              <div className="flex items-center justify-center gap-2 text-sm bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
+                <Mail className="h-4 w-4 text-blue-600" />
+                <span className="text-blue-700 dark:text-blue-300">
+                  Vous avez été invité à rejoindre une organisation
+                </span>
+              </div>
+            ) : (
+              <>
+                Ou{" "}
+                <Link
+                  href="/auth/signin"
+                  className="font-medium text-primary hover:underline"
+                >
+                  connectez-vous à votre compte existant
+                </Link>
+              </>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form action={handleSubmit} className="space-y-4">
+            {invitationId && (
+              <input type="hidden" name="invitationId" value={invitationId} />
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="name">Nom</Label>
               <Input
@@ -77,9 +97,18 @@ const SignUpClientPage = () => {
                 name="email"
                 type="email"
                 placeholder="Entrez votre email"
+                defaultValue={prefillEmail || ""}
                 required
+                readOnly={!!invitationId}
+                disabled={!!invitationId}
                 aria-invalid={!!state.fieldErrors?.email}
+                className={invitationId ? "bg-muted cursor-not-allowed" : ""}
               />
+              {invitationId && (
+                <p className="text-xs text-muted-foreground">
+                  L'email est verrouillé car cette inscription est liée à une invitation.
+                </p>
+              )}
               {state.fieldErrors?.email && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.email[0]}
