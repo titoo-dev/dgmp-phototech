@@ -10,6 +10,7 @@ export const statement = {
     role: ["create", "update", "delete"],
     permission: ["create", "update", "delete"],
     settings: ["create", "update", "delete"],
+    organization: ["create", "update", "delete", "list", "manage-members"],
     noAccess: [],
 } as const;
  
@@ -28,9 +29,13 @@ export const u3 = ac.newRole({
 }); 
  
 // @ts-ignore
-export const u4 = ac.newRole({ 
+export const u4 = ac.newRole({
     mission: ["create", "update"],
     ...adminAc.statements,
     user: ["create", "list", "set-role", "ban", "impersonate", "delete", "set-password", "update"],
-}); 
+});
+
+export const u5 = ac.newRole({
+    organization: ["create", "update", "delete", "list", "manage-members"],
+});
  

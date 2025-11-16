@@ -43,6 +43,11 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 					url: "/dashboard/users",
 					permission: "canManageUsers",
 				},
+				{
+					title: "Organisations",
+					url: "/dashboard/organizations",
+					permission: "canManageOrganizations",
+				},
 			].filter((item) => hasPermission(item.permission as keyof RolePermissions)),
 		},
 		{

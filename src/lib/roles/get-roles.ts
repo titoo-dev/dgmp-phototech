@@ -4,7 +4,8 @@ const AVAILABLE_ROLES = [
   "U1", // Utilisateur chargé d'exécuter les missions
   "U2", // Responsable ayant accès aux rapports de mission
   "U3", // Responsable de la rédaction du magazine
-  "U4"  // Administrateur du système
+  "U4", // Administrateur du système
+  "U5"  // Super administrateur (gestion des organisations)
 ] as const;
 
 export type Role = typeof AVAILABLE_ROLES[number];
@@ -18,9 +19,10 @@ export const getRoleLabel = (role: Role): string => {
     U1: "Utilisateur mission",
     U2: "Responsable rapports",
     U3: "Responsable rédaction",
-    U4: "Administrateur"
+    U4: "Administrateur",
+    U5: "Super administrateur"
   };
-  
+
   return roleLabels[role];
 };
 

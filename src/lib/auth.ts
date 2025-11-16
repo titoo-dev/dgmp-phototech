@@ -2,10 +2,11 @@ import { User, betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "./generated/prisma";
 import { admin as adminPlugin, openAPI } from "better-auth/plugins";
-import { ac, u1, u2, u3, u4 } from "./permissions/permissions";
+import { ac, u1, u2, u3, u4, u5 } from "./permissions/permissions";
 import { Resend } from "resend";
 import { VerificationTemplate } from "@/components/template/verification-template";
 import { nextCookies } from "better-auth/next-js";
+import { organization } from "better-auth/plugins"
  
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -35,7 +36,7 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         autoSignIn: false,
-        disableSignUp: process.env.DISABLE_SIGN_UP === "true",
+        disableSignUp: false,
     },
     trustedOrigins: [
         `${process.env.NEXT_PUBLIC_APP_URL}`,
@@ -52,9 +53,10 @@ export const auth = betterAuth({
                 u1,
                 u2,
                 u3,
-                u4
+                u4,
+                u5
             },
-            adminRoles: ['u4'],
+            adminRoles: ['u4', 'u5'],
             adminUserIds: ['vtSUjR6YWn3ov2sDMkyzwe36LDes8X7b'],
             defaultRole: 'u1',
             defaultBanExpiresIn: 30,
@@ -62,5 +64,6 @@ export const auth = betterAuth({
             defaultBanReason: 'Banni par l\'administrateur.',
         }),
         openAPI(),
+        organization(),
     ],
 });

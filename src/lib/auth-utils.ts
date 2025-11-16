@@ -1,6 +1,6 @@
 import { User } from "better-auth";
 
-export type UserRole = "u1" | "u2" | "u3" | "u4";
+export type UserRole = "u1" | "u2" | "u3" | "u4" | "u5";
 
 export interface AuthUser extends User {
   role?: UserRole;
@@ -11,6 +11,7 @@ export const roleHierarchy: Record<UserRole, number> = {
   u2: 2,
   u3: 3,
   u4: 4,
+  u5: 5,
 };
 
 export type RolePermissions = {
@@ -29,6 +30,7 @@ export type RolePermissions = {
   canEditProjects?: boolean;
   canDeleteProjects?: boolean;
   canDeleteCompanies?: boolean;
+  canManageOrganizations?: boolean;
 };
 
 export const rolePermissions: Record<UserRole, RolePermissions> = {
@@ -73,6 +75,10 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canDeleteCompanies: true,
     canManageUsers: true,
   },
+  u5: {
+    canViewMissions: false,
+    canManageOrganizations: true,
+  },
 };
 
 export function getUserRole(user: AuthUser | null): UserRole {
@@ -95,7 +101,7 @@ export function hasPermission(
 
 export function canAccessRoute(user: AuthUser | null, routePath: string): boolean {
   const userRole = getUserRole(user);
-  
+
   // Route-specific access control
   const routeAccess: Record<string, UserRole[]> = {
     "/dashboard": ["u1", "u2", "u3", "u4"],
@@ -109,18 +115,24 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
     "/dashboard/users": ["u4"],
     "/dashboard/users/new": ["u4"],
     "/dashboard/profile": ["u1", "u2", "u3", "u4"],
+    "/dashboard/organizations": ["u5"],
+    "/dashboard/organizations/new": ["u5"],
   };
-  
+
   // Check for pattern matches (e.g., company modifier routes)
   if (routePath.includes("/companies/") && routePath.includes("/modifier")) {
     return hasRole(user, "u4");
   }
-  
+
+  if (routePath.includes("/organizations/") && routePath.includes("/modifier")) {
+    return hasRole(user, "u5");
+  }
+
   const allowedRoles = routeAccess[routePath];
   if (!allowedRoles) {
     return true; // Allow access to routes not explicitly restricted
   }
-  
+
   return allowedRoles.includes(userRole);
 }
 
@@ -134,6 +146,8 @@ export function getRoleDisplayName(userRole: UserRole): string {
       return "Rédacteur";
     case "u4":
       return "Administrateur";
+    case "u5":
+      return "Super administrateur";
     default:
       return "Utilisateur";
   }
@@ -141,9 +155,11 @@ export function getRoleDisplayName(userRole: UserRole): string {
 
 export function getRedirectPath(user: AuthUser | null): string {
   const userRole = getUserRole(user);
-  
+
   // Redirect based on user role
   switch (userRole) {
+    case "u5":
+      return "/dashboard/organizations";
     case "u4":
       return "/dashboard/users";
     case "u3":

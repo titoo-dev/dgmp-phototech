@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { AuthUser } from "@/lib/auth-utils";
 import { headers } from "next/headers";
 
 export const getSessionAction = async () => {
@@ -9,7 +10,7 @@ export const getSessionAction = async () => {
       headers: await headers()
     });
     
-    return { session };
+    return { session, user: session?.user as AuthUser | null };
   } catch (error) {
     console.error("Get session error:", error);
     return { session: null };

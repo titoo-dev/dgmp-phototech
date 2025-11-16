@@ -41,6 +41,7 @@ const navigationIcons: Record<string, React.ComponentType<{ className?: string }
   "/dashboard/projects": Building2,
   "/dashboard/companies": Building,
   "/dashboard/users": Users,
+  "/dashboard/organizations": Building2,
   "/dashboard/profile": User,
 };
 
