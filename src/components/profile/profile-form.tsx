@@ -25,6 +25,7 @@ const roleLabels = {
   u2: "Responsable",
   u3: "Rédacteur",
   u4: "Administrateur",
+  u5: "Super Administrateur"
 };
 
 type ProfileState = {

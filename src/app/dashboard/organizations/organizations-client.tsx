@@ -68,10 +68,7 @@ type Organization = {
     };
   }>;
   _count: {
-    missions: number;
-    projects: number;
-    companies: number;
-    contacts: number;
+    members: number;
   };
 };
 
@@ -194,8 +191,8 @@ export const OrganizationsClient = ({
                   <TableRow>
                     <TableHead>Organisation</TableHead>
                     <TableHead>Slug</TableHead>
-                    <TableHead>Administrateurs</TableHead>
-                    <TableHead>Statistiques</TableHead>
+                    <TableHead>Membres</TableHead>
+                    <TableHead>Membres actifs</TableHead>
                     <TableHead>Date de création</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -225,22 +222,13 @@ export const OrganizationsClient = ({
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-muted-foreground" />
-                          <span>{org.members.length}</span>
+                          <span>{org._count.members} membres</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col gap-1 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {org._count.missions} missions
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {org._count.projects} projets
-                            </Badge>
-                          </div>
-                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {org.members.length} membres actifs
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         {format(new Date(org.createdAt), "dd MMM yyyy", { locale: fr })}

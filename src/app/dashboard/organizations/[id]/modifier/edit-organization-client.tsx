@@ -3,8 +3,6 @@
 import { useActionState, useTransition, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { updateOrganization, FormState } from "@/actions/organization/update-organization";
-import { addAdminToOrganization } from "@/actions/organization/add-admin-to-organization";
-import { removeAdminFromOrganization } from "@/actions/organization/remove-admin-from-organization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,13 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -30,16 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -49,7 +30,6 @@ import {
   Loader2,
   Trash2,
   Users,
-  UserPlus,
   Upload,
   X,
   CheckCircle2,
@@ -81,10 +61,7 @@ type Organization = {
     };
   }>;
   _count: {
-    missions: number;
-    projects: number;
-    companies: number;
-    contacts: number;
+    members: number;
   };
 };
 
@@ -226,44 +203,6 @@ export const EditOrganizationClient = ({
 
   const slugValidation = validateSlugFormat(slug);
   const showSlugValidation = slugTouched && slug;
-
-  const handleAddAdmin = async () => {
-    if (!selectedAdminId) {
-      toast.error("Veuillez sélectionner un administrateur");
-      return;
-    }
-
-    setIsAddingAdmin(true);
-    const result = await addAdminToOrganization(organization.id, selectedAdminId);
-
-    if (result.success) {
-      toast.success(
-        `${result.data?.userName} a été ajouté à l'organisation ${result.data?.organizationName}`
-      );
-      setSelectedAdminId("");
-      router.refresh();
-    } else {
-      toast.error(result.error || "Erreur lors de l'ajout de l'administrateur");
-    }
-    setIsAddingAdmin(false);
-  };
-
-  const handleRemoveAdmin = async () => {
-    if (!selectedMember) return;
-
-    const result = await removeAdminFromOrganization(selectedMember.id);
-
-    if (result.success) {
-      toast.success(
-        `${result.data?.userName} a été retiré de l'organisation ${result.data?.organizationName}`
-      );
-      setRemoveDialogOpen(false);
-      setSelectedMember(null);
-      router.refresh();
-    } else {
-      toast.error(result.error || "Erreur lors du retrait de l'administrateur");
-    }
-  };
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -437,20 +376,12 @@ export const EditOrganizationClient = ({
                       </div>
                       <Separator />
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Missions</span>
-                        <Badge>{organization._count.missions}</Badge>
+                        <span className="text-sm text-muted-foreground">Nombre de membres</span>
+                        <Badge>{organization._count.members}</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Projets</span>
-                        <Badge>{organization._count.projects}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Entreprises</span>
-                        <Badge>{organization._count.companies}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Contacts</span>
-                        <Badge>{organization._count.contacts}</Badge>
+                        <span className="text-sm text-muted-foreground">Membres actifs</span>
+                        <Badge>{organization.members.length}</Badge>
                       </div>
                     </div>
                   </div>
@@ -476,39 +407,6 @@ export const EditOrganizationClient = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-          {/* Add Admin Section */}
-          {initialAvailableAdmins.length > 0 && (
-            <div className="rounded-lg border bg-muted/50 p-4">
-              <Label className="mb-2 block text-sm font-medium">Ajouter un administrateur</Label>
-              <div className="flex items-end gap-2">
-                <div className="flex-1">
-                  <Select value={selectedAdminId} onValueChange={setSelectedAdminId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner un administrateur..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {initialAvailableAdmins.map((admin) => (
-                        <SelectItem key={admin.id} value={admin.id}>
-                          {admin.name} ({admin.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  onClick={handleAddAdmin}
-                  disabled={!selectedAdminId || isAddingAdmin}
-                >
-                  {isAddingAdmin ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
-                  )}
-                  Ajouter
-                </Button>
-              </div>
-            </div>
-          )}
 
           {/* Current Admins Table */}
           {organization.members.length === 0 ? (
@@ -574,28 +472,6 @@ export const EditOrganizationClient = ({
           </CardContent>
         </Card>
       </div>
-
-      {/* Remove Admin Confirmation Dialog */}
-      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Retirer l'administrateur</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir retirer "{selectedMember?.user.name}" de cette organisation ?
-              Cet utilisateur perdra l'accès aux données de l'organisation.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRemoveAdmin}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Retirer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

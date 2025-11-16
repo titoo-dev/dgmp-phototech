@@ -15,6 +15,7 @@ const EditOrganizationPage = async ({
     redirect("/auth/signin");
   }
 
+  
   // Only u5 (super admin) can edit organizations
   if (user.role !== "u5") {
     redirect("/dashboard");

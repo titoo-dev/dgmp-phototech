@@ -57,10 +57,7 @@ export const getOrganizations = async (searchParams?: {
         },
         _count: {
           select: {
-            missions: true,
-            projects: true,
-            companies: true,
-            contacts: true,
+            members: true,
           },
         },
       },

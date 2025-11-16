@@ -40,10 +40,7 @@ export const getOrganization = async (organizationId: string) => {
         },
         _count: {
           select: {
-            missions: true,
-            projects: true,
-            companies: true,
-            contacts: true,
+            members: true,
           },
         },
       },
