@@ -57,8 +57,8 @@ export const auth = betterAuth({
                 u5
             },
             adminRoles: ['u4', 'u5'],
-            adminUserIds: ['vtSUjR6YWn3ov2sDMkyzwe36LDes8X7b'],
-            defaultRole: 'u1',
+            adminUserIds: [],
+            defaultRole: 'u5',
             defaultBanExpiresIn: 30,
             bannedUserMessage: 'Votre compte a été banni. Veuillez contacter l\'administrateur.',
             defaultBanReason: 'Banni par l\'administrateur.',
