@@ -31,7 +31,7 @@ const sendVerificationEmail = async ({ user, url }: { user: User, url: string })
 };
 
 const sendInvitationEmail = async (data: any) => {
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${data.invitation.id}`;
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${data.invitation.id}?email=${encodeURIComponent(data.email)}`;
 
     const inviterUser = data.inviter.user || data.inviter;
 

@@ -13,14 +13,19 @@ import { Mail } from "lucide-react";
 
 const initialState: SignUpFormState = {};
 
-const SignUpClientPage = () => {
+interface SignUpClientPageProps {
+  invitationId?: string;
+  email?: string;
+}
+
+const SignUpClientPage = ({ invitationId: propInvitationId, email: propEmail }: SignUpClientPageProps = {}) => {
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const invitationId = searchParams.get("invitationId");
-  const prefillEmail = searchParams.get("email");
+
+  const invitationId = propInvitationId || searchParams.get("invitationId");
+  const prefillEmail = propEmail || searchParams.get("email");
   
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {
@@ -100,7 +105,6 @@ const SignUpClientPage = () => {
                 defaultValue={prefillEmail || ""}
                 required
                 readOnly={!!invitationId}
-                disabled={!!invitationId}
                 aria-invalid={!!state.fieldErrors?.email}
                 className={invitationId ? "bg-muted cursor-not-allowed" : ""}
               />

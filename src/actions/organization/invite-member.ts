@@ -125,7 +125,7 @@ export const inviteMember = async (
       },
     });
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${invitation.id}`;
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${invitation.id}?email=${encodeURIComponent(data.email)}`;
 
     await resend.batch.send([
       {
