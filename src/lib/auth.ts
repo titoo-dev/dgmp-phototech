@@ -4,31 +4,14 @@ import { PrismaClient } from "./generated/prisma";
 import { admin as adminPlugin, openAPI } from "better-auth/plugins";
 import { ac, u1, u2, u3, u4, u5 } from "./permissions/permissions";
 import { Resend } from "resend";
-import { VerificationTemplate } from "@/components/template/verification-template";
 import { InvitationTemplate } from "@/components/template/invitation-template";
 import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins"
- 
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const prisma = new PrismaClient();
 
-const sendVerificationEmail = async ({ user, url }: { user: User, url: string }) => {
-    const { data, error } = await resend.batch.send([
-        {
-            from: 'MarketScan <noreply@titosy.dev>',
-            to: [user.email],
-            subject: 'MarketScan Email Verification',
-            react: VerificationTemplate({ firstName: user.name, url }),
-        }
-    ]);
-
-    if (error) {
-        console.error(error);
-    }
-
-    console.log(data);
-};
 
 const sendInvitationEmail = async (data: any) => {
     const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${data.invitation.id}?email=${encodeURIComponent(data.email)}`;
@@ -69,10 +52,6 @@ export const auth = betterAuth({
     trustedOrigins: [
         `${process.env.NEXT_PUBLIC_APP_URL}`,
     ],
-    emailVerification: {
-        sendOnSignUp: true,
-        sendVerificationEmail,
-    },
     plugins: [
         nextCookies(),
         adminPlugin({
@@ -94,8 +73,8 @@ export const auth = betterAuth({
         openAPI(),
         organization({
             sendInvitationEmail,
-            ac, 
-            roles: {                
+            ac,
+            roles: {
                 u1,
                 u2,
                 u3,
