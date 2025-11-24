@@ -8,14 +8,14 @@ import { AuthUser } from "@/lib/auth-utils";
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
-  const { session } = await getSessionAction();
-  
-  if (!session?.user) {
+  const { user } = await getSessionAction();
+
+  if (!user) {
     return redirect('/auth/signin');
   }
 
   const result = await getProfileAction();
-  
+
   if (!result.success || !result.data) {
     return (
       <Container>
@@ -41,7 +41,7 @@ export default async function ProfilePage() {
               Gérez vos informations personnelles et paramètres de compte
             </p>
           </div>
-          
+
           <ProfileForm user={result.data as AuthUser} />
         </div>
       </div>

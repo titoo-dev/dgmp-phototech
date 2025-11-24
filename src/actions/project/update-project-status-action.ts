@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { ProjectStatus } from "@/lib/generated/prisma";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type UpdateProjectStatusState = {
   errors?: Record<string, string[]>;
@@ -30,9 +31,14 @@ export async function updateProjectStatusAction(
       };
     }
 
+    const { organizationId } = await requireOrganization();
+
     // Check if project exists
-    const existingProject = await prisma.project.findUnique({
-      where: { id: projectId },
+    const existingProject = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        organizationId
+      },
       select: { id: true, status: true, title: true }
     });
 

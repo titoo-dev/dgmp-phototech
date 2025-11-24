@@ -5,9 +5,9 @@ import NewUserClient from "./new-user-client"
 export const dynamic = 'force-dynamic'
 
 export default async function NewUserPage() {
-  const { session } = await getSessionAction()
-  
-  if (!session?.user) {
+  const { user } = await getSessionAction()
+
+  if (!user) {
     return redirect('/auth/signin')
   }
 

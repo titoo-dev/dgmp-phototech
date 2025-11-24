@@ -2,12 +2,18 @@
 
 import prisma from "@/lib/prisma";
 import type { Company } from "@/models/company-schema";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export async function getCompanyAction(id: string) {
   if (!id || typeof id !== 'string') throw new Error("Invalid company id");
 
-  const company = await prisma.company.findUnique({
-    where: { id },
+  const { organizationId } = await requireOrganization();
+
+  const company = await prisma.company.findFirst({
+    where: {
+      id,
+      organizationId
+    },
     include: {
       projects: {
         select: {

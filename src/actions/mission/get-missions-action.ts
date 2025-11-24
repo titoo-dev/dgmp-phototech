@@ -1,81 +1,8 @@
-'use server'
+"use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { getUserRole, AuthUser } from "@/lib/auth-utils";
+import { requireOrganization } from "@/lib/auth-guard";
 
-export async function getMissionsAction(): Promise<
-    | { success: true; data: MissionWithRelations[] }
-    | { success: false; error: string; data?: undefined }
-> {
-    try {
-        // Get current user session
-        const session = await auth.api.getSession({
-            headers: await headers()
-        });
-
-        if (!session?.user) {
-            return {
-                success: false,
-                error: 'User not authenticated'
-            };
-        }
-
-        const userRole = getUserRole(session.user as AuthUser);
-
-        // Role-based filtering
-        let whereClause = {};
-
-        if (userRole === 'u1') {
-            // u1 users: only see their own missions
-            whereClause = { teamLeaderId: session.user.id };
-        } else if (userRole === 'u2') {
-            // u2 users: see all missions except DRAFT
-            whereClause = { status: { not: 'DRAFT' } };
-        } else if (userRole === 'u3') {
-            // u3 users: only see completed missions
-            whereClause = { status: 'COMPLETED' };
-        } else {
-            // u4 users: see all missions
-            whereClause = {};
-        }
-
-        const missions = await prisma.mission.findMany({
-            where: whereClause,
-            include: {
-                teamLeader: true,
-                members: true,
-                missionProjects: {
-                    include: {
-                        project: {
-                            include: {
-                                company: true
-                            }
-                        },
-                        files: true,
-                    }
-                }
-            },
-            orderBy: {
-                startDate: 'desc'
-            }
-        })
-
-        return {
-            success: true,
-            data: missions as unknown as MissionWithRelations[]
-        }
-    } catch (error) {
-        console.error('Failed to fetch missions:', error)
-        return {
-            success: false,
-            error: 'Failed to fetch missions'
-        }
-    }
-}
-
-// Define the type based on what we actually return
 export type MissionWithRelations = {
     id: string;
     missionNumber: string;
@@ -135,3 +62,46 @@ export type MissionWithRelations = {
         };
     }>;
 };
+
+export async function getMissionsAction(): Promise<
+    | { success: true; data: MissionWithRelations[] }
+    | { success: false; error: string; data?: undefined }
+> {
+    try {
+        const { organizationId } = await requireOrganization();
+
+        const missions = await prisma.mission.findMany({
+            where: {
+                organizationId,
+            },
+            include: {
+                teamLeader: true,
+                members: true,
+                missionProjects: {
+                    include: {
+                        project: {
+                            include: {
+                                company: true
+                            }
+                        },
+                        files: true,
+                    }
+                }
+            },
+            orderBy: {
+                startDate: 'desc'
+            }
+        });
+
+        return {
+            success: true,
+            data: missions as unknown as MissionWithRelations[]
+        };
+    } catch (error) {
+        console.error('Failed to fetch missions:', error);
+        return {
+            success: false,
+            error: 'Failed to fetch missions'
+        };
+    }
+}

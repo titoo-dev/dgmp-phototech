@@ -1,10 +1,11 @@
 "use server";
 
+import { requireOrganization } from "@/lib/auth-guard";
+import prisma from "@/lib/prisma";
+import { UpdateProjectForm, UpdateProjectFormSchema } from "@/models/project-schema";
+import { ProjectNature, ProjectStatus } from "@/lib/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { UpdateProjectFormSchema, type UpdateProjectForm } from "../../models/project-schema";
-import prisma from "@/lib/prisma";
-import { ProjectStatus, ProjectNature } from "@/lib/generated/prisma";
 
 export type UpdateProjectState = {
   errors?: Record<string, string[]>;
@@ -54,10 +55,15 @@ export async function updateProjectAction(
 
   const data = validation.data as UpdateProjectForm;
 
+  const { organizationId } = await requireOrganization();
+
   try {
     // Check if project exists
-    const existing = await prisma.project.findUnique({
-      where: { id: data.id },
+    const existing = await prisma.project.findFirst({
+      where: {
+        id: data.id,
+        organizationId
+      },
       include: {
         company: true,
         missionProjects: {
@@ -122,6 +128,6 @@ export async function updateProjectAction(
 }
 
 export async function updateProjectWithRedirectAction(formData: FormData): Promise<void> {
-	const res = await updateProjectAction({}, formData);
-	if (res.success) redirect('/dashboard/projects');
+  const res = await updateProjectAction({}, formData);
+  if (res.success) redirect('/dashboard/projects');
 }

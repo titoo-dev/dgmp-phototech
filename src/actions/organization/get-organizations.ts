@@ -31,11 +31,11 @@ export const getOrganizations = async (searchParams?: {
 
     const where = search
       ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { slug: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { slug: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
       : {};
 
     const total = await prisma.organization.count({ where });
@@ -68,10 +68,19 @@ export const getOrganizations = async (searchParams?: {
       take: limit,
     });
 
+    // Transform members to add id field (composite key as string)
+    const transformedOrganizations = organizations.map(org => ({
+      ...org,
+      members: org.members.map(member => ({
+        ...member,
+        id: `${member.organizationId}-${member.userId}`,
+      })),
+    }));
+
     return {
       success: true,
       data: {
-        organizations,
+        organizations: transformedOrganizations,
         pagination: {
           page,
           limit,

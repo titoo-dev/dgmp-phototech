@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 
 /**
  * @swagger
@@ -125,9 +126,31 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
-    const project = await prisma.project.findUnique({
-      where: { id },
+    const project = await prisma.project.findFirst({
+      where: {
+        id,
+        organizationId,
+      },
       include: {
         company: true,
       },
@@ -155,9 +178,40 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { title, description, startDate, endDate, status, companyId, nature } = body;
+
+    // First check if project exists and belongs to organization
+    const existingProject = await prisma.project.findFirst({
+      where: { id, organizationId },
+    });
+
+    if (!existingProject) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
 
     const project = await prisma.project.update({
       where: { id },
@@ -190,7 +244,39 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
+
+    // First check if project exists and belongs to organization
+    const existingProject = await prisma.project.findFirst({
+      where: { id, organizationId },
+    });
+
+    if (!existingProject) {
+      return NextResponse.json(
+        { error: 'Project not found' },
+        { status: 404 }
+      );
+    }
+
     await prisma.project.delete({
       where: { id },
     });

@@ -10,12 +10,12 @@ import { redirect } from 'next/navigation';
 export const dynamic = 'force-dynamic'
 
 export default async function EntreprisesPage() {
-	const { session } = await getSessionAction()
-	
-	if (!session?.user) {
+	const { user } = await getSessionAction()
+
+	if (!user) {
 		return redirect('/auth/signin')
 	}
-	
+
 	const result = await getCompaniesAction();
 	const companies: CompanyModel[] = result.companies || [];
 

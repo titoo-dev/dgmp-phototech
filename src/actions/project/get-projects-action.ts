@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from "@/lib/prisma";
+import { requireOrganization } from "@/lib/auth-guard";
 
 
 export async function getProjectsAction(): Promise<
@@ -8,7 +9,12 @@ export async function getProjectsAction(): Promise<
     | { success: false; error: string; data?: undefined }
 > {
     try {
+        const { organizationId } = await requireOrganization();
+
         const projects = await prisma.project.findMany({
+            where: {
+                organizationId,
+            },
             include: {
                 company: true,
                 // Include mission projects count for each project

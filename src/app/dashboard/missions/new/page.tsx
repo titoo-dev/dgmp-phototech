@@ -20,17 +20,17 @@ export default async function NewMissionPage() {
 		throw new Error('Failed to fetch projects');
 	}
 
-	if (!sessionResult.session?.user) {
+	if (!sessionResult.user) {
 		return redirect('/auth/signin');
 	}
 
 	return (
 		<div className="min-h-screen bg-background">
-			<MissionFormClient 
+			<MissionFormClient
 				teamLeaders={teamLeadersResult.users}
 				contacts={contactsResult.contacts}
 				projects={projectsResult.data}
-				currentUser={sessionResult.session.user as UserModel}
+				currentUser={sessionResult.user as UserModel}
 			/>
 		</div>
 	);

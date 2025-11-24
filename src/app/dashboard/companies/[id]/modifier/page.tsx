@@ -8,9 +8,9 @@ type Props = {
 };
 
 export default async function Page(props: Props) {
-  const { session } = await getSessionAction()
-  
-  if (!session?.user) {
+  const { user } = await getSessionAction()
+
+  if (!user) {
     return redirect('/auth/signin')
   }
 

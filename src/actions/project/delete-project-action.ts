@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type DeleteProjectState = {
   errors?: Record<string, string[]>;
@@ -21,11 +22,16 @@ export async function deleteProjectAction(
       };
     }
 
+    const { organizationId } = await requireOrganization();
+
     // Check if market exists and get project title for the success message
-    const existingProject = await prisma.project.findUnique({
-      where: { id: projectId },
-      select: { 
-        id: true, 
+    const existingProject = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        organizationId
+      },
+      select: {
+        id: true,
         title: true,
         missionProjects: {
           select: {

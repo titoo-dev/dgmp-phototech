@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { UpdateMissionFormSchema, type UpdateMissionForm } from "../../models/mission-schema";
 import prisma from "@/lib/prisma";
 import { uploadPhotoFile } from "./create-mission-action";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type UpdateMissionState = {
   errors?: Record<string, string[]>;
@@ -64,7 +65,7 @@ export async function updateMissionAction(
   }
 
   // Remove duplicates from memberIds
-  const uniqueMemberIds = Array.isArray(raw.memberIds) 
+  const uniqueMemberIds = Array.isArray(raw.memberIds)
     ? [...new Set(raw.memberIds.map(id => String(id)))]
     : [];
 
@@ -72,9 +73,11 @@ export async function updateMissionAction(
   const calculatedAgentCount = uniqueMemberIds.length + 1;
 
   // Auto-calculate marketCount from projectsData length if not provided
-  const calculatedMarketCount = raw.marketCount 
+  const calculatedMarketCount = raw.marketCount
     ? Number(raw.marketCount)
     : projectsData.length;
+
+  const { organizationId } = await requireOrganization();
 
   const parsed = {
     id: raw.id ? String(raw.id) : undefined,
@@ -102,9 +105,12 @@ export async function updateMissionAction(
   const data = validation.data as UpdateMissionForm;
 
   try {
-    // Check if mission exists
-    const existing = await prisma.mission.findUnique({
-      where: { id: data.id },
+    // Check if mission exists and belongs to organization
+    const existing = await prisma.mission.findFirst({
+      where: {
+        id: data.id,
+        organizationId
+      },
       include: {
         missionProjects: {
           include: {
@@ -158,7 +164,7 @@ export async function updateMissionAction(
           }
         }
       });
-      
+
       await prisma.missionProject.deleteMany({
         where: { missionId: mission.id }
       });
@@ -182,11 +188,11 @@ export async function updateMissionAction(
         if (!missionProject) continue;
 
         const marketPhotos = photoFiles[projectData.marketName] || [];
-        
+
         for (const photoFile of marketPhotos) {
           try {
             const uploadResult = await uploadPhotoFile(photoFile);
-            
+
             await prisma.missionFile.create({
               data: {
                 fileUrl: uploadResult.url,
@@ -220,6 +226,6 @@ export async function updateMissionAction(
 }
 
 export async function updateMissionWithRedirectAction(formData: FormData): Promise<void> {
-	const res = await updateMissionAction({}, formData);
-	if (res.success) redirect('/dashboard/missions');
+  const res = await updateMissionAction({}, formData);
+  if (res.success) redirect('/dashboard/missions');
 }

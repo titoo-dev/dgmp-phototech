@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { CreateContact, CreateContactSchema } from "@/models/contact-schema";
 import { revalidatePath } from "next/cache";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type CreateContactState = {
     errors?: Record<string, string[]>;
@@ -53,9 +54,14 @@ export async function createContactAction(
     const data = validation.data as CreateContact;
 
     try {
-        // Check if contact with same email already exists
+        const { organizationId } = await requireOrganization();
+
+        // Check if contact with same email already exists in this organization
         const existingContact = await prisma.contact.findFirst({
-            where: { email: data.email },
+            where: {
+                email: data.email,
+                organizationId
+            },
         });
 
         if (existingContact) {
@@ -73,6 +79,7 @@ export async function createContactAction(
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
+                organization: { connect: { id: organizationId } },
             },
         });
 

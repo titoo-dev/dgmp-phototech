@@ -68,10 +68,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     // Check if user has u1 role
     const user = session.user as AuthUser;
     const userRole = getUserRole(user);
-    
+
     if (!['u1', 'u4'].includes(userRole)) {
       return NextResponse.json(
         { error: 'Forbidden - Only u1 and u4 users can access contacts' },
@@ -80,6 +88,9 @@ export async function GET(request: NextRequest) {
     }
 
     const contacts = await prisma.contact.findMany({
+      where: {
+        organizationId,
+      },
       orderBy: [
         { firstName: 'asc' },
         { lastName: 'asc' }
@@ -212,7 +223,7 @@ export async function POST(request: NextRequest) {
     // Check if user has u1 role
     const user = session.user as AuthUser;
     const userRole = getUserRole(user);
-    
+
     if (!['u1', 'u4'].includes(userRole)) {
       return NextResponse.json(
         { error: 'Forbidden - Only u1 and u4 users can create contacts' },
@@ -234,9 +245,9 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Failed to create contact',
-          errors: result.errors 
+          errors: result.errors
         },
         { status: 400 }
       );

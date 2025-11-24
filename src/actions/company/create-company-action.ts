@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { CreateCompanySchema, type CreateCompany } from "@/models/company-schema";
 import { redirect } from "next/navigation";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type CreateCompanyState = {
     errors?: {
@@ -18,12 +19,6 @@ export type CreateCompanyState = {
     data?: CreateCompany;
 };
 
-/**
- * Server action to create a new company
- * @param prevState - Previous state from useActionState
- * @param formData - Form data from the submission
- * @returns CreateCompanyState with validation errors or success status
- */
 export async function createCompanyAction(
     prevState: CreateCompanyState,
     formData: FormData
@@ -60,9 +55,12 @@ export async function createCompanyAction(
     const validatedData = validationResult.data;
 
     try {
-        // Check if company with same email or NIF already exists
+        const { organizationId } = await requireOrganization();
+
+        // Check if company with same email or NIF already exists in this organization
         const existingCompany = await prisma.company.findFirst({
             where: {
+                organizationId,
                 OR: [
                     { email: validatedData.email },
                     { nif: validatedData.nif },
@@ -80,7 +78,7 @@ export async function createCompanyAction(
                     data: validatedData,
                 };
             }
-            
+
             if (existingCompany.nif === validatedData.nif) {
                 return {
                     errors: {
@@ -94,20 +92,23 @@ export async function createCompanyAction(
 
         // Create the company
         const company = await prisma.company.create({
-            data: validatedData,
+            data: {
+                ...validatedData,
+                organization: { connect: { id: organizationId } },
+            },
         });
 
         // Revalidate the companies page to show the new company
         revalidatePath("/dashboard/companies");
         revalidatePath("/(client)/dashboard/companies", "page");
-        
+
         return {
             success: true,
             data: company,
         };
     } catch (error) {
         console.error("Error creating company:", error);
-        
+
         return {
             errors: {
                 _form: ["Une erreur est survenue lors de la création de l'entreprise"],
@@ -118,17 +119,13 @@ export async function createCompanyAction(
     }
 }
 
-/**
- * Server action to create a company and redirect to the companies list
- * @param formData - Form data from the submission
- */
 export async function createCompanyWithRedirectAction(formData: FormData): Promise<void> {
     const result = await createCompanyAction({}, formData);
-    
+
     if (result.success) {
         redirect("/dashboard/companies");
     }
-    
+
     // If there are errors, the form component should handle them
     // by using useActionState with createCompanyAction instead
 }

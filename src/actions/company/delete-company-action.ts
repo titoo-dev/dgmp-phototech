@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
+import { requireOrganization } from '@/lib/auth-guard';
 
 // Schema for delete company action
 const DeleteCompanySchema = z.object({
@@ -23,12 +24,17 @@ export async function deleteCompanyAction(
     companyId: string
 ): Promise<DeleteCompanyResult> {
     try {
+        const { organizationId } = await requireOrganization();
+
         // Validate input
         const validatedData = DeleteCompanySchema.parse({ id: companyId });
 
         // Check if company exists
-        const existingCompany = await prisma.company.findUnique({
-            where: { id: validatedData.id },
+        const existingCompany = await prisma.company.findFirst({
+            where: {
+                id: validatedData.id,
+                organizationId
+            },
             include: {
                 projects: {
                     select: { id: true },

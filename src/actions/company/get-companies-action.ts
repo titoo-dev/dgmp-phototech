@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import type { CompanyModel } from "@/models/company-schema";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type GetCompaniesState = {
     companies: CompanyModel[];
@@ -14,7 +15,12 @@ export type GetCompaniesState = {
  */
 export async function getCompaniesAction(): Promise<GetCompaniesState> {
     try {
+        const { organizationId } = await requireOrganization();
+
         const companies = await prisma.company.findMany({
+            where: {
+                organizationId,
+            },
             include: {
                 projects: {
                     select: {
@@ -41,7 +47,7 @@ export async function getCompaniesAction(): Promise<GetCompaniesState> {
         };
     } catch (error) {
         console.error("Error fetching companies:", error);
-        
+
         return {
             companies: [],
             error: "Une erreur est survenue lors du chargement des entreprises",
@@ -56,8 +62,11 @@ export async function getCompaniesAction(): Promise<GetCompaniesState> {
  */
 export async function searchCompaniesAction(query: string): Promise<GetCompaniesState> {
     try {
+        const { organizationId } = await requireOrganization();
+
         const companies = await prisma.company.findMany({
             where: {
+                organizationId,
                 OR: [
                     {
                         name: {
@@ -111,7 +120,7 @@ export async function searchCompaniesAction(query: string): Promise<GetCompanies
         };
     } catch (error) {
         console.error("Error searching companies:", error);
-        
+
         return {
             companies: [],
             error: "Une erreur est survenue lors de la recherche des entreprises",

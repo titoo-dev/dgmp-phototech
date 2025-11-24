@@ -7,6 +7,7 @@ import {
 } from '@/models/company-schema';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
+import { requireOrganization } from '@/lib/auth-guard';
 
 export type UpdateCompanyState = {
 	errors?: {
@@ -61,8 +62,13 @@ export async function updateCompanyAction(
 	const validated = validationResult.data;
 
 	try {
-		const existing = await prisma.company.findUnique({
-			where: { id: validated.id },
+		const { organizationId } = await requireOrganization();
+
+		const existing = await prisma.company.findFirst({
+			where: {
+				id: validated.id,
+				organizationId
+			},
 		});
 		if (!existing) {
 			return {
@@ -75,6 +81,7 @@ export async function updateCompanyAction(
 		// Prevent duplicate email or nif (if changed)
 		const conflict = await prisma.company.findFirst({
 			where: {
+				organizationId,
 				OR: [{ email: validated.email }, { nif: validated.nif }],
 				AND: {
 					id: { not: validated.id },
@@ -92,7 +99,7 @@ export async function updateCompanyAction(
 					data: validated,
 				};
 			}
-			
+
 			if (conflict.nif === validated.nif) {
 				return {
 					errors: {
