@@ -1,6 +1,6 @@
 import { APIError } from "better-auth/api";
 
-export const getAuthErrorMessage = (error: unknown, context?: 'signin' | 'signup'): string => {
+export const getAuthErrorMessage = (error: unknown, context?: 'signin' | 'signup' | 'email-verification'): string => {
     if (error instanceof APIError) {
       // Check for specific error codes in the message
       const errorMessage = error.message?.toLowerCase() || '';
@@ -39,6 +39,9 @@ export const getAuthErrorMessage = (error: unknown, context?: 'signin' | 'signup
         case 404:
           if (context === 'signup') {
             return "Registration service unavailable. Please try again later.";
+          }
+          if (context === 'email-verification') {
+            return "Email address not found. Please check your email address or sign up for a new account.";
           }
           return "Account not found. Please check your email address or sign up for a new account.";
         case 409:

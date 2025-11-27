@@ -64,126 +64,13 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Image from "next/image";
 
-type Organization = {
-  id: string;
-  name: string;
-  slug: string | null;
-  logo: string | null;
-  createdAt: Date;
-  metadata: string | null;
-  members: Array<{
-    id: string;
-    role: string;
-    createdAt: Date;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      role: string | null;
-      image: string | null;
-    };
-  }>;
-  _count: {
-    members: number;
-  };
-};
-
-type Invitation = {
-  id: string;
-  email: string;
-  role: string | null;
-  status: string;
-  expiresAt: Date;
-  organizationId: string;
-  inviterId: string;
-  inviter: {
-    id: string;
-    name: string;
-    email: string;
-    image: string | null;
-  };
-};
-
-type EditOrganizationClientProps = {
-  organization: Organization;
-  initialInvitations: Invitation[];
-};
-
-const SubmitButton = () => {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Enregistrer les modifications
-    </Button>
-  );
-};
-
-const InviteButton = () => {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      <Mail className="mr-2 h-4 w-4" />
-      Envoyer l'invitation
-    </Button>
-  );
-};
-
-const getRoleBadgeVariant = (role: string | null) => {
-  switch (role) {
-    case "u4":
-    case "u5":
-      return "default";
-    case "u2":
-    case "u3":
-      return "secondary";
-    case "u1":
-      return "outline";
-    default:
-      return "outline";
-  }
-};
-
-const getRoleDisplayName = (role: string | null): string => {
-  if (!role) return "Agent de terrain";
-  
-  switch (role) {
-    case "u1":
-      return "Agent de terrain";
-    case "u2":
-      return "Responsable missions";
-    case "u3":
-      return "Rédacteur magazine";
-    case "u4":
-      return "Administrateur système";
-    case "u5":
-      return "Gestionnaire organisation";
-    default:
-      return role;
-  }
-};
-
-const generateSlug = (name: string): string => {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
-
-const validateSlugFormat = (slug: string): { isValid: boolean; message?: string } => {
-  if (!slug) return { isValid: false };
-  if (slug.length < 2) return { isValid: false, message: "Minimum 2 caractères" };
-  if (slug.length > 50) return { isValid: false, message: "Maximum 50 caractères" };
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-    return { isValid: false, message: "Lettres minuscules, chiffres et tirets uniquement" };
-  }
-  return { isValid: true };
-};
+import type { Organization, Invitation, EditOrganizationClientProps, Role } from "./types";
+import {
+  getRoleBadgeVariant,
+  getRoleDisplayName,
+  generateSlug,
+  validateSlugFormat,
+} from "./utils";
 
 export const EditOrganizationClient = ({
   organization,
@@ -203,7 +90,7 @@ export const EditOrganizationClient = ({
   const [logoPreview, setLogoPreview] = useState(organization.logo || "");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"u1" | "u2" | "u3" | "u4" | "u5">("u1");
+  const [inviteRole, setInviteRole] = useState<Role>("u1");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initialState: FormState = {
@@ -214,8 +101,8 @@ export const EditOrganizationClient = ({
     success: false,
   };
 
-  const [state, formAction] = useActionState(updateOrganization, initialState);
-  const [inviteState, inviteFormAction] = useActionState(inviteMember, initialInviteState);
+  const [state, formAction, isFormPending] = useActionState(updateOrganization, initialState);
+  const [inviteState, inviteFormAction, isInvitePending] = useActionState(inviteMember, initialInviteState);
 
   useEffect(() => {
     if (!slugTouched && name) {
@@ -334,7 +221,7 @@ export const EditOrganizationClient = ({
   };
 
   const slugValidation = validateSlugFormat(slug);
-  const showSlugValidation = slugTouched && slug;
+  const showSlugValidation = slugTouched && !!slug;
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8 overflow-y-auto">
@@ -522,7 +409,10 @@ export const EditOrganizationClient = ({
 
               <Separator />
 
-              <SubmitButton />
+              <Button type="submit" disabled={isFormPending}>
+                {isFormPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Enregistrer les modifications
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -541,7 +431,7 @@ export const EditOrganizationClient = ({
           <CardContent>
             <form action={inviteFormAction} className="space-y-4">
               <input type="hidden" name="organizationId" value={organization.id} />
-              
+
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="md:col-span-2 space-y-2">
                   <Label htmlFor="invite-email">
@@ -571,7 +461,7 @@ export const EditOrganizationClient = ({
                   <Select
                     name="role"
                     value={inviteRole}
-                    onValueChange={(value: "u1" | "u2" | "u3" | "u4" | "u5") => setInviteRole(value)}
+                    onValueChange={(value: Role) => setInviteRole(value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner un rôle" />
@@ -618,7 +508,12 @@ export const EditOrganizationClient = ({
                 </div>
               </div>
 
-              <InviteButton />
+
+              <Button type="submit" disabled={isInvitePending}>
+                {isInvitePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Mail className="mr-2 h-4 w-4" />
+                Envoyer l'invitation
+              </Button>
             </form>
           </CardContent>
         </Card>

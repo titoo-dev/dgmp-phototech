@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "mcp__better-auth__search"
+      "mcp__better-auth__search",
+      "Bash(pnpm build)",
+      "Bash(pnpm prisma generate:*)",
+      "Bash(pnpm db:push)"
     ],
     "deny": [],
     "ask": []
