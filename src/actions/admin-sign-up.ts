@@ -10,9 +10,6 @@ const adminSignUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(2, "Name must be at least 2 characters"),
   phoneNumber: z.string().optional(),
-  role: z.enum(["u4", "u5"], {
-    message: "Only admin roles (u4, u5) are allowed"
-  }),
 });
 
 export type AdminSignUpFormState = {
@@ -23,7 +20,6 @@ export type AdminSignUpFormState = {
     password?: string[];
     name?: string[];
     phoneNumber?: string[];
-    role?: string[];
   };
   redirect?: string;
 };
@@ -38,7 +34,6 @@ export const adminSignUpAction = async (
       password: formData.get("password") as string,
       name: formData.get("name") as string,
       phoneNumber: formData.get("phoneNumber") as string,
-      role: formData.get("role") as string,
     };
 
     const validatedData = adminSignUpSchema.safeParse(rawData);
@@ -50,7 +45,7 @@ export const adminSignUpAction = async (
       };
     }
 
-    const { email, password, name, phoneNumber, role } = validatedData.data;
+    const { email, password, name, phoneNumber } = validatedData.data;
 
     const result = await auth.api.signUpEmail({
       body: {
@@ -65,13 +60,6 @@ export const adminSignUpAction = async (
       await prisma.user.update({
         where: { id: result.user.id },
         data: { phoneNumber },
-      });
-    }
-
-    if (result.user.id) {
-      await prisma.user.update({
-        where: { id: result.user.id },
-        data: { role },
       });
     }
 

@@ -10,14 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Shield, AlertTriangle } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
 
 const initialState: AdminSignUpFormState = {};
 
@@ -25,7 +17,6 @@ const AdminSignUpClientPage = () => {
   const [state, formAction] = useActionState(adminSignUpAction, initialState);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<"u4" | "u5">("u5");
   
   const handleSubmit = (formData: FormData) => {
     startTransition(() => {
@@ -55,14 +46,14 @@ const AdminSignUpClientPage = () => {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Création de compte administrateur
+            Création de compte gestionnaire organisation
           </CardTitle>
           <CardDescription className="text-center">
             <div className="flex items-start gap-2 text-sm bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg mt-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div className="text-left">
                 <p className="font-semibold text-yellow-700 dark:text-yellow-300">
-                  Accès réservé aux administrateurs système
+                  Accès réservé aux gestionnaires d'organisation (U5)
                 </p>
                 <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-1">
                   Cette page sera désactivée après la configuration initiale
@@ -146,52 +137,12 @@ const AdminSignUpClientPage = () => {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role">
-                Rôle administrateur <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                name="role"
-                value={selectedRole}
-                onValueChange={(value: "u4" | "u5") => setSelectedRole(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un rôle" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="u5">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-blue-600" />
-                      <div>
-                        <p className="font-medium">Gestionnaire organisation (U5)</p>
-                        <p className="text-xs text-muted-foreground">Gestion des organisations</p>
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="u4">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-yellow-600" />
-                      <div>
-                        <p className="font-medium">Administrateur système (U4)</p>
-                        <p className="text-xs text-muted-foreground">Accès complet au système</p>
-                      </div>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {state.fieldErrors?.role && (
-                <p className="text-sm text-destructive">
-                  {state.fieldErrors.role[0]}
-                </p>
-              )}
-            </div>
-
             <Button
               type="submit"
               className="w-full"
               disabled={isPending}
             >
-              {isPending ? "Création du compte..." : "Créer le compte administrateur"}
+              {isPending ? "Création du compte..." : "Créer le compte gestionnaire"}
             </Button>
           </form>
 

@@ -88,7 +88,7 @@ export const signUpAction = async (
         email,
         password,
         name: name || "unknown",
-        callbackURL: `/auth/signin`,
+        callbackURL: process.env.NEXT_PUBLIC_APP_URL,
       },
     });
 

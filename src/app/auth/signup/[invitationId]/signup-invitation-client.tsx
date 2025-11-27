@@ -139,7 +139,6 @@ const SignUpInvitationClient = ({
                 value={email}
                 required
                 readOnly
-                disabled
                 aria-invalid={!!state.fieldErrors?.email}
                 className="bg-muted cursor-not-allowed"
               />
