@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { MissionStatus } from "@/lib/generated/prisma";
 import { getUsersAction } from "@/actions/user/get-users-action";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmailByApi } from "@/lib/email/send-email";
 
 export type SendMissionReportState = {
   errors?: Record<string, string[]>;
@@ -78,50 +76,50 @@ export async function sendMissionReportAction(
       };
     }
 
-    // Send email notifications to all u2 users
     try {
-      const emailPromises = u2UsersResult.users
-        .filter(user => user.emailVerified && !user.banned)
-        .map(user => ({
-          from: 'MarketScan <noreply@titosy.dev>',
-          to: [user.email],
-          subject: `Nouvelle mission à valider - Mission #${existingMission.missionNumber}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
-                Nouvelle Mission à Valider
-              </h2>
-              
-              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #007bff; margin-top: 0;">Mission #${existingMission.missionNumber}</h3>
-                <p><strong>Chef d'équipe:</strong> ${existingMission.teamLeader.name} (${existingMission.teamLeader.email})</p>
-                <p><strong>Lieu:</strong> ${existingMission.location}</p>
-                <p><strong>Période:</strong> Du ${new Date(existingMission.startDate).toLocaleDateString('fr-FR')} au ${new Date(existingMission.endDate).toLocaleDateString('fr-FR')}</p>
+      const validUsers = u2UsersResult.users.filter(user => user.emailVerified && !user.banned);
+      
+      for (const user of validUsers) {
+        try {
+          await sendEmailByApi({
+            to: user.email,
+            subject: `Nouvelle mission à valider - Mission #${existingMission.missionNumber}`,
+            template: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+                  Nouvelle Mission à Valider
+                </h2>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3 style="color: #007bff; margin-top: 0;">Mission #${existingMission.missionNumber}</h3>
+                  <p><strong>Chef d'équipe:</strong> ${existingMission.teamLeader.name} (${existingMission.teamLeader.email})</p>
+                  <p><strong>Lieu:</strong> ${existingMission.location}</p>
+                  <p><strong>Période:</strong> Du ${new Date(existingMission.startDate).toLocaleDateString('fr-FR')} au ${new Date(existingMission.endDate).toLocaleDateString('fr-FR')}</p>
+                </div>
+                
+                <p>Une nouvelle mission a été soumise pour validation et nécessite votre attention.</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/missions" 
+                     style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    Voir la mission
+                  </a>
+                </div>
+                
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
+                <p style="color: #6c757d; font-size: 14px; text-align: center;">
+                  DGMP Photothèque - Système de gestion des missions
+                </p>
               </div>
-              
-              <p>Une nouvelle mission a été soumise pour validation et nécessite votre attention.</p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/missions" 
-                   style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                  Voir la mission
-                </a>
-              </div>
-              
-              <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
-              <p style="color: #6c757d; font-size: 14px; text-align: center;">
-                MarketScan - Système de gestion des missions
-              </p>
-            </div>
-          `
-        }));
-
-      if (emailPromises.length > 0) {
-        await resend.batch.send(emailPromises);
+            `,
+            context: {},
+          });
+        } catch (individualEmailError) {
+          console.error(`Failed to send email to ${user.email}:`, individualEmailError);
+        }
       }
     } catch (emailError) {
       console.error('Error sending email notifications:', emailError);
-      // Don't fail the entire operation if email fails
     }
 
     // Revalidate the missions page to show updated data

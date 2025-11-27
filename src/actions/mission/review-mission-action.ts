@@ -3,9 +3,7 @@
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { MissionStatus } from "@/lib/generated/prisma";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmailByApi } from "@/lib/email/send-email";
 
 export type ReviewMissionState = {
   errors?: Record<string, string[]>;
@@ -83,13 +81,11 @@ export async function reviewMissionAction(
       },
     });
 
-    // Send email notification to team leader with review comment
     try {
-      await resend.batch.send([{
-        from: 'MarketScan <noreply@titosy.dev>',
-        to: [existingMission.teamLeader.email],
+      await sendEmailByApi({
+        to: existingMission.teamLeader.email,
         subject: `Mission à réviser - Mission #${existingMission.missionNumber}`,
-        html: `
+        template: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 10px;">
               Mission à Réviser 📝
@@ -120,14 +116,14 @@ export async function reviewMissionAction(
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
             <p style="color: #6c757d; font-size: 14px; text-align: center;">
-              MarketScan - Système de gestion des missions
+              DGMP Photothèque - Système de gestion des missions
             </p>
           </div>
-        `
-      }]);
+        `,
+        context: {},
+      });
     } catch (emailError) {
       console.error('Error sending review email:', emailError);
-      // Don't fail the entire operation if email fails
     }
 
     // Revalidate the missions page to show updated data

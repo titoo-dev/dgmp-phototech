@@ -3,10 +3,7 @@
 import prisma from "@/lib/prisma";
 import { getSessionAction } from "@/actions/get-session";
 import { z } from "zod";
-import { Resend } from "resend";
-import { InvitationTemplate } from "@/components/template/invitation-template";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendInvitationEmail } from "@/lib/email/send-email";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -125,22 +122,20 @@ export const inviteMember = async (
       },
     });
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${invitation.id}`;
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${invitation.id}?email=${encodeURIComponent(data.email)}`;
 
-    await resend.batch.send([
-      {
-        from: "MarketScan <noreply@titosy.dev>",
-        to: [data.email],
-        subject: `Invitation à rejoindre ${organization.name}`,
-        react: InvitationTemplate({
-          inviterName: user.name,
-          organizationName: organization.name,
-          organizationLogo: organization.logo,
-          role: data.role,
-          invitationUrl,
-        }),
-      },
-    ]);
+    try {
+      await sendInvitationEmail(
+        data.email,
+        invitationUrl,
+        user.name,
+        organization.name,
+        data.role,
+        organization.logo
+      );
+    } catch (emailError) {
+      console.error("Failed to send invitation email:", emailError);
+    }
 
     return {
       success: true,

@@ -5,10 +5,7 @@ import { auth } from "@/lib/auth";
 import { getAuthErrorMessage } from "@/lib/errors/get-auth-error-message";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
-import { Resend } from "resend";
-import { WelcomeUserTemplate } from "@/components/template/welcome-user-template";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendWelcomeEmail } from "@/lib/email/send-email";
 
 
 const createUserSchema = z.object({
@@ -97,22 +94,10 @@ export const createUserAction = async (
       };
     }
 
-    // Send welcome email with credentials
     try {
-      await resend.emails.send({
-        from: 'MarketScan <noreply@titosy.dev>',
-        to: [email],
-        subject: 'Bienvenue sur MarketScan DGMP - Vos identifiants de connexion',
-        react: WelcomeUserTemplate({
-          firstName: name,
-          email: email,
-          password: password,
-          androidAppUrl: process.env.ANDROID_APP_URL || "#"
-        }),
-      });
+      await sendWelcomeEmail(email, name);
     } catch (emailError) {
       console.error("Failed to send welcome email:", emailError);
-      // Don't fail the user creation if email fails
     }
 
     return {

@@ -3,9 +3,7 @@
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { MissionStatus } from "@/lib/generated/prisma";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmailByApi } from "@/lib/email/send-email";
 
 export type ValidateMissionState = {
   errors?: Record<string, string[]>;
@@ -64,13 +62,11 @@ export async function validateMissionAction(
       data: { status: MissionStatus.COMPLETED },
     });
 
-    // Send email notification to team leader
     try {
-      await resend.batch.send([{
-        from: 'MarketScan <noreply@titosy.dev>',
-        to: [existingMission.teamLeader.email],
+      await sendEmailByApi({
+        to: existingMission.teamLeader.email,
         subject: `Mission validée - Mission #${existingMission.missionNumber}`,
-        html: `
+        template: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #16a34a; border-bottom: 2px solid #16a34a; padding-bottom: 10px;">
               Mission Validée ✅
@@ -94,14 +90,14 @@ export async function validateMissionAction(
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e9ecef;">
             <p style="color: #6c757d; font-size: 14px; text-align: center;">
-              MarketScan - Système de gestion des missions
+              DGMP Photothèque - Système de gestion des missions
             </p>
           </div>
-        `
-      }]);
+        `,
+        context: {},
+      });
     } catch (emailError) {
       console.error('Error sending validation email:', emailError);
-      // Don't fail the entire operation if email fails
     }
 
     // Revalidate the missions page to show updated data
