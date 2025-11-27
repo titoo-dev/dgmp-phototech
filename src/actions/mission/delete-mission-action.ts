@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type DeleteMissionState = {
   errors?: Record<string, string[]>;
@@ -21,11 +22,16 @@ export async function deleteMissionAction(
       };
     }
 
+    const { organizationId } = await requireOrganization();
+
     // Check if mission exists and get mission number for the success message
-    const existingMission = await prisma.mission.findUnique({
-      where: { id: missionId },
-      select: { 
-        id: true, 
+    const existingMission = await prisma.mission.findFirst({
+      where: {
+        id: missionId,
+        organizationId
+      },
+      select: {
+        id: true,
         missionNumber: true,
         missionProjects: {
           select: {

@@ -325,9 +325,9 @@ export type CreateMissionApiPayload = {
   endDate: string;
   location: string;
   memberIds: string[];
-  projectsData: Array<{ 
-    projectId: string; 
-    notes: string; 
+  projectsData: Array<{
+    projectId: string;
+    notes: string;
     marketName: string;
   }>;
   imageFiles?: { [marketName: string]: string[] };
@@ -383,9 +383,9 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
   if (!validation.success) {
     console.log('Validation errors:', validation.error.flatten().fieldErrors);
     return NextResponse.json(
-      { 
+      {
         error: 'Validation failed',
-        details: validation.error.flatten().fieldErrors 
+        details: validation.error.flatten().fieldErrors
       },
       { status: 400 }
     );
@@ -408,6 +408,7 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
         status: 'DRAFT' as MissionStatus,
         agentCount: data.agentCount,
         marketCount: data.marketCount,
+        organization: { connect: { id: session.session.activeOrganizationId } },
       },
       include: {
         teamLeader: true,
@@ -436,7 +437,7 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
           if (!missionProject) continue;
 
           const marketImages = payload.imageFiles[projectData.marketName] || [];
-          
+
           for (const imageUrl of marketImages) {
             try {
               await prisma.missionFile.create({
@@ -474,7 +475,7 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
 export async function GET() {
   try {
     const result = await getMissionsAction();
-    
+
     if (!result.success) {
       // Check if it's an authentication error
       if (result.error === 'User not authenticated') {
@@ -522,12 +523,21 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
+    // Check organization
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     return await handleJsonMissionCreation(request, session);
 
   } catch (error) {
     console.error('Error creating mission:', error);
-    
+
     // Handle specific error types
     if (error instanceof Error) {
       if (error.message.includes('payload too large')) {
@@ -536,7 +546,7 @@ export async function POST(request: NextRequest) {
           { status: 413 }
         );
       }
-      
+
       if (error.message.includes('Only image files are allowed')) {
         return NextResponse.json(
           { error: 'Only image files are allowed' },

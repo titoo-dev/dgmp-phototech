@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { CreateProject, CreateProjectSchema } from "@/models/project-schema";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type CreateProjectState = {
     errors?: Record<string, string[]>;
@@ -48,7 +49,10 @@ export async function createProjectAction(
 
     const data = validation.data as CreateProject;
 
+    const { organizationId } = await requireOrganization();
+
     try {
+
         const project = await prisma.project.create({
             data: {
                 title: data.title,
@@ -58,6 +62,7 @@ export async function createProjectAction(
                 companyId: data.companyId,
                 nature: data.nature as unknown as ProjectNature,
                 status: data.status as unknown as ProjectStatus,
+                organizationId,
             },
         });
 

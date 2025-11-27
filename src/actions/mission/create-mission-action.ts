@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { put } from '@vercel/blob';
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { requireOrganization } from "@/lib/auth-guard";
 
 
 export type CreateMissionState = {
@@ -56,12 +57,10 @@ export async function createMissionAction(
   formData: FormData
 ): Promise<CreateMissionState> {
 
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
+  const { session, organizationId, user } = await requireOrganization();
 
   const raw = {
-    teamLeaderId: session?.user?.id as string,
+    teamLeaderId: user?.id as string,
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
     location: formData.get("location"),
@@ -86,7 +85,7 @@ export async function createMissionAction(
   }
 
   // Remove duplicates from memberIds
-  const uniqueMemberIds = Array.isArray(raw.memberIds) 
+  const uniqueMemberIds = Array.isArray(raw.memberIds)
     ? [...new Set(raw.memberIds.map(id => String(id)))]
     : [];
 
@@ -140,7 +139,7 @@ export async function createMissionAction(
     const mission = await prisma.mission.create({
       data: {
         missionNumber: missionNumber as string,
-        teamLeader: { connect: { id: session?.user?.id as string } },
+        teamLeader: { connect: { id: user?.id as string } },
         members: data.members && data.members.length > 0 ? {
           connect: data.members.map(memberId => ({ id: memberId }))
         } : undefined,
@@ -150,6 +149,7 @@ export async function createMissionAction(
         status: 'DRAFT',
         agentCount: data.agentCount,
         marketCount: data.marketCount,
+        organization: { connect: { id: organizationId } },
       },
       include: {
         teamLeader: true,
@@ -177,11 +177,11 @@ export async function createMissionAction(
         if (!missionProject) continue;
 
         const marketPhotos = photoFiles[projectData.marketName] || [];
-        
+
         for (const photoFile of marketPhotos) {
           try {
             const uploadResult = await uploadPhotoFile(photoFile);
-            
+
             await prisma.missionFile.create({
               data: {
                 fileUrl: uploadResult.url,

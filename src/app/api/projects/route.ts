@@ -156,7 +156,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     const projects = await prisma.project.findMany({
+      where: {
+        organizationId,
+      },
       include: {
         company: true,
         // Include mission projects count for each project
@@ -194,6 +205,25 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const organizationId = session.session.activeOrganizationId;
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization required' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { title, description, startDate, endDate, status, companyId, nature } = body;
 
@@ -204,8 +234,9 @@ export async function POST(request: NextRequest) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         status,
-        companyId,
+        company: { connect: { id: companyId } },
         nature,
+        organization: { connect: { id: organizationId } },
       },
       include: {
         company: true,

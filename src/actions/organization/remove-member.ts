@@ -2,6 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { getSessionAction } from "@/actions/get-session";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const removeMember = async (memberId: string, organizationId: string) => {
   try {
@@ -23,7 +25,10 @@ export const removeMember = async (memberId: string, organizationId: string) => 
 
     const member = await prisma.member.findUnique({
       where: {
-        id: memberId,
+        organizationId_userId: {
+          organizationId,
+          userId: memberId,
+        },
       },
     });
 
@@ -41,10 +46,12 @@ export const removeMember = async (memberId: string, organizationId: string) => 
       };
     }
 
-    await prisma.member.delete({
-      where: {
-        id: memberId,
+    await auth.api.removeMember({
+      body: {
+        memberIdOrEmail: memberId,
+        organizationId
       },
+      headers: await headers(),
     });
 
     return {

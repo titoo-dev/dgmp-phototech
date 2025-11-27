@@ -9,12 +9,12 @@ type Props = {
 };
 
 export default async function UpdateProjectPage(props: Props) {
-  const { session } = await getSessionAction()
-  
-  if (!session?.user) {
+  const { user } = await getSessionAction()
+
+  if (!user) {
     return redirect('/auth/signin')
   }
-  
+
   const { params } = props;
   const { id } = await params;
 
@@ -29,7 +29,7 @@ export default async function UpdateProjectPage(props: Props) {
 
   return (
     <div className="min-h-screen bg-background">
-      <UpdateProjectFormClient 
+      <UpdateProjectFormClient
         project={project}
         companies={companiesResult.companies}
       />

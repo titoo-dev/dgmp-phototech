@@ -53,9 +53,18 @@ export const getOrganization = async (organizationId: string) => {
       };
     }
 
+    // Transform members to add id field (composite key as string)
+    const transformedOrganization = {
+      ...organization,
+      members: organization.members.map(member => ({
+        ...member,
+        id: `${member.organizationId}-${member.userId}`,
+      })),
+    };
+
     return {
       success: true,
-      data: organization,
+      data: transformedOrganization,
     };
   } catch (error) {
     console.error("Error getting organization:", error);

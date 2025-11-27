@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import type { ContactModel } from "@/models/contact-schema";
+import { requireOrganization } from "@/lib/auth-guard";
 
 export type GetContactsState = {
     contacts: ContactModel[];
@@ -14,7 +15,12 @@ export type GetContactsState = {
  */
 export async function getContactsAction(): Promise<GetContactsState> {
     try {
+        const { organizationId } = await requireOrganization();
+
         const contacts = await prisma.contact.findMany({
+            where: {
+                organizationId,
+            },
             orderBy: [
                 { firstName: 'asc' },
                 { lastName: 'asc' }
@@ -33,7 +39,7 @@ export async function getContactsAction(): Promise<GetContactsState> {
         };
     } catch (error) {
         console.error("Error fetching contacts:", error);
-        
+
         return {
             contacts: [],
             error: "Une erreur est survenue lors du chargement des contacts",

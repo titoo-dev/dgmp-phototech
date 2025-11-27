@@ -7,9 +7,9 @@ import { AuthUser, getUserRole } from '@/lib/auth-utils';
 export const dynamic = 'force-dynamic';
 
 export default async function MissionsPage() {
-	const { session } = await getSessionAction()
-	
-	if (!session?.user) {
+	const { user } = await getSessionAction()
+
+	if (!user) {
 		return redirect('/auth/signin')
 	}
 
@@ -19,12 +19,11 @@ export default async function MissionsPage() {
 		throw new Error('Failed to fetch missions');
 	}
 
-	const user = session.user as AuthUser;
 	const userRole = getUserRole(user);
 
 	return (
-		<MissionsClient 
-			missions={missionsResult.data} 
+		<MissionsClient
+			missions={missionsResult.data}
 			user={user}
 			userRole={userRole}
 		/>

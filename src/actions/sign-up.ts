@@ -88,9 +88,7 @@ export const signUpAction = async (
         email,
         password,
         name: name || "unknown",
-        callbackURL: invitationId 
-          ? `${process.env.NEXT_PUBLIC_APP_URL}/invitation/${invitationId}`
-          : `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
+        callbackURL: `/auth/signin`,
       },
     });
 
@@ -121,7 +119,6 @@ export const signUpAction = async (
 
         await prisma.member.create({
           data: {
-            id: crypto.randomUUID(),
             userId: result.user.id,
             organizationId: invitation.organizationId,
             role: invitation.role || "u1",

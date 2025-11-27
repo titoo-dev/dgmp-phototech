@@ -1,12 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { 
-  FileText, 
-  MapPin, 
-  Building2, 
-  Users, 
-  Camera, 
+import {
+  FileText,
+  MapPin,
+  Building2,
+  Users,
+  Camera,
   TrendingUp,
   Calendar,
   CheckCircle,
@@ -20,9 +20,9 @@ import { redirect } from "next/navigation"
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const { session } = await getSessionAction()
-  
-  if (!session?.user) {
+  const { user } = await getSessionAction()
+
+  if (!user) {
     return redirect('/auth/signin')
   }
 

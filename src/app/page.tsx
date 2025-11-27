@@ -23,13 +23,13 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const { session } = await getSessionAction();
+  const { user } = await getSessionAction();
 
-  if (session?.user) {
-    if (!session.user.emailVerified) {
+  if (user) {
+    if (!user.emailVerified) {
       redirect("/auth/verify-email");
     }
-    const redirectPath = getRedirectPath(session.user as AuthUser);
+    const redirectPath = getRedirectPath(user as AuthUser);
     redirect(redirectPath);
   }
 
