@@ -505,8 +505,8 @@ export const EditOrganizationClient = ({
 
               <Button type="submit" disabled={isInvitePending}>
                 {isInvitePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Mail className="mr-2 h-4 w-4" />
-                Envoyer l'invitation
+                {!isInvitePending ? <Mail className="mr-2 h-4 w-4" /> : null}
+                {isInvitePending ? "Envoi en cours..." : "Envoyer l'invitation"}
               </Button>
             </form>
           </CardContent>
@@ -592,12 +592,12 @@ export const EditOrganizationClient = ({
         </Card>
 
         {/* Pending Invitations */}
-        {invitations.length > 0 && (
+        {invitations.filter(inv => inv.status === 'pending').length > 0 && (
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Invitations en attente ({invitations.length})
+                Invitations en attente ({invitations.filter(inv => inv.status === 'pending').length})
               </CardTitle>
               <CardDescription>
                 Liste des invitations envoyées en attente d'acceptation
@@ -616,7 +616,7 @@ export const EditOrganizationClient = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invitations.map((invitation) => (
+                  {invitations.filter(inv => inv.status === 'pending').map((invitation) => (
                     <TableRow key={invitation.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">

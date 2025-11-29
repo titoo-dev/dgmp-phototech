@@ -5,6 +5,7 @@ import { getSessionAction } from "@/actions/get-session";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -128,6 +129,8 @@ export const inviteMember = async (
       success: false,
       message: error?.message || "Une erreur est survenue lors de l'invitation du membre",
     };
+  } finally {
+    revalidatePath("/dashboard/organizations/[id]/modifier");
   }
 };
 
