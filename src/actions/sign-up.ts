@@ -130,7 +130,7 @@ export const signUpAction = async (
 
     return {
       success: true,
-      redirect: "/dashboard",
+      redirect: "/",
     };
   } catch (error) {
     console.error("Sign up error:", error);

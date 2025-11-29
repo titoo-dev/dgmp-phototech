@@ -8,7 +8,7 @@ export default async function AdminSignUpPage() {
   const { session } = await getSessionAction();
 
   if (session) {
-    return redirect("/dashboard");
+    return redirect("/");
   }
 
   if (process.env.ENABLE_ADMIN_SIGNUP !== "true") {

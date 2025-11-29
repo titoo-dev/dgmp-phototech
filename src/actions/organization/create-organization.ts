@@ -58,21 +58,14 @@ export const createOrganization = async (
     const organizationSlug =
       data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-    const bodyData: {
-      name: string;
-      slug: string;
-      logo?: string;
-    } = {
-      name: data.name,
-      slug: organizationSlug,
-    };
-
-    if (data.logo) {
-      bodyData.logo = data.logo;
-    }
 
     const organization = await auth.api.createOrganization({
-      body: bodyData,
+      body: {
+        name: data.name,
+        slug: organizationSlug,
+        userId: user.id,
+        logo: data.logo, 
+      },
       headers: await headers(),
     });
 

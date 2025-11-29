@@ -52,7 +52,7 @@ export const adminSignUpAction = async (
         email,
         password,
         name,
-        callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        callbackURL: process.env.NEXT_PUBLIC_APP_URL,
       },
     });
 
@@ -73,7 +73,7 @@ export const adminSignUpAction = async (
 
     return {
       success: true,
-      redirect: "/dashboard",
+      redirect: "/",
     };
   } catch (error) {
     console.error("Admin sign up error:", error);

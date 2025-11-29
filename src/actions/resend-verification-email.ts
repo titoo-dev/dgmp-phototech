@@ -36,7 +36,7 @@ export const resendVerificationEmailAction = async (
     await auth.api.sendVerificationEmail({
       body: {
         email,
-        callbackURL: "/dashboard",
+        callbackURL: "/",
       },
     });
 

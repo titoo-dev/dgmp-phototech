@@ -1,5 +1,74 @@
 import { getSessionAction } from "@/actions/get-session";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
+import { auth } from "./auth";
+import { headers } from "next/headers";
+import { AuthUser } from "./auth-utils";
+
+
+export async function verifySession({ withRedirect }: { withRedirect?: boolean } = {}) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session && withRedirect) {
+    redirect("/auth/signin");
+  }
+
+  if (!session) {
+    unauthorized();
+  }
+
+  if (!session.user.emailVerified) {
+    redirect("/auth/verify-email");
+  }
+
+  if (!session.user.role) {
+    redirect("/auth/signin");
+  }
+
+  return {
+    success: true,
+    userId: session.user.id,
+    user: session.user as AuthUser,
+  }
+}
+
+export async function verifyU1Session() {
+  const session = await verifySession();
+  if (session.user.role !== "u1") {
+      unauthorized();
+  }
+}
+
+export async function verifyU2Session() {
+  const session = await verifySession();
+  if (session.user.role !== "u2") {
+      unauthorized();
+  }
+}
+
+export async function verifyU3Session() {
+  const session = await verifySession();
+  if (session.user.role !== "u3") {
+      unauthorized();
+  }
+}
+
+export async function verifyU4Session() {
+  const session = await verifySession();
+  if (session.user.role !== "u4") {
+      unauthorized();
+  }
+}
+
+export async function verifyU5Session() {
+  const session = await verifySession();
+  if (session.user.role !== "u5") {
+      unauthorized();
+  }
+}
+
+
 
 export async function requireAuth() {
   const { session, user } = await getSessionAction();
