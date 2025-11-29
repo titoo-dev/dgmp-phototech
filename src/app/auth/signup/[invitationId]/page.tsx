@@ -1,9 +1,6 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import prisma from "@/lib/prisma";
 import SignUpInvitationClient from "./signup-invitation-client";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -58,16 +55,6 @@ export default async function SignUpInvitationPage({
         </div>
       </div>
     );
-  }
-
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email: invitation.email },
-  });
-
-  if (existingUser) {
-    // User already has an account, redirect to signin
-    return redirect(`/`);
   }
 
   return (
