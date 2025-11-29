@@ -1,7 +1,8 @@
-import { createAccessControl } from "better-auth/plugins/access";
+import { createAccessControl,  } from "better-auth/plugins/access";
 import { defaultStatements, adminAc } from "better-auth/plugins/admin/access";
+import { defaultStatements as defaultOrganizationStatements, adminAc as adminOrganizationAc, memberAc as memberOrganizationAc, ownerAc as ownerOrganizationAc } from "better-auth/plugins/organization/access";
 
-export const statement = {
+export const statements = {
     ...defaultStatements,
     mission: ["create", "update", "delete"],
     report: ["create", "update", "delete"],
@@ -10,32 +11,36 @@ export const statement = {
     role: ["create", "update", "delete"],
     permission: ["create", "update", "delete"],
     settings: ["create", "update", "delete"],
-    organization: ["create", "update", "delete", "list", "manage-members"],
+    ...defaultOrganizationStatements,
     noAccess: [],
 } as const;
- 
-export const ac = createAccessControl(statement);
+
+
+export const ac = createAccessControl(statements);
  
 export const u1 = ac.newRole({ 
-    mission: ["create"], 
+    mission: ["create"],
+    ...memberOrganizationAc.statements,
 }); 
 
 export const u2 = ac.newRole({ 
     mission: ["create", "update"],
+    ...memberOrganizationAc.statements,
 }); 
 
 export const u3 = ac.newRole({
     mission: ["create", "update"],
+    ...memberOrganizationAc.statements,
 }); 
  
-// @ts-ignore
 export const u4 = ac.newRole({
-    mission: ["create", "update"],
     ...adminAc.statements,
-    user: ["create", "list", "set-role", "ban", "impersonate", "delete", "set-password", "update"],
+    mission: ["create", "update"],
+    ...adminOrganizationAc.statements,
 });
 
 export const u5 = ac.newRole({
-    organization: ["create", "update", "delete", "list", "manage-members"],
+    ...adminAc.statements,
+    ...ownerOrganizationAc.statements,
 });
  

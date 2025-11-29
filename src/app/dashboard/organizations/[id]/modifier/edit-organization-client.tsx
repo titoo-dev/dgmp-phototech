@@ -491,12 +491,6 @@ export const EditOrganizationClient = ({
                           Administrateur système
                         </div>
                       </SelectItem>
-                      <SelectItem value="u5">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4" />
-                          Gestionnaire organisation
-                        </div>
-                      </SelectItem>
                     </SelectContent>
                   </Select>
                   {inviteState.fieldErrors?.role && (

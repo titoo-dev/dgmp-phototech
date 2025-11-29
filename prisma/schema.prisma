@@ -76,6 +76,7 @@ model Session {
 
   @@unique([token])
   @@map("session")
+  @@index([userId])
 }
 
 model Account {
@@ -95,6 +96,7 @@ model Account {
   updatedAt             DateTime
 
   @@map("account")
+  @@index([userId])
 }
 
 model Verification {
@@ -106,15 +108,15 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+  @@index([identifier])
 }
 
 model Contact {
-  id             String    @id @default(cuid())
+  id             String       @id @default(cuid())
   firstName      String
   lastName       String
-  email          String    @unique
-  missionsMember Mission[] @relation("Member")
-  
+  email          String       @unique
+  missionsMember Mission[]    @relation("Member")
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
@@ -194,7 +196,6 @@ model Organization {
   metadata    String?
   members     Member[]
   invitations Invitation[]
-  
   missions    Mission[]
   companies   Company[]
   projects    Project[]
@@ -205,13 +206,13 @@ model Organization {
 }
 
 model Member {
-  id             String    @id @default(cuid())
+  id             String       @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   role           String
-  createdAt      DateTime       @default(now())
+  createdAt      DateTime     @default(now())
 
   @@unique([organizationId, userId])
   @@map("member")

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { getAuthErrorMessage } from "@/lib/errors/get-auth-error-message";
 import prisma from "@/lib/prisma";
+import { headers } from "next/headers";
 
 const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -88,8 +89,10 @@ export const signUpAction = async (
         email,
         password,
         name: name || "unknown",
-        callbackURL: process.env.NEXT_PUBLIC_APP_URL,
+        callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${invitationId || ""}/accept`,
+        role: invitationRole || "u1",
       },
+      headers: await headers(),
     });
 
     if (phoneNumber && result.user.id) {
@@ -107,25 +110,12 @@ export const signUpAction = async (
     }
 
     if (invitationId && result.user.id) {
-      const invitation = await prisma.invitation.findUnique({
-        where: { id: invitationId },
+      await auth.api.acceptInvitation({
+        body: {
+          invitationId: invitationId,
+        },
+        headers: await headers(),
       });
-
-      if (invitation && invitation.status === "pending") {
-        await prisma.invitation.update({
-          where: { id: invitationId },
-          data: { status: "accepted" },
-        });
-
-        await prisma.member.create({
-          data: {
-            userId: result.user.id,
-            organizationId: invitation.organizationId,
-            role: invitation.role || "u1",
-            createdAt: new Date(),
-          },
-        });
-      }
     }
 
     return {

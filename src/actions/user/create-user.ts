@@ -69,6 +69,7 @@ export const createUserAction = async (
           password,
           name: name || "unknown",
           callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
+          role: role,
         },
     });
 

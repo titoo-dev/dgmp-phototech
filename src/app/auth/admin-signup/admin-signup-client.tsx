@@ -53,7 +53,7 @@ const AdminSignUpClientPage = () => {
               <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div className="text-left">
                 <p className="font-semibold text-yellow-700 dark:text-yellow-300">
-                  Accès réservé aux gestionnaires d'organisation (U5)
+                  Accès réservé aux gestionnaires d'organisation (owner)
                 </p>
                 <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-1">
                   Cette page sera désactivée après la configuration initiale

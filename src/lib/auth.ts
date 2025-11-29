@@ -1,4 +1,4 @@
-import { User, betterAuth } from "better-auth";
+import { betterAuth, User } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "./generated/prisma";
 import { admin as adminPlugin, openAPI } from "better-auth/plugins";
@@ -61,7 +61,7 @@ export const auth = betterAuth({
     plugins: [
         nextCookies(),
         adminPlugin({
-            ac,
+            ac: ac,
             roles: {
                 u1,
                 u2,
@@ -79,14 +79,109 @@ export const auth = betterAuth({
         openAPI(),
         organization({
             sendInvitationEmail,
-            ac, 
-            roles: {                
+            organizationHooks: {
+                beforeCreateOrganization: async (data: any) => {
+                    console.log("beforeCreateOrganization", data);
+                    return {
+                        ...organization
+                    }
+                },
+                afterCreateOrganization: async (organization: any) => {
+                    console.log("afterCreateOrganization", organization);
+                },
+                beforeUpdateOrganization: async (data: any) => {
+                    console.log("beforeUpdateOrganization", data);
+                    return {
+                        ...data
+                    }
+                },
+                afterUpdateOrganization: async (organization: any) => {
+                    console.log("afterUpdateOrganization", organization);
+                },
+                beforeAddMember: async ({ member, user, organization }: any) => {
+                    console.log(`Adding ${user.email} to ${organization.name}`);
+                    return {
+                        data: {
+                            ...member,
+                        },
+                    };
+                },
+                afterAddMember: async ({ member, user, organization }: any) => {
+                    console.log("afterAddMember", member, user, organization);
+                },
+                beforeRemoveMember: async ({ member, user, organization }: any) => {
+                    console.log("beforeRemoveMember", member, user, organization);
+                },
+                afterRemoveMember: async ({ member, user, organization }: any) => {
+                    console.log("afterRemoveMember", member, user, organization);
+                },
+                beforeUpdateMemberRole: async ({
+                    member,
+                    newRole,
+                    user,
+                    organization,
+                }: any) => {
+                    console.log("beforeUpdateMemberRole", member, newRole, user, organization);
+                    return {
+                        data: {
+                            role: newRole,
+                        },
+                    };
+                },
+                afterUpdateMemberRole: async ({
+                    member,
+                    previousRole,
+                    user,
+                    organization,
+                }: any) => {
+                    console.log("afterUpdateMemberRole", member, previousRole, user, organization);
+                },
+                afterCreateInvitation: async ({
+                    invitation,
+                    inviter,
+                    organization,
+                }: any) => {
+                    console.log("afterCreateInvitation", invitation, inviter, organization);
+                },
+                afterAcceptInvitation: async ({
+                    invitation,
+                    member,
+                    user,
+                    organization,
+                }: any) => {
+                    // Setup user account, assign default resources
+                    console.log("afterAcceptInvitation", invitation, member, user, organization);
+                },
+                afterRejectInvitation: async ({ invitation, user, organization }: any) => {
+                    console.log("afterRejectInvitation", invitation, user, organization);
+                },
+                afterCancelInvitation: async ({
+                    invitation,
+                    cancelledBy,
+                    organization,
+                }: any) => {
+                    console.log("afterCancelInvitation", invitation, cancelledBy, organization);
+                },
+            },
+            ac,
+            roles: {
                 u1,
                 u2,
                 u3,
                 u4,
-                u5,
+                u5
             },
+            creatorRole: 'u5',
         }),
     ],
+    user: {
+        additionalFields: {
+            role: {
+                type: "string",
+                required: true,
+                enum: ["u1", "u2", "u3", "u4", "u5"],
+                default: "u5",
+            }
+        }
+    },
 });

@@ -10,7 +10,7 @@ export const authClient = createAuthClient({
     },
     plugins: [
         adminPlugin({
-            ac,
+            ac: ac,
             roles: {
                 u1,
                 u2,
@@ -20,7 +20,7 @@ export const authClient = createAuthClient({
             adminRoles: ['u4']
         }),
         organizationClient({
-            ac,
+            ac: ac,
             roles: {
                 u1,
                 u2,

@@ -53,6 +53,7 @@ export const adminSignUpAction = async (
         password,
         name,
         callbackURL: process.env.NEXT_PUBLIC_APP_URL,
+        role: "u5",
       },
     });
 

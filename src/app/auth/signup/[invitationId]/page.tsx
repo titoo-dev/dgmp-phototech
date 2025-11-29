@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import prisma from "@/lib/prisma";
 import SignUpInvitationClient from "./signup-invitation-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 

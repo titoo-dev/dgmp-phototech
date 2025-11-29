@@ -3,13 +3,14 @@
 import prisma from "@/lib/prisma";
 import { getSessionAction } from "@/actions/get-session";
 import { z } from "zod";
-import { sendInvitationEmail } from "@/lib/email/send-email";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Email invalide"),
   organizationId: z.string().min(1, "ID de l'organisation requis"),
-  role: z.enum(["u1", "u2", "u3", "u4", "u5"], {
-    message: "Rôle invalide. Choisissez parmi: u1, u2, u3, u4, u5"
+  role: z.enum(["u1", "u2", "u3", "u4"], {
+    message: "Rôle invalide. Choisissez parmi: u1, u2, u3, u4"
   }),
 });
 
@@ -105,41 +106,20 @@ export const inviteMember = async (
       };
     }
 
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 48);
-
-    const invitationId = crypto.randomUUID();
-
-    const invitation = await prisma.invitation.create({
-      data: {
-        id: invitationId,
-        email: data.email,
-        organizationId: data.organizationId,
+    const invitation = await auth.api.createInvitation({
+      body: {
+        email: data.email, // required
         role: data.role,
-        status: "pending",
-        expiresAt,
-        inviterId: user.id,
+        organizationId: data.organizationId,
+        resend: true,
       },
+      headers: await headers(),
     });
 
-    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/signup/${invitation.id}?email=${encodeURIComponent(data.email)}`;
-
-    try {
-      await sendInvitationEmail(
-        data.email,
-        invitationUrl,
-        user.name,
-        organization.name,
-        data.role,
-        organization.logo
-      );
-    } catch (emailError) {
-      console.error("Failed to send invitation email:", emailError);
-    }
 
     return {
       success: true,
-      message: `Invitation envoyée à ${data.email} avec le rôle ${data.role}`,
+      message: `Invitation envoyée à ${invitation.email} avec le rôle ${invitation.role}`,
     };
   } catch (error: any) {
     console.error("Error inviting member:", error);

@@ -65,6 +65,7 @@ export const createOrganization = async (
         slug: organizationSlug,
         userId: user.id,
         logo: data.logo, 
+        keepCurrentActiveOrganization: false,
       },
       headers: await headers(),
     });
