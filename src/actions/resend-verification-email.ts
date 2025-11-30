@@ -36,7 +36,7 @@ export const resendVerificationEmailAction = async (
     await auth.api.sendVerificationEmail({
       body: {
         email,
-        callbackURL: "/",
+        callbackURL: process.env.NEXT_PUBLIC_APP_URL,
       },
     });
 
