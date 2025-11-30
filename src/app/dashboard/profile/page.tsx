@@ -1,18 +1,13 @@
 import { getProfileAction } from "@/actions/user/update-profile-action";
-import { getSessionAction } from "@/actions/get-session";
 import { ProfileForm } from "@/components/profile/profile-form";
-import { redirect } from "next/navigation";
 import { Container } from "@/components/container/container";
 import { AuthUser } from "@/lib/auth-utils";
+import { verifyOrganization } from "@/lib/auth-guard";
 
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
-  const { user } = await getSessionAction();
-
-  if (!user) {
-    return redirect('/auth/signin');
-  }
+	await verifyOrganization();
 
   const result = await getProfileAction();
 

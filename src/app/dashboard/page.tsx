@@ -14,17 +14,12 @@ import {
   AlertCircle
 } from "lucide-react"
 import Link from "next/link"
-import { getSessionAction } from "@/actions/get-session"
-import { redirect } from "next/navigation"
+import { verifyOrganization } from "@/lib/auth-guard"
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const { user } = await getSessionAction()
-
-  if (!user) {
-    return redirect('/auth/signin')
-  }
+  await verifyOrganization()
 
   const stats = [
     {

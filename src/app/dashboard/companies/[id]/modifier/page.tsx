@@ -1,18 +1,13 @@
 import { getCompanyAction } from '@/actions/company/get-company-action';
 import EditCompanyForm from './edit-company-form';
-import { getSessionAction } from '@/actions/get-session';
-import { redirect } from 'next/navigation';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 export default async function Page(props: Props) {
-  const { user } = await getSessionAction()
-
-  if (!user) {
-    return redirect('/auth/signin')
-  }
+	await verifyOrganization();
 
   const { params } = props;
   const { id } = await params;

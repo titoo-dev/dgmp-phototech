@@ -1,16 +1,11 @@
 import { getCompaniesAction } from '@/actions/company/get-companies-action';
 import ProjectFormClient from '@/components/projects/new/project-form-client';
-import { getSessionAction } from '@/actions/get-session';
-import { redirect } from 'next/navigation';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewProjectPage() {
-	const { user } = await getSessionAction()
-
-	if (!user) {
-		return redirect('/auth/signin')
-	}
+	await verifyOrganization();
 
 	const companiesResult = await getCompaniesAction();
 

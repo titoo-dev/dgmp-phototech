@@ -7,8 +7,8 @@ import {
 import Link from "next/link"
 import { listUsersWithRoleFilterAction, type ListUsersParams } from "@/actions/user/get-users-action"
 import { UsersClient } from "./users-client"
-import { getAuth } from "@/actions/get-auth"
-import { redirect } from "next/navigation"
+import { verifyOrganization } from "@/lib/auth-guard"
+import { UserRole } from "@/lib/auth-utils"
 
 export const dynamic = 'force-dynamic'
 
@@ -22,11 +22,7 @@ interface UtilisateursPageProps {
 }
 
 export default async function UtilisateursPage({ searchParams }: UtilisateursPageProps) {
-  const { user, isAuthenticated, userRole } = await getAuth()
-  
-  if (!isAuthenticated || !user) {
-    return redirect('/auth/signin')
-  }
+  const { user } = await verifyOrganization();
   
   const params = await searchParams
   const page = parseInt(params.page || "1")
@@ -86,7 +82,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
           currentPage={page}
           totalPages={totalPages}
           searchParams={params}
-          userRole={userRole}
+          userRole={user.role as UserRole}
         />
       </Suspense>
     </div>

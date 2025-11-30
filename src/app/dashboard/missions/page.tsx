@@ -1,17 +1,12 @@
 import { getMissionsAction } from '@/actions/mission/get-missions-action';
 import { MissionsClient } from '@/components/missions/missions-client';
-import { getSessionAction } from '@/actions/get-session';
-import { redirect } from 'next/navigation';
-import { AuthUser, getUserRole } from '@/lib/auth-utils';
+import { getUserRole } from '@/lib/auth-utils';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MissionsPage() {
-	const { user } = await getSessionAction()
-
-	if (!user) {
-		return redirect('/auth/signin')
-	}
+	const { user } = await verifyOrganization();
 
 	const missionsResult = await getMissionsAction();
 

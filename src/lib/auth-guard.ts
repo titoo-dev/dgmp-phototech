@@ -6,32 +6,66 @@ import { AuthUser } from "./auth-utils";
 
 
 export async function verifySession({ withRedirect }: { withRedirect?: boolean } = {}) {
-  const session = await auth.api.getSession({
+  const result = await auth.api.getSession({
     headers: await headers(),
   })
 
-  if (!session && withRedirect) {
+  if (!result && withRedirect) {
     redirect("/auth/signin");
   }
 
-  if (!session) {
+  if (!result) {
     unauthorized();
   }
 
-  if (!session.user.emailVerified) {
+  if (!result.user.emailVerified) {
     redirect("/auth/verify-email");
   }
 
-  if (!session.user.role) {
+  if (!result.user.role) {
     redirect("/auth/signin");
+  }
+
+  const { session, user } = result;
+
+  return {
+    success: true,
+    userId: user.id,
+    user: user as AuthUser,
+    activeOrganizationId: session.activeOrganizationId,
+  }
+}
+
+export async function verifyOrganization() {
+
+  const session = await verifySession();
+
+  if (!session.activeOrganizationId) {
+    const organizations = await auth.api.listOrganizations({
+      headers: await headers(),
+    });
+
+    console.log("USER ORGANIZATIONS", organizations);
+
+    if (organizations?.length && organizations.length > 0) {
+      await auth.api.setActiveOrganization({
+        headers: await headers(),
+        body: {
+          organizationId: organizations[0].id,
+        },
+      });
+    } else {
+      unauthorized();
+    }
   }
 
   return {
     success: true,
-    userId: session.user.id,
+    activeOrganizationId: session.activeOrganizationId,
     user: session.user as AuthUser,
   }
 }
+
 
 export async function verifyU1Session() {
   const session = await verifySession();

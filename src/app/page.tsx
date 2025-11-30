@@ -6,7 +6,7 @@ export default async function HomePage() {
   const sessionResult = await verifySession({ withRedirect: true });
 
   const redirectPath = getRedirectPath(sessionResult.user);
-
+ 
   redirect(redirectPath);
 }
 

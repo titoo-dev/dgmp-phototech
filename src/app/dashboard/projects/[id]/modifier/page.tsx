@@ -1,19 +1,14 @@
 import { getProjectAction } from '@/actions/project/get-project-action';
 import { getCompaniesAction } from '@/actions/company/get-companies-action';
 import UpdateProjectFormClient from '@/components/projects/update/update-project-form-client';
-import { getSessionAction } from '@/actions/get-session';
-import { redirect } from 'next/navigation';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 export default async function UpdateProjectPage(props: Props) {
-  const { user } = await getSessionAction()
-
-  if (!user) {
-    return redirect('/auth/signin')
-  }
+  await verifyOrganization();
 
   const { params } = props;
   const { id } = await params;

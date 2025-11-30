@@ -1,15 +1,9 @@
-import { getSessionAction } from "@/actions/get-session"
-import { redirect } from "next/navigation"
 import NewUserClient from "./new-user-client"
+import { verifyOrganization } from "@/lib/auth-guard";
 
 export const dynamic = 'force-dynamic'
 
 export default async function NewUserPage() {
-  const { user } = await getSessionAction()
-
-  if (!user) {
-    return redirect('/auth/signin')
-  }
-
+  await verifyOrganization();
   return <NewUserClient />
 }

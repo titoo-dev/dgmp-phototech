@@ -5,10 +5,13 @@ import { getSessionAction } from '@/actions/get-session';
 import { UserModel } from '@/models/user-schema';
 import MissionFormClient from '@/components/missions/new/mission-form-client';
 import { redirect } from 'next/navigation';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewMissionPage() {
+	await verifyOrganization();
+
 	const [teamLeadersResult, contactsResult, projectsResult, sessionResult] = await Promise.all([
 		getTeamLeadersAction(),
 		getContactsAction(),

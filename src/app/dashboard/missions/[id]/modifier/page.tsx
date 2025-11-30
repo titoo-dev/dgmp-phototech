@@ -2,12 +2,14 @@ import { getMissionAction } from '@/actions/mission/get-mission-action';
 import { getContactsAction } from '@/actions/contact/get-contacts-action';
 import { getProjectsAction } from '@/actions/project/get-projects-action';
 import UpdateMissionFormClient from '@/components/missions/update/update-mission-form-client';
+import { verifyOrganization } from '@/lib/auth-guard';
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
 export default async function UpdateMissionPage(props: Props) {
+  await verifyOrganization();
   const { params } = props;
   const { id } = await params;
 

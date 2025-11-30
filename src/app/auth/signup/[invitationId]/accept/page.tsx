@@ -26,13 +26,6 @@ export default async function AcceptInvitationPage({
       }
     });
 
-    await auth.api.setActiveOrganization({
-      headers: await headers(),
-      body: {
-        organizationId: invitation.organizationId,
-      },
-    });
-    
   } catch (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background via-background to-muted/20">
