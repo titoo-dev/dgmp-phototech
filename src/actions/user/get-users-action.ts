@@ -29,10 +29,10 @@ export async function getUsersAction(role?: string): Promise<GetUsersState> {
             // For other roles, respect the role parameter
             whereClause = { role };
         } else {
-            // For other roles, exclude admin users (u4) by default
+            // For other roles, exclude admin users (u4, u5) by default
             whereClause = { 
                 role: {
-                    not: "u4"
+                    notIn: ["u4", "u5"]
                 }
             };
         }
@@ -133,10 +133,10 @@ export async function listUsersWithRoleFilterAction(
             // For other roles, respect the role parameter
             whereClause = { role: params.role };
         } else {
-            // For other roles, exclude admin users (u4) by default
+            // For other roles, exclude admin users (u4, u5) by default
             whereClause = { 
                 role: {
-                    not: "u4"
+                    notIn: ["u4", "u5"]
                 }
             };
         }

@@ -9,6 +9,7 @@ import { listUsersWithRoleFilterAction, type ListUsersParams } from "@/actions/u
 import { UsersClient } from "./users-client"
 import { verifyOrganization } from "@/lib/auth-guard"
 import { UserRole } from "@/lib/auth-utils"
+import { getOrganizationInvitations } from "@/actions/organization/get-organization-invitations"
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +23,7 @@ interface UtilisateursPageProps {
 }
 
 export default async function UtilisateursPage({ searchParams }: UtilisateursPageProps) {
-  const { user } = await verifyOrganization();
+  const { user, activeOrganizationId } = await verifyOrganization();
   
   const params = await searchParams
   const page = parseInt(params.page || "1")
@@ -40,7 +41,10 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
     status: params.status,
   }
 
-  const result = await listUsersWithRoleFilterAction(paramsValues)
+  const [result, invitationsResult] = await Promise.all([
+    listUsersWithRoleFilterAction(paramsValues),
+    activeOrganizationId ? getOrganizationInvitations(activeOrganizationId) : Promise.resolve({ success: false, data: [] })
+  ])
   
   if (result.error) {
     return (
@@ -57,6 +61,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
   const users = result.users || []
   const total = result.total || 0
   const totalPages = Math.ceil(total / limit)
+  const invitations = invitationsResult.data || []
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -70,7 +75,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
         <Button asChild>
           <Link href="/dashboard/users/new">
             <UserPlus className="w-4 h-4 mr-2" />
-            Nouvel utilisateur
+            Inviter un utilisateur
           </Link>
         </Button>
       </div>
@@ -83,6 +88,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
           totalPages={totalPages}
           searchParams={params}
           userRole={user.role as UserRole}
+          invitations={invitations}
         />
       </Suspense>
     </div>

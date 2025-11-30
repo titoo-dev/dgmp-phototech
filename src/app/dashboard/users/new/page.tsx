@@ -4,6 +4,11 @@ import { verifyOrganization } from "@/lib/auth-guard";
 export const dynamic = 'force-dynamic'
 
 export default async function NewUserPage() {
-  await verifyOrganization();
-  return <NewUserClient />
+  const { activeOrganizationId } = await verifyOrganization();
+  
+  if (!activeOrganizationId) {
+    throw new Error("Aucune organisation active");
+  }
+  
+  return <NewUserClient organizationId={activeOrganizationId} />
 }

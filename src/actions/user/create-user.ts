@@ -2,39 +2,25 @@
 
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { getAuthErrorMessage } from "@/lib/errors/get-auth-error-message";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
-import { sendWelcomeEmail } from "@/lib/email/send-email";
+import { getSessionAction } from "@/actions/get-session";
+import { revalidatePath } from "next/cache";
 
-
-const createUserSchema = z.object({
-  email: z.email("Adresse email invalide"),
-  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-  confirmPassword: z.string(),
-  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  phoneNumber: z.string().optional(),
-  role: z.enum(["u1", "u2", "u3"]).optional().default("u1"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirmPassword"],
+const inviteUserSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  role: z.enum(["u1", "u2", "u3", "u4"], {
+    message: "Rôle invalide. Choisissez parmi: u1, u2, u3, u4"
+  }),
 });
 
 export type CreateUserFormState = {
   success?: boolean;
   error?: string;
+  message?: string;
   fieldErrors?: {
     email?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    name?: string[];
-    phoneNumber?: string[];
     role?: string[];
-  };
-  user?: {
-    id: string;
-    email: string;
-    name: string;
   };
 };
 
@@ -43,77 +29,111 @@ export const createUserAction = async (
   formData: FormData
 ): Promise<CreateUserFormState> => {
   try {
+    const { session, user } = await getSessionAction();
+
+    if (!session || !user) {
+      return {
+        success: false,
+        error: "Vous devez être connecté pour inviter un utilisateur",
+      };
+    }
+
+    if (user.role !== "u4") {
+      return {
+        success: false,
+        error: "Vous n'avez pas les permissions nécessaires pour inviter un utilisateur",
+      };
+    }
+
+    const organizationId = session.activeOrganizationId;
+
+    if (!organizationId) {
+      return {
+        success: false,
+        error: "Aucune organisation active",
+      };
+    }
+
     const rawData = {
       email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      confirmPassword: formData.get("confirmPassword") as string,
-      name: formData.get("name") as string,
-      phoneNumber: formData.get("phoneNumber") as string,
       role: formData.get("role") as string,
     };
 
-    const validatedData = createUserSchema.safeParse(rawData);
+    const validatedData = inviteUserSchema.safeParse(rawData);
 
     if (!validatedData.success) {
       return {
-        error: "Please check your input and try again",
+        success: false,
+        error: "Veuillez vérifier les champs du formulaire",
         fieldErrors: validatedData.error.flatten().fieldErrors,
       };
     }
 
-    const { email, password, name, phoneNumber, role } = validatedData.data;
+    const { email, role } = validatedData.data;
 
-    const newUser = await auth.api.signUpEmail({
-        body: {
-          email,
-          password,
-          name: name || "unknown",
-          callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/auth/signin`,
-          role: role,
-        },
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
     });
 
-    // Update user with phone number if provided
-    if (phoneNumber && newUser.user.id) {
-      await prisma.user.update({
-        where: { id: newUser.user.id },
-        data: { phoneNumber },
-      });
-    }
-
-    const data = await auth.api.setRole({
-        body: {
-            userId: newUser.user.id,
-            role: role,
-        },
-        headers: await headers(),
-    });
-
-    if (!data) {
+    if (!organization) {
       return {
-        error: "Failed to set user role",
+        success: false,
+        error: "Organisation introuvable",
       };
     }
 
-    try {
-      await sendWelcomeEmail(email, name);
-    } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
+    const existingMember = await prisma.member.findFirst({
+      where: {
+        organizationId: organizationId,
+        user: {
+          email: email,
+        },
+      },
+    });
+
+    if (existingMember) {
+      return {
+        success: false,
+        error: "Cet utilisateur est déjà membre de l'organisation",
+      };
     }
+
+    const existingInvitation = await prisma.invitation.findFirst({
+      where: {
+        organizationId: organizationId,
+        email: email,
+        status: "pending",
+      },
+    });
+
+    if (existingInvitation) {
+      return {
+        success: false,
+        error: "Une invitation en attente existe déjà pour cet utilisateur",
+      };
+    }
+
+    const invitation = await auth.api.createInvitation({
+      body: {
+        email: email,
+        role: role,
+        organizationId: organizationId,
+        resend: true,
+      },
+      headers: await headers(),
+    });
+
+    revalidatePath("/dashboard/users");
 
     return {
       success: true,
-      user: {
-        id: newUser.user.id,
-        email: newUser.user.email,
-        name: newUser.user.name,
-      },
+      message: `Invitation envoyée à ${invitation.email} pour rejoindre ${organization.name} avec le rôle ${invitation.role}`,
     };
-  } catch (error) {
-    console.error("Create user error:", error);
-    const errorMessage = getAuthErrorMessage(error, 'signup');
+  } catch (error: any) {
+    console.error("Error inviting user:", error);
     return {
-      error: errorMessage,
+      success: false,
+      error: error?.message || "Une erreur est survenue lors de l'invitation de l'utilisateur",
     };
   }
 };

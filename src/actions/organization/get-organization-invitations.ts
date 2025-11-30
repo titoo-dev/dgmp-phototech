@@ -34,7 +34,7 @@ export const getOrganizationInvitations = async (organizationId: string): Promis
       };
     }
 
-    if (user.role !== "u5") {
+    if (user.role !== "u4" && user.role !== "u5") {
       return {
         success: false,
         error: "Vous n'avez pas les permissions nécessaires pour voir les invitations",

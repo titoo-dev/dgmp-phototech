@@ -71,6 +71,7 @@ import { banUserAction } from "@/actions/user/ban-user"
 import { unbanUserAction } from "@/actions/user/unban-user"
 import { removeUserAction } from "@/actions/user/remove-user"
 import { UserRole } from "@/lib/auth-utils"
+import { PendingInvitationsCard } from "@/components/users/pending-invitations-card"
 
 interface User {
     id: string
@@ -81,6 +82,22 @@ interface User {
     emailVerified?: boolean
     createdAt: string
     updatedAt: string
+}
+
+type Invitation = {
+  id: string
+  email: string
+  role: string | null
+  status: string
+  expiresAt: Date
+  organizationId: string
+  inviterId: string
+  inviter: {
+    id: string
+    name: string
+    email: string
+    image: string | null
+  }
 }
 
 interface UsersClientProps {
@@ -95,6 +112,7 @@ interface UsersClientProps {
         status?: string
     }
     userRole: UserRole
+    invitations: Invitation[]
 }
 
 export function UsersClient({
@@ -103,7 +121,8 @@ export function UsersClient({
     currentPage,
     totalPages,
     searchParams,
-    userRole
+    userRole,
+    invitations
 }: UsersClientProps) {
     const router = useRouter()
     const searchParamsHook = useSearchParams()
@@ -456,6 +475,8 @@ export function UsersClient({
 
     return (
         <>
+            <PendingInvitationsCard invitations={invitations} />
+            
             <Card className="shadow-none">
                 <CardHeader>
                     <div className="flex items-center gap-4">
@@ -599,7 +620,7 @@ export function UsersClient({
                                     <Button asChild>
                                         <Link href="/dashboard/users/new">
                                             <UserPlus className="w-4 h-4 mr-2" />
-                                            Créer un utilisateur
+                                            Inviter un utilisateur
                                         </Link>
                                     </Button>
                                 )}
