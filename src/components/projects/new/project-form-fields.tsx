@@ -143,7 +143,9 @@ export default function ProjectFormFields({ state, companies, formData, onFieldC
                   </SelectTrigger>
                   <SelectContent>
                     {companies.length === 0 ? (
-                      <SelectItem value="" disabled>Aucune entreprise disponible</SelectItem>
+                      <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                        Aucune entreprise disponible
+                      </div>
                     ) : (
                       companies.map((company) => (
                         <SelectItem key={company.id} value={company.id}>

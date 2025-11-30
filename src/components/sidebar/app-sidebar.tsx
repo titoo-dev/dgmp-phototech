@@ -122,12 +122,13 @@ export function AppSidebar({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isPending}>Annuler</AlertDialogCancel>
-              <AlertDialogAction 
+              <Button
                 onClick={handleSignOut}
                 disabled={isPending}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isPending ? "Déconnexion..." : "Déconnexion"}
-              </AlertDialogAction>
+              </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
