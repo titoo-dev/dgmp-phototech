@@ -40,7 +40,10 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
     canCreateMissions: true,
     canViewProjects: true,
     canViewGallery: true,
-    canViewCompanies: false,
+    canViewCompanies: true,
+    canCreateCompanies: true,
+    canEditCompanies: true,
+    canDeleteCompanies: true,
   },
   u2: {
     canViewMissions: true,
@@ -113,8 +116,8 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
     "/dashboard/missions/new": ["u1"],
     "/dashboard/projects": ["u2", "u3", "u4"],
     "/dashboard/projects/new": ["u2", "u3", "u4"],
-    "/dashboard/companies": ["u3", "u4"],
-    "/dashboard/companies/new": ["u3", "u4"],
+    "/dashboard/companies": ["u1", "u2", "u3", "u4"],
+    "/dashboard/companies/new": ["u1", "u2", "u3", "u4"],
     "/dashboard/users": ["u4"],
     "/dashboard/users/new": ["u4"],
     "/dashboard/profile": ["u1", "u2", "u3", "u4"],
@@ -124,7 +127,7 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
 
   // Check for pattern matches (e.g., company modifier routes)
   if (routePath.includes("/companies/") && routePath.includes("/modifier")) {
-    return hasRole(user, "u4");
+    return ["u1", "u2", "u4"].includes(userRole);
   }
 
   if (routePath.includes("/organizations/") && routePath.includes("/modifier")) {
