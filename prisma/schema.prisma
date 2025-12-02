@@ -124,14 +124,17 @@ model Contact {
 model Company {
   id            String    @id @default(cuid())
   name          String
-  email         String    @unique
+  email         String
   phoneNumber   String
-  nif           String    @unique
+  nif           String
   employeeCount Int
   projects      Project[]
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([email, organizationId])
+  @@unique([nif, organizationId])
 }
 
 model Project {
