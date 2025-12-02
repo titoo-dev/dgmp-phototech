@@ -2,6 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { requireOrganization } from "@/lib/auth-guard";
+import { UserRole } from "@/lib/auth-utils";
+import { MissionStatus } from "@/lib/generated/prisma";
 
 export type MissionWithRelations = {
     id: string;
@@ -63,7 +65,7 @@ export type MissionWithRelations = {
     }>;
 };
 
-export async function getMissionsAction(): Promise<
+export async function getMissionsAction(userRole?: UserRole): Promise<
     | { success: true; data: MissionWithRelations[] }
     | { success: false; error: string; data?: undefined }
 > {
@@ -73,6 +75,7 @@ export async function getMissionsAction(): Promise<
         const missions = await prisma.mission.findMany({
             where: {
                 organizationId,
+                ...(userRole === 'u3' && { status: MissionStatus.COMPLETED }),
             },
             include: {
                 teamLeader: true,

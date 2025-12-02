@@ -472,12 +472,16 @@ async function handleJsonMissionCreation(request: NextRequest, session: any) {
 }
 
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const result = await getMissionsAction();
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    const userRole = session?.user ? getUserRole(session.user as AuthUser) : undefined;
+    const result = await getMissionsAction(userRole);
 
     if (!result.success) {
-      // Check if it's an authentication error
       if (result.error === 'User not authenticated') {
         return NextResponse.json(
           { error: result.error },
