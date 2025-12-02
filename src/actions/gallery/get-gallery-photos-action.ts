@@ -1,9 +1,9 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { getUserRole, AuthUser } from "@/lib/auth-utils";
+import { requireOrganization } from "@/lib/auth-guard";
+import { getUserRole } from "@/lib/auth-utils";
+import { MissionStatus, Prisma } from "@/lib/generated/prisma";
 
 export type GalleryPhoto = {
   id: string;
@@ -47,40 +47,18 @@ export type GalleryPhoto = {
 };
 
 export async function getGalleryPhotosAction() {
-  // Get current user session for role-based access control
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
+  const { user, organizationId } = await requireOrganization();
+  const userRole = getUserRole(user);
 
-  if (!session?.user) {
-    throw new Error("User not authenticated");
-  }
-
-  const userRole = getUserRole(session.user as AuthUser);
-
-  let whereClause = {};
-
-  // Role-based access control
-  if (userRole === 'u1') {
-    // Team leaders can only see photos from their missions
-    whereClause = {
-      missionProject: {
-        mission: {
-          teamLeaderId: session.user.id
-        }
+  const whereClause: Prisma.MissionFileWhereInput = {
+    missionProject: {
+      mission: {
+        organizationId,
+        ...(userRole === 'u1' && { teamLeaderId: user.id }),
+        ...(userRole === 'u3' && { status: MissionStatus.COMPLETED }),
       }
-    };
-  } else if (userRole === 'u3') {
-    // External users can only see photos from completed missions
-    whereClause = {
-      missionProject: {
-        mission: {
-          status: 'COMPLETED'
-        }
-      }
-    };
-  }
-  // u0 and u2 roles can see all photos (no additional where clause)
+    }
+  };
 
   const photos = await prisma.missionFile.findMany({
     where: whereClause,
