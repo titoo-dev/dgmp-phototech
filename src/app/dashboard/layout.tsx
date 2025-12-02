@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 import { RolePermissions } from "@/lib/auth-utils";
 import prisma from "@/lib/prisma";
 import { verifyOrganization } from "@/lib/auth-guard";
+import { UserGuideSheet } from "@/components/user-guide/user-guide-sheet";
 
 export default async function ClientLayout({ children }: { children: ReactNode }) {
 	const { hasPermission, user, userRole } = await getAuth();
@@ -95,6 +96,10 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 					/>
 
 					<AppBreadcrumb showHome={false} />
+
+					<div className="ml-auto">
+						<UserGuideSheet userRole={userRole} />
+					</div>
 				</header>
 				{children}
 			</SidebarInset>

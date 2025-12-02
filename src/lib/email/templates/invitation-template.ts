@@ -5,13 +5,33 @@
 
 import type { EmailTemplateContent } from "../types";
 
+const getRoleDisplayName = (role: string): string => {
+  switch (role.toLowerCase()) {
+    case "u1":
+      return "Agent terrain";
+    case "u2":
+      return "Responsable";
+    case "u3":
+      return "Rédacteur";
+    case "u4":
+      return "Administrateur";
+    case "u5":
+      return "Super Administrateur";
+    default:
+      return role;
+  }
+};
+
 export const invitationTemplate = (
   invitationUrl: string,
   inviterName: string,
   organizationName: string,
   role: string,
   organizationLogo?: string | null
-): EmailTemplateContent => ({
+): EmailTemplateContent => {
+  const displayRole = getRoleDisplayName(role);
+  
+  return {
   subject: `Invitation à rejoindre ${organizationName} - DGMP Photothèque`,
   htmlContent: `
     <!DOCTYPE html>
@@ -56,7 +76,7 @@ export const invitationTemplate = (
             </p>
             <div class="info-box">
               <p><strong>Organisation :</strong> ${organizationName}</p>
-              <p><strong>Rôle attribué :</strong> ${role}</p>
+              <p><strong>Rôle attribué :</strong> ${displayRole}</p>
               <p><strong>Invité par :</strong> ${inviterName}</p>
             </div>
             <p class="message">
@@ -95,7 +115,7 @@ Bonjour !
 ${inviterName} vous invite à rejoindre l'organisation ${organizationName} sur la plateforme DGMP Photothèque.
 
 Organisation : ${organizationName}
-Rôle attribué : ${role}
+Rôle attribué : ${displayRole}
 Invité par : ${inviterName}
 
 En acceptant cette invitation, vous pourrez accéder aux projets de l'organisation, collaborer avec l'équipe et gérer les rapports de mission selon votre rôle.
@@ -112,5 +132,6 @@ Visitez notre plateforme : ${process.env.NEXT_PUBLIC_APP_URL || "http://localhos
 
 © 2025 DGMP Photothèque. Tous droits réservés.
   `,
-});
+  };
+};
 
