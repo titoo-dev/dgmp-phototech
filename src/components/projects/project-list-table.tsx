@@ -21,6 +21,25 @@ import Link from 'next/link';
 import { ProjectModel } from '@/models/project-schema';
 import { ProjectStatusBadge } from './project-status-badge';
 
+const getNatureFrench = (nature: string) => {
+	switch (nature) {
+		case 'SUPPLY':
+			return 'Fourniture';
+		case 'SERVICES':
+			return 'Services';
+		case 'INTELLECTUAL':
+			return 'Prestations intellectuelles';
+		case 'PROGRAM':
+			return 'Programme';
+		case 'MIXED':
+			return 'Mixte';
+		case 'CONTROLLED_EXPENSES':
+			return 'Dépenses contrôlées';
+		default:
+			return nature;
+	}
+};
+
 type ProjectKanbanItem = {
 	id: string;
 	name: string;
@@ -68,8 +87,8 @@ export function ProjectListTable({ projects, searchQuery }: ProjectListTableProp
 										</div>
 									</TableCell>
 									<TableCell>
-										<Badge variant="outline" className="capitalize">
-											{projet.nature.replace('_', ' ')}
+										<Badge variant="outline">
+											{getNatureFrench(projet.nature)}
 										</Badge>
 									</TableCell>
 									<TableCell>
