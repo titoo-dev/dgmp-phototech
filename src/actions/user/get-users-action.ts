@@ -88,6 +88,7 @@ export type ListUsersParams = {
     sortDirection?: "asc" | "desc";
     role?: string;
     status?: string;
+    organizationId?: string;
 };
 
 // Type for client component - ensures non-null role and string dates
@@ -120,42 +121,53 @@ export async function listUsersWithRoleFilterAction(
     params: ListUsersParams = {}
 ): Promise<ListUsersState> {
     try {
-        // Get current user's role to implement role-based filtering
         const { userRole } = await getAuth();
 
-        let whereClause: any = {};
+        if (!params.organizationId) {
+            return {
+                users: [],
+                total: 0,
+                error: "Organisation requise",
+            };
+        }
 
-        // Apply role-based filtering based on current user's role
+        let roleFilter: any = {};
+
         if (userRole === "u2") {
-            // u2 users can only manage u1 users
-            whereClause = { role: "u1" };
+            roleFilter = { role: "u1" };
         } else if (params.role && params.role !== "all") {
-            // For other roles, respect the role parameter
-            whereClause = { role: params.role };
+            roleFilter = { role: params.role };
         } else {
-            // For other roles, exclude admin users (u4, u5) by default
-            whereClause = { 
+            roleFilter = { 
                 role: {
                     notIn: ["u4", "u5"]
                 }
             };
         }
 
-        // Add search filtering
+        let searchFilter: any = {};
         if (params.searchValue) {
             const searchField = params.searchField || "name";
-            whereClause[searchField] = {
+            searchFilter[searchField] = {
                 contains: params.searchValue,
                 mode: 'insensitive'
             };
         }
 
-        // Get total count for pagination
+        const whereClause = {
+            ...roleFilter,
+            ...searchFilter,
+            members: {
+                some: {
+                    organizationId: params.organizationId
+                }
+            }
+        };
+
         const total = await prisma.user.count({
             where: whereClause,
         });
 
-        // Get paginated users
         const users = await prisma.user.findMany({
             where: whereClause,
             orderBy: { 
@@ -166,22 +178,21 @@ export async function listUsersWithRoleFilterAction(
         });
 
         let filteredUsers: ClientUser[] = users
-            .filter((user) => user.role) // Filter out users with null roles
+            .filter((user) => user.role)
             .map((user) => ({
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role!, // Use non-null assertion since we filtered out nulls
+                role: user.role!,
                 banned: user.banned || false,
                 emailVerified: user.emailVerified,
-                createdAt: user.createdAt.toISOString(), // Convert Date to string
-                updatedAt: user.updatedAt.toISOString(), // Convert Date to string
+                createdAt: user.createdAt.toISOString(),
+                updatedAt: user.updatedAt.toISOString(),
                 image: user.image,
                 banReason: user.banReason,
                 banExpires: user.banExpires,
             }));
 
-        // Apply status filtering on client side
         if (params.status && params.status !== "all") {
             filteredUsers = filteredUsers.filter((user: any) => {
                 switch (params.status) {
@@ -199,7 +210,7 @@ export async function listUsersWithRoleFilterAction(
 
         return {
             users: filteredUsers,
-            total: filteredUsers.length, // Use filtered count for accurate pagination
+            total: filteredUsers.length,
         };
     } catch (error) {
         console.error("Error fetching users:", error);

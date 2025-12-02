@@ -39,6 +39,7 @@ export default async function UtilisateursPage({ searchParams }: UtilisateursPag
     sortDirection: "asc",
     role: params.role,
     status: params.status,
+    organizationId: activeOrganizationId ?? undefined,
   }
 
   const [result, invitationsResult] = await Promise.all([
