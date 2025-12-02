@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 
 const inviteUserSchema = z.object({
   email: z.string().email("Adresse email invalide"),
-  role: z.enum(["u1", "u2", "u3", "u4"], {
+  role: z.enum(["u1", "u2", "u3", "u4", "u5"], {
     message: "Rôle invalide. Choisissez parmi: u1, u2, u3, u4"
   }),
 });
@@ -38,7 +38,7 @@ export const createUserAction = async (
       };
     }
 
-    if (user.role !== "u4") {
+    if (!["u2", "u4", "u5"].includes(user.role as string)) {
       return {
         success: false,
         error: "Vous n'avez pas les permissions nécessaires pour inviter un utilisateur",

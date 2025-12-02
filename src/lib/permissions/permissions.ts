@@ -26,6 +26,7 @@ export const u1 = ac.newRole({
 export const u2 = ac.newRole({ 
     mission: ["create", "update"],
     ...memberOrganizationAc.statements,
+    invitation: ["create", "cancel"],
 }); 
 
 export const u3 = ac.newRole({

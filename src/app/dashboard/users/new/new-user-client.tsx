@@ -31,12 +31,14 @@ import {
 	Loader2,
 } from 'lucide-react';
 import { createUserAction } from '@/actions/user/create-user';
+import { UserRole } from '@/lib/auth-utils';
 
 interface NewUserClientProps {
 	organizationId: string;
+	userRole: UserRole;
 }
 
-export default function NewUserClient({ organizationId }: NewUserClientProps) {
+export default function NewUserClient({ organizationId, userRole }: NewUserClientProps) {
 	const router = useRouter();
 	const [inviteEmail, setInviteEmail] = React.useState('');
 	const [selectedRole, setSelectedRole] = React.useState<string>('u1');
@@ -183,24 +185,28 @@ export default function NewUserClient({ organizationId }: NewUserClientProps) {
 															Agent de terrain
 														</div>
 													</SelectItem>
-													<SelectItem value="u2">
-														<div className="flex items-center gap-2">
-															<Shield className="w-4 h-4 text-purple-600" />
-															Responsable missions
-														</div>
-													</SelectItem>
-													<SelectItem value="u3">
-														<div className="flex items-center gap-2">
-															<Edit className="w-4 h-4 text-green-600" />
-															Rédacteur magazine
-														</div>
-													</SelectItem>
-													<SelectItem value="u4">
-														<div className="flex items-center gap-2">
-															<Shield className="w-4 h-4 text-yellow-600" />
-															Administrateur système
-														</div>
-													</SelectItem>
+													{userRole === 'u4' && (
+														<>
+															<SelectItem value="u2">
+																<div className="flex items-center gap-2">
+																	<Shield className="w-4 h-4 text-purple-600" />
+																	Responsable missions
+																</div>
+															</SelectItem>
+															<SelectItem value="u3">
+																<div className="flex items-center gap-2">
+																	<Edit className="w-4 h-4 text-green-600" />
+																	Rédacteur magazine
+																</div>
+															</SelectItem>
+															<SelectItem value="u4">
+																<div className="flex items-center gap-2">
+																	<Shield className="w-4 h-4 text-yellow-600" />
+																	Administrateur système
+																</div>
+															</SelectItem>
+														</>
+													)}
 												</SelectContent>
 											</Select>
 										</div>
