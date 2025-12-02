@@ -40,7 +40,7 @@ export async function verifyOrganization() {
 
   const session = await verifySession();
 
-  if (!session.activeOrganizationId) {
+  if (session.user.role !== "u5" && !session.activeOrganizationId) {
     const organizations = await auth.api.listOrganizations({
       headers: await headers(),
     });
