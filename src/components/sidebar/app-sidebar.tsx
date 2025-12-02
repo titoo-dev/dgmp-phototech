@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Building, Building2, Camera, FolderOpen, Home, LogOut, Users, User } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
@@ -34,6 +35,12 @@ interface NavigationGroup {
   items: NavigationItem[];
 }
 
+interface Organization {
+  id: string;
+  name: string;
+  logo: string | null;
+}
+
 const navigationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "/dashboard": Home,
   "/dashboard/gallery": Camera,
@@ -48,16 +55,20 @@ const navigationIcons: Record<string, React.ComponentType<{ className?: string }
 export function AppSidebar({ 
   navigationItems, 
   user, 
-  userRole, 
+  userRole,
+  organization,
   ...props 
 }: React.ComponentProps<typeof Sidebar> & { 
   navigationItems: NavigationGroup[];
   user: AuthUser | null;
   userRole: UserRole;
+  organization: Organization | null;
 }) {
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
   const router = useRouter();
+
+  console.log("ORGANIZATION", organization);
   
   const handleSignOut = () => {
     startTransition(async () => {
@@ -73,9 +84,40 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2 p-1.5 mb-3">
-              <Building2 className="size-5" />
-              <span className="text-base font-semibold">MarketScan</span>
+            <div className="flex items-center gap-3 p-1.5 mb-3">
+              {userRole === "u5" ? (
+                <>
+                  <Building2 className="size-8 shrink-0" />
+                  <span className="text-lg font-semibold">
+                    MarketScan
+                  </span>
+                </>
+              ) : organization ? (
+                <>
+                  {organization.logo ? (
+                    <div className="relative size-8 shrink-0 rounded-full overflow-hidden">
+                      <Image 
+                        src={organization.logo} 
+                        alt={organization.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <Building2 className="size-8 shrink-0" />
+                  )}
+                  <span className="text-lg font-semibold">
+                    {organization.name}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Building2 className="size-8 shrink-0" />
+                  <span className="text-lg font-semibold">
+                    MarketScan
+                  </span>
+                </>
+              )}
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

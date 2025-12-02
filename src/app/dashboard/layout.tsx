@@ -5,9 +5,24 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { RolePermissions } from "@/lib/auth-utils";
+import prisma from "@/lib/prisma";
+import { verifyOrganization } from "@/lib/auth-guard";
 
 export default async function ClientLayout({ children }: { children: ReactNode }) {
 	const { hasPermission, user, userRole } = await getAuth();
+	const { activeOrganizationId } = await verifyOrganization();
+
+	let organization = null;
+	if (activeOrganizationId && userRole !== "u5") {
+		organization = await prisma.organization.findUnique({
+			where: { id: activeOrganizationId },
+			select: {
+				id: true,
+				name: true,
+				logo: true,
+			},
+		});
+	}
 
 	const navigationItems = [
 		{
@@ -64,7 +79,12 @@ export default async function ClientLayout({ children }: { children: ReactNode }
 
 	return (
 		<SidebarProvider>
-			<AppSidebar navigationItems={navigationItems} user={user} userRole={userRole} />
+			<AppSidebar 
+				navigationItems={navigationItems} 
+				user={user} 
+				userRole={userRole}
+				organization={organization}
+			/>
 			<SidebarInset>
 				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
 					<SidebarTrigger className="-ml-1" />
