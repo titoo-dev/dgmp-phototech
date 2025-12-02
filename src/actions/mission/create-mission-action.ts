@@ -1,12 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 import { CreateMissionSchema, type CreateMission } from "../../models/mission-schema";
 import prisma from "@/lib/prisma";
 import { put } from '@vercel/blob';
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { requireOrganization } from "@/lib/auth-guard";
 
 
@@ -58,6 +56,10 @@ export async function createMissionAction(
 ): Promise<CreateMissionState> {
 
   const { session, organizationId, user } = await requireOrganization();
+
+  if (user?.role !== "u1") {
+    unauthorized();
+  }
 
   const raw = {
     teamLeaderId: user?.id as string,

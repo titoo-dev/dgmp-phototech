@@ -130,7 +130,7 @@ export function MissionsClient({ missions, user, userRole }: MissionsClientProps
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <ReportHeader />
+      <ReportHeader userRole={userRole} />
 
       <ReportSearch
         searchQuery={searchQuery}

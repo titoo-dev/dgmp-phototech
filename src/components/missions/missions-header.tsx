@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import Link from "next/link";
+import { UserRole } from "@/lib/auth-utils";
 
-export function MissionHeader() {
+interface MissionHeaderProps {
+  userRole?: UserRole;
+}
+
+export function MissionHeader({ userRole }: MissionHeaderProps) {
+  const canCreateMission = userRole === "u1";
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -11,14 +18,16 @@ export function MissionHeader() {
           Gérez et suivez vos missions de mission de contrôle
         </p>
       </div>
-      <div className="flex items-center gap-2">
-        <Button asChild>
-          <Link href="/dashboard/missions/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau rapport
-          </Link>
-        </Button>
-      </div>
+      {canCreateMission && (
+        <div className="flex items-center gap-2">
+          <Button asChild>
+            <Link href="/dashboard/missions/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouveau rapport
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

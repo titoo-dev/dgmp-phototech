@@ -45,6 +45,7 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   u2: {
     canViewMissions: true,
     canValidateMissions: true,
+    canCreateMissions: false,
     canViewDashboard: false,
     canViewProjects: true,
     canCreateProjects: true,
@@ -59,12 +60,14 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
   u3: {
     canViewMissions: true,
+    canCreateMissions: false,
     canViewGallery: true,
     canViewProjects: true,
   },
   u4: {
     canViewMissions: true,
     canEditMissions: true,
+    canCreateMissions: false,
     canViewGallery: true,
     canViewProjects: true,
     canEditProjects: true,
@@ -107,7 +110,7 @@ export function canAccessRoute(user: AuthUser | null, routePath: string): boolea
     "/dashboard": ["u1", "u2", "u3", "u4"],
     "/dashboard/gallery": ["u1", "u2", "u3", "u4"],
     "/dashboard/missions": ["u1", "u2", "u3", "u4"],
-    "/dashboard/missions/new": ["u1", "u2", "u3", "u4"],
+    "/dashboard/missions/new": ["u1"],
     "/dashboard/projects": ["u2", "u3", "u4"],
     "/dashboard/projects/new": ["u2", "u3", "u4"],
     "/dashboard/companies": ["u3", "u4"],

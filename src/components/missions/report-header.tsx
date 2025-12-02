@@ -1,10 +1,15 @@
 import React from 'react';
 import { MissionHeader } from '@/components/missions/missions-header';
+import { UserRole } from '@/lib/auth-utils';
 
-export function ReportHeader() {
+interface ReportHeaderProps {
+  userRole?: UserRole;
+}
+
+export function ReportHeader({ userRole }: ReportHeaderProps) {
   return (
     <div>
-      <MissionHeader />
+      <MissionHeader userRole={userRole} />
     </div>
   );
 }
