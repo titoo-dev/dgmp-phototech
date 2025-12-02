@@ -74,8 +74,8 @@ The application uses Better Auth with a role-based access control system based o
 
 1. **User** - Better Auth user with role, ban status, phone number
 2. **Session/Account/Verification** - Better Auth tables
-3. **Contact** - Mission team members (unique email, name fields)
-4. **Company** - Companies responsible for projects (unique email, NIF)
+3. **Contact** - Mission team members (email unique per organization)
+4. **Company** - Companies responsible for projects (email and NIF unique per organization)
 5. **Project** - Construction projects with status tracking
 6. **Mission** - Inspection missions with team leader, members, dates
 7. **MissionProject** - Junction table linking missions to projects with notes and files
@@ -223,7 +223,7 @@ Required environment variables (see `.env.local` template in README):
    - U2/U4 reviews and validates/rejects missions
    - U3 can only view COMPLETED missions
 
-4. **Data Integrity**: Email and NIF fields have unique constraints in Contact and Company models.
+4. **Data Integrity**: Email and NIF fields have unique constraints per organization in Contact and Company models.
 
 5. **Admin User**: Default admin user ID is hardcoded in `src/lib/auth.ts` - update this for production deployments.
 

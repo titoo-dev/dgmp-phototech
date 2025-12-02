@@ -115,10 +115,12 @@ model Contact {
   id             String       @id @default(cuid())
   firstName      String
   lastName       String
-  email          String       @unique
+  email          String
   missionsMember Mission[]    @relation("Member")
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([email, organizationId])
 }
 
 model Company {
